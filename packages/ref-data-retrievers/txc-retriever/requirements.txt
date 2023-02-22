@@ -1,0 +1,2 @@
+aurora-data-api==0.4.0
+requests==2.26.0

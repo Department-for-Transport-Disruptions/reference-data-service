@@ -1,0 +1,21 @@
+{
+    "name": "@reference-data-service/ref-data-uploaders",
+    "version": "0.1.0",
+    "scripts": {
+        "test": "sst bind vitest",
+        "typecheck": "tsc -noEmit"
+    },
+    "devDependencies": {
+        "@types/bluebird": "^3.5.38",
+        "@types/node": "^18.13.0",
+        "@types/papaparse": "^5.3.7",
+        "sst": "^2.0.22",
+        "vitest": "^0.28.5"
+    },
+    "dependencies": {
+        "@reference-data-service/core": "file:../core",
+        "bluebird": "^3.7.2",
+        "papaparse": "^5.3.2",
+        "sst": "^2.0.22"
+    }
+}

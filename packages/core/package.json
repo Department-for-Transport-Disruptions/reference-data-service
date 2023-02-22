@@ -1,0 +1,17 @@
+{
+  "name": "@reference-data-service/core",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "sst bind vitest",
+    "typecheck": "tsc -noEmit"
+  },
+  "devDependencies": {
+    "vitest": "^0.28.5",
+    "@types/node": "^18.13.0",
+    "sst": "^2.0.22"
+  },
+  "dependencies": {
+    "sst": "^2.0.22"
+  }
+}
