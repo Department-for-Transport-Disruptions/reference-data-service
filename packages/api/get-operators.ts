@@ -1,72 +1,14 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import * as logger from "lambda-log";
-import crypto from "crypto";
 import { ClientError } from "./error";
-import { getDbClient } from "@reference-data-service/core/db";
 import { getOperators, OperatorQueryInput } from "./client";
+import { executeClient } from "./execute-client";
 
-const MAX_NOC_CODES = process.env.MAX_NOC_CODES || 50;
+const MAX_NOC_CODES = process.env.MAX_NOC_CODES || "5";
 
-export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> => {
-    try {
-        logger.options.dev = process.env.NODE_ENV !== "production";
-        logger.options.debug = process.env.ENABLE_DEBUG_LOGS === "true" || process.env.NODE_ENV !== "production";
+export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
+    executeClient(event, getQueryInput, getOperators);
 
-        logger.options.meta = {
-            path: event.path,
-            method: event.httpMethod,
-            pathParams: event.pathParameters,
-            queryParams: event.queryStringParameters,
-            id: crypto.randomUUID(),
-        };
-
-        logger.info("Starting request");
-
-        const dbClient = getDbClient();
-
-        const input = getQueryInput(event);
-
-        logger.debug("Query input", { queryInput: input });
-
-        const operators = await getOperators(dbClient, input);
-
-        logger.info("Operators retrieved successfully");
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify(operators),
-        };
-    } catch (e) {
-        if (e instanceof ClientError) {
-            logger.error(e);
-
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    error: e.message,
-                }),
-            };
-        } else if (e instanceof Error) {
-            logger.error(e);
-
-            return {
-                statusCode: 500,
-                body: JSON.stringify({
-                    error: "There was a problem with the service",
-                }),
-            };
-        }
-
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                error: "There was a problem with the service",
-            }),
-        };
-    }
-};
-
-const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
+export const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
     const { pathParameters, queryStringParameters } = event;
 
     const nocCode = pathParameters?.nocCode;
@@ -78,13 +20,16 @@ const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
     }
 
     const batchNocCodes = queryStringParameters?.["nocCodes"] ?? "";
-    const batchNocCodesArray = batchNocCodes.split(",").filter((a) => a);
+    const batchNocCodesArray = batchNocCodes
+        .split(",")
+        .filter((nocCode) => nocCode)
+        .map((nocCode) => nocCode.trim());
 
-    if (batchNocCodesArray.length > MAX_NOC_CODES) {
+    if (batchNocCodesArray.length > Number(MAX_NOC_CODES)) {
         throw new ClientError(`Only up to ${MAX_NOC_CODES} NOC codes can be provided`);
     }
 
-    const page = Number(queryStringParameters?.["page"] ?? "");
+    const page = Number(queryStringParameters?.["page"] ?? "1");
 
     if (isNaN(page)) {
         throw new ClientError("Provided page is not valid");
@@ -92,6 +37,6 @@ const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
 
     return {
         ...(batchNocCodes ? { batchNocCodes: batchNocCodesArray } : {}),
-        ...(page ? { page: page - 1 } : {}),
+        page: page - 1,
     };
 };

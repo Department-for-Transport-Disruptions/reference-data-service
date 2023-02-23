@@ -1,3 +1,4 @@
+import { Duration } from "aws-cdk-lib";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Bucket, EventType } from "aws-cdk-lib/aws-s3";
 import { LambdaDestination } from "aws-cdk-lib/aws-s3-notifications";
@@ -64,6 +65,7 @@ export function UploadersStack({ stack }: StackContext) {
             }),
         ],
         enableLiveDev: false,
+        maxEventAge: Duration.hours(3),
     });
 
     txcBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(txcUploader));

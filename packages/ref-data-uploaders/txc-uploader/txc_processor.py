@@ -6,10 +6,12 @@ import xml.etree.ElementTree as eT
 
 NOC_INTEGRITY_ERROR_MSG = "Cannot add or update a child row: a foreign key constraint fails (`ref_data`.`services`, CONSTRAINT `fk_services_operators_nocCode` FOREIGN KEY (`nocCode`) REFERENCES `operators` (`nocCode`))"
 
+
 def create_unique_line_id(noc, line_name):
     first_part = "UZ"
     second_part = "000"
     return f"{first_part}{second_part}{noc}:{noc}{line_name}"
+
 
 def put_metric_data_by_data_source(cloudwatch, data_source, metric_name, metric_value):
     cloudwatch.put_metric_data(
@@ -214,7 +216,7 @@ def iterate_through_journey_patterns_and_run_insert_queries(
 def insert_into_txc_journey_pattern_table(
     cursor: aurora_data_api.AuroraDataAPICursor, operator_service_id, journey_pattern_info, joined_section_refs
 ):
-    query = f"INSERT INTO service_journey_patterns_new (operatorServiceId, destinationDisplay, direction, routeRef, sectionRefs) VALUES (:op_service_id, :destination_display, :direction, :route_ref, :section_refs)"
+    query = "INSERT INTO service_journey_patterns_new (operatorServiceId, destinationDisplay, direction, routeRef, sectionRefs) VALUES (:op_service_id, :destination_display, :direction, :route_ref, :section_refs)"
     cursor.execute(
         query,
         {
@@ -266,7 +268,7 @@ def insert_into_txc_operator_service_table(
         mode
     ) = extract_data_for_txc_operator_service_table(operator, service, line)
 
-    query = f"""INSERT INTO services_new (nocCode, lineName, lineId, startDate, endDate, operatorShortName, inboundDirectionDescription, outboundDirectionDescription, serviceDescription, serviceCode, regionCode, dataSource, origin, destination, mode)
+    query = """INSERT INTO services_new (nocCode, lineName, lineId, startDate, endDate, operatorShortName, inboundDirectionDescription, outboundDirectionDescription, serviceDescription, serviceCode, regionCode, dataSource, origin, destination, mode)
         VALUES (:noc_code, :line_name, :line_id, :start_date, :end_date, :operator_short_name, :inbound_direction_description, :outbound_direction_description, :service_description, :service_code, :region_code, :data_source, :origin, :destination, :mode)"""
 
     line_id = line.get("@id", "")
@@ -311,7 +313,7 @@ def insert_into_txc_operator_service_table(
 def check_journey_pattern_exists(
     cursor: aurora_data_api.AuroraDataAPICursor, op_service_id, destination_display, direction, route_ref, joined_section_refs, logger
 ):
-    query = f"""
+    query = """
         SELECT id FROM service_journey_patterns_new
         WHERE operatorServiceId <=> :op_service_id AND destinationDisplay <=> :destination_display AND direction <=> :direction AND routeRef <=> :route_ref AND sectionRefs <=> :section_refs
         LIMIT 1
@@ -355,7 +357,7 @@ def check_txc_line_exists(
         mode
     ) = extract_data_for_txc_operator_service_table(operator, service, line)
 
-    query = f"""
+    query = """
         SELECT id FROM services_new
         WHERE nocCode <=> :noc_code AND lineName <=> :line_name AND serviceCode <=> :service_code AND startDate <=> :start_date AND endDate <=> :end_date AND dataSource <=> :data_source
         LIMIT 1

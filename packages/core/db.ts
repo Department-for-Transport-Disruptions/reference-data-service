@@ -149,6 +149,8 @@ export interface ServiceJourneyPatternsTable {
     operatorServiceId: number;
     destinationDisplay: string | null;
     direction: string | null;
+    routeRef: string | null;
+    sectionRefs: string | null;
 }
 
 export interface ServiceJourneyPatternLinksTable {

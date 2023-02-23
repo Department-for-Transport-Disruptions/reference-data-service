@@ -172,7 +172,7 @@ export function RetrieversStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: txcRetrieverSchedule[stack.stage] || Schedule.cron({ minute: "30", hour: "4" }),
+                schedule: txcRetrieverSchedule[stack.stage] || Schedule.cron({ minute: "00", hour: "4" }),
             },
         },
     });
