@@ -10,6 +10,7 @@
         "remove": "sst remove",
         "console": "sst console",
         "diff": "sst diff",
+        "sst": "sst",
         "typecheck": "tsc --noEmit",
         "lint": "eslint ."
     },
