@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v2
 
@@ -40,3 +41,6 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
           prerelease: true
+
+      - name: Deploy to test
+        run: npm run diff -- --stage test
