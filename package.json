@@ -10,6 +10,8 @@
         "remove": "sst remove",
         "console": "sst console",
         "diff": "sst diff",
+        "sst": "sst",
+        "cdk": "cdk",
         "typecheck": "tsc --noEmit",
         "lint": "eslint ."
     },
@@ -19,6 +21,7 @@
         "@typescript-eslint/eslint-plugin": "^5.52.0",
         "@typescript-eslint/parser": "^5.52.0",
         "aws-cdk-lib": "2.62.2",
+        "cdk": "^2.66.1",
         "constructs": "10.1.156",
         "eslint": "^8.34.0",
         "eslint-config-prettier": "^8.6.0",
@@ -27,7 +30,7 @@
         "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-vitest": "^0.0.48",
         "prettier": "^2.8.4",
-        "sst": "^2.0.22",
+        "sst": "^2.0.38",
         "typescript": "^4.9.5"
     },
     "workspaces": [

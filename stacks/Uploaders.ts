@@ -47,7 +47,7 @@ export function UploadersStack({ stack }: StackContext) {
         runtime: "python3.9",
         timeout: 300,
         memorySize: 1024,
-        reservedConcurrentExecutions: 40,
+        // reservedConcurrentExecutions: 40, // TODO: uncomment this when quota increase approved
         environment: {
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
