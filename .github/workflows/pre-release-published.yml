@@ -1,0 +1,32 @@
+name: Pull Request Merged
+
+on:
+  release:
+    types:
+      - prereleased
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    environment: REF_DATA_TEST
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Assume role using OIDC
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/cd-infra-github-actions-role-eu-west-2
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Deploy to test
+        run: npm run diff -- --stage test
