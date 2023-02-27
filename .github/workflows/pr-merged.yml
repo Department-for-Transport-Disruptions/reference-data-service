@@ -32,6 +32,7 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: 'N/A'
           pre_release_branches: 'main'
 
       - name: Create a GitHub release
