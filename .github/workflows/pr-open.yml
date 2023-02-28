@@ -6,7 +6,8 @@ on:
       - main
 
 jobs:
-  build:
+  build_and_test:
+    name: Build and Test PR
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
