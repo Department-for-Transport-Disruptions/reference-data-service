@@ -6,7 +6,8 @@ on:
       - main
 
 jobs:
-  build:
+  build_and_deploy_to_test:
+    name: Build and Deploy to Test env
     runs-on: ubuntu-22.04
     environment: REF_DATA_TEST
     permissions:
@@ -52,4 +53,4 @@ jobs:
       - name: Deploy to test
         run: |
           npm run sst -- build --stage test
-          npm run cdk -- deploy --app ./.sst/dist --all
+          npm run cdk -- deploy --require-approval never --app ./.sst/dist --all
