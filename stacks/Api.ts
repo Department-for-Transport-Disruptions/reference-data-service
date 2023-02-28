@@ -75,6 +75,11 @@ export function ApiStack({ stack }: StackContext) {
             "GET /operators/{nocCode}/services": servicesFunction,
             "GET /operators/{nocCode}/services/{serviceId}": serviceByIdFunction,
         },
+        cdk: {
+            httpApi: {
+                apiName: `ref-data-service-api-${stack.stage}`,
+            },
+        },
     });
 
     stack.addOutputs({
