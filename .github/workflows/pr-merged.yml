@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '18.14.x'
           cache: 'npm'
 
       - name: Install packages
@@ -51,6 +51,8 @@ jobs:
           prerelease: true
 
       - name: Deploy to test
+        env:
+          ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
         run: |
           npm run sst -- build --stage test
           npm run cdk -- deploy --require-approval never --app ./.sst/dist --all

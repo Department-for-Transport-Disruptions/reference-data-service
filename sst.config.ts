@@ -1,6 +1,7 @@
 import { SSTConfig } from "sst";
 import { ApiStack } from "./stacks/Api";
 import { DatabaseStack } from "./stacks/Database";
+import { DnsStack } from "./stacks/Dns";
 import { RetrieversStack } from "./stacks/Retrievers";
 import { S3Stack } from "./stacks/S3";
 import { TableRenamerStack } from "./stacks/TableRenamer";
@@ -15,6 +16,7 @@ export default {
     },
     stacks(app) {
         app.stack(S3Stack);
+        app.stack(DnsStack);
         app.stack(DatabaseStack);
         app.stack(RetrieversStack);
         app.stack(UploadersStack);

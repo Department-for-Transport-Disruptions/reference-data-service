@@ -1,8 +1,16 @@
 import { Api, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
+import { DnsStack } from "./Dns";
 
 export function ApiStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
+    const { hostedZone } = use(DnsStack);
+
+    const { ROOT_DOMAIN: rootDomain } = process.env;
+
+    if (!rootDomain) {
+        throw new Error("ROOT_DOMAIN must be set");
+    }
 
     const stopsFunction = new Function(stack, "ref-data-service-get-stops-function", {
         bind: [cluster],
@@ -67,6 +75,8 @@ export function ApiStack({ stack }: StackContext) {
         logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
     });
 
+    const subDomain = ["test", "preprod", "prod"].includes(stack.stage) ? "api" : `api.${stack.stage}`;
+
     const api = new Api(stack, "ref-data-service-api", {
         routes: {
             "GET /stops": stopsFunction,
@@ -74,6 +84,11 @@ export function ApiStack({ stack }: StackContext) {
             "GET /operators/{nocCode}": operatorsFunction,
             "GET /operators/{nocCode}/services": servicesFunction,
             "GET /operators/{nocCode}/services/{serviceId}": serviceByIdFunction,
+        },
+        customDomain: {
+            domainName: `${subDomain}.${hostedZone.zoneName}`,
+            hostedZone: hostedZone.zoneName,
+            path: "v1",
         },
         cdk: {
             httpApi: {

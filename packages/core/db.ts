@@ -1,4 +1,4 @@
-import { RDSDataService } from "aws-sdk";
+import { RDSData } from "@aws-sdk/client-rds-data";
 import { Generated, Kysely } from "kysely";
 import { DataApiDialect } from "kysely-data-api";
 
@@ -229,7 +229,9 @@ export const getDbClient = () => {
                 database: dbName,
                 secretArn: secretArn,
                 resourceArn: resourceArn,
-                client: new RDSDataService(),
+                client: new RDSData({
+                    region: "eu-west-2",
+                }),
             },
         }),
     });
