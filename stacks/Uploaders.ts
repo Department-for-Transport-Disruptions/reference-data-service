@@ -19,7 +19,7 @@ export function UploadersStack({ stack }: StackContext) {
         handler: "packages/ref-data-uploaders/csv-uploader/index.main",
         runtime: "nodejs18.x",
         timeout: 600,
-        memorySize: 512,
+        memorySize: 3008,
         environment: {
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
