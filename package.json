@@ -13,7 +13,11 @@
         "sst": "sst",
         "cdk": "cdk",
         "typecheck": "tsc --noEmit",
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "prepare": "husky install",
+        "test:api": "npm -w @reference-data-service/api run test:unit",
+        "test": "npm run test:api -- run",
+        "tsc:build": "tsc --noemit"
     },
     "devDependencies": {
         "@tsconfig/node18": "^1.0.1",
@@ -31,7 +35,8 @@
         "eslint-plugin-vitest": "^0.0.48",
         "prettier": "^2.8.4",
         "sst": "^2.1.23",
-        "typescript": "^4.9.5"
+        "typescript": "^4.9.5",
+        "husky": "^8.0.0"
     },
     "workspaces": [
         "packages/**/*"

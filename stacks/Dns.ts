@@ -1,4 +1,4 @@
-import { HostedZone, IHostedZone } from "aws-cdk-lib/aws-route53";
+import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { StackContext } from "sst/constructs";
 
 export const DnsStack = ({ stack }: StackContext) => {
@@ -8,17 +8,11 @@ export const DnsStack = ({ stack }: StackContext) => {
         throw new Error("ROOT_DOMAIN must be set");
     }
 
-    let hostedZone: IHostedZone;
+    const stage = ["test", "preprod", "prod"].includes(stack.stage) ? stack.stage : "sandbox";
 
-    if (["test", "preprod", "prod"].includes(stack.stage)) {
-        hostedZone = new HostedZone(stack, "ref-data-service-hosted-zone", {
-            zoneName: `${stack.stage}.ref-data.${rootDomain}`,
-        });
-    } else {
-        hostedZone = HostedZone.fromLookup(stack, "ref-data-service-hosted-zone", {
-            domainName: `sandbox.ref-data.${rootDomain}`,
-        });
-    }
+    const hostedZone = HostedZone.fromLookup(stack, "ref-data-service-hosted-zone", {
+        domainName: `${stage}.ref-data.${rootDomain}`,
+    });
 
     return {
         hostedZone,
