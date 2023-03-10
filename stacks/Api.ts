@@ -77,6 +77,12 @@ export function ApiStack({ stack }: StackContext) {
 
     const subDomain = ["test", "preprod", "prod"].includes(stack.stage) ? "api" : `api.${stack.stage}`;
 
+    const allowedOrigins = [`https://${stack.stage}.cdd.${rootDomain}`];
+
+    if (stack.stage === "test") {
+        allowedOrigins.push("http://localhost:3000");
+    }
+
     const api = new Api(stack, "ref-data-service-api", {
         routes: {
             "GET /stops": stopsFunction,
@@ -89,6 +95,11 @@ export function ApiStack({ stack }: StackContext) {
             domainName: `${subDomain}.${hostedZone.zoneName}`,
             hostedZone: hostedZone.zoneName,
             path: "v1",
+        },
+        cors: {
+            allowMethods: ["GET"],
+            allowHeaders: ["Accept", "Content-Type", "Authorization"],
+            allowOrigins: allowedOrigins,
         },
         cdk: {
             httpApi: {
