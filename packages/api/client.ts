@@ -68,7 +68,7 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
 export type StopsQueryInput = {
     atcoCodes?: string[];
     naptanCodes?: string[];
-    commonNames?: string[];
+    commonName?: string;
     adminAreaCode?: string;
     page?: number;
 };
@@ -82,13 +82,13 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
         const stopsByAdminAreaCode = await dbClient
             .selectFrom("stops")
             .selectAll()
-            .$if(!!(input.atcoCodes || input.naptanCodes || input.commonNames), (qb) =>
+            .$if(!!(input.atcoCodes || input.naptanCodes || input.commonName), (qb) =>
                 qb
                     .where("naptanCode", "in", input.naptanCodes ?? ["---"])
                     .orWhere("atcoCode", "in", input.atcoCodes ?? ["---"])
-                    .orWhere("commonName", "in", input.commonNames ?? ["---"]),
+                    .orWhere("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
             )
-            .where("stops.administrativeAreaCode", "=", input.adminAreaCode)
+            .where("administrativeAreaCode", "=", input.adminAreaCode)
             .execute();
 
         if (!stopsByAdminAreaCode) {
@@ -98,7 +98,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
         return stopsByAdminAreaCode;
     }
 
-    if (input.atcoCodes || input.naptanCodes || input.commonNames) {
+    if (input.atcoCodes || input.naptanCodes || input.commonName) {
         return dbClient
             .selectFrom("stops")
             .selectAll()
@@ -106,7 +106,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                 qb
                     .where("naptanCode", "in", input.naptanCodes ?? ["---"])
                     .orWhere("atcoCode", "in", input.atcoCodes ?? ["---"])
-                    .orWhere("commonName", "in", input.commonNames ?? ["---"]),
+                    .orWhere("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
             )
             .offset((input.page || 0) * STOPS_PAGE_SIZE)
             .limit(STOPS_PAGE_SIZE)

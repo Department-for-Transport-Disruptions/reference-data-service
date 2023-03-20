@@ -14,6 +14,16 @@ describe("get-stops", () => {
             expect(getQueryInput(event)).toEqual({ atcoCodes: ["test123", "test456"], page: 0 });
         });
 
+        it("handles commonName", () => {
+            const event = {
+                queryStringParameters: {
+                    commonName: "test",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ commonName: "test", page: 0 });
+        });
+
         it("handles naptanCodes", () => {
             const event = {
                 queryStringParameters: {
@@ -37,6 +47,46 @@ describe("get-stops", () => {
                 naptanCodes: ["abcde", "fghij"],
                 page: 0,
             });
+        });
+
+        it("handles commonName and atcoCodes and naptanCodes", () => {
+            const event = {
+                queryStringParameters: {
+                    commonName: "test",
+                    atcoCodes: "test123,test456",
+                    naptanCodes: "abcde,fghij",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({
+                commonName: "test",
+                atcoCodes: ["test123", "test456"],
+                naptanCodes: ["abcde", "fghij"],
+                page: 0,
+            });
+        });
+
+        it("handles adminAreaCode", () => {
+            const event = {
+                pathParameters: {
+                    adminAreaCode: "009",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ adminAreaCode: "009", page: 0 });
+        });
+
+        it("handles commonName and adminAreaCode", () => {
+            const event = {
+                pathParameters: {
+                    adminAreaCode: "009",
+                },
+                queryStringParameters: {
+                    commonName: "test",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ commonName: "test", adminAreaCode: "009", page: 0 });
         });
 
         it("handles atcoCodes and naptanCodes with trailing or leading spaces", () => {

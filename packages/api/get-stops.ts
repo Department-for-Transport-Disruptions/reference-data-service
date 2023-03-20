@@ -5,7 +5,6 @@ import { executeClient } from "./execute-client";
 
 const MAX_ATCO_CODES = process.env.MAX_ATCO_CODES || "5";
 const MAX_NAPTAN_CODES = process.env.MAX_NAPTAN_CODES || "5";
-const MAX_COMMON_NAMES = "1";
 
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     executeClient(event, getQueryInput, getStops);
@@ -14,12 +13,6 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
     const { pathParameters, queryStringParameters } = event;
 
     const adminAreaCode = pathParameters?.adminAreaCode;
-
-    if (adminAreaCode) {
-        return {
-            adminAreaCode,
-        };
-    }
 
     const atcoCodes = queryStringParameters?.["atcoCodes"] ?? "";
     const atcoCodesArray = atcoCodes
@@ -41,15 +34,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         throw new ClientError(`Only up to ${MAX_NAPTAN_CODES} NaPTAN codes can be provided`);
     }
 
-    const commonNames = queryStringParameters?.["commonNames"] ?? "";
-    const commonNamesArray = commonNames
-        .split(",")
-        .filter((commonName) => commonName)
-        .map((commonName) => commonName.trim());
-
-    if (commonNamesArray.length > Number(MAX_COMMON_NAMES)) {
-        throw new ClientError(`Only up to ${MAX_COMMON_NAMES} common names can be provided`);
-    }
+    const commonName = queryStringParameters?.["commonName"] ?? "";
 
     const page = Number(queryStringParameters?.["page"] ?? "1");
 
@@ -60,7 +45,8 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
     return {
         ...(atcoCodes ? { atcoCodes: atcoCodesArray } : {}),
         ...(naptanCodes ? { naptanCodes: naptanCodesArray } : {}),
-        ...(commonNames ? { commonNames: commonNamesArray } : {}),
+        ...(commonName ? { commonName } : {}),
+        ...(adminAreaCode ? { adminAreaCode } : {}),
         page: page - 1,
     };
 };
