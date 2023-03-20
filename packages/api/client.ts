@@ -79,6 +79,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
     const STOPS_PAGE_SIZE = 1000;
 
     if (input.adminAreaCode) {
+        logger.info("Filtering by admin area code...");
         const stopsByAdminAreaCode = await dbClient
             .selectFrom("stops")
             .selectAll()
@@ -99,6 +100,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
     }
 
     if (input.atcoCodes || input.naptanCodes || input.commonName) {
+        logger.info("Filtering by other attributes...");
         return dbClient
             .selectFrom("stops")
             .selectAll()
