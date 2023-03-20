@@ -86,6 +86,7 @@ export function ApiStack({ stack }: StackContext) {
     const api = new Api(stack, "ref-data-service-api", {
         routes: {
             "GET /stops": stopsFunction,
+            "GET /stops/{adminAreaCode}": stopsFunction,
             "GET /operators": operatorsFunction,
             "GET /operators/{nocCode}": operatorsFunction,
             "GET /operators/{nocCode}/services": servicesFunction,

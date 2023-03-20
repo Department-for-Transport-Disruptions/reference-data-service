@@ -68,22 +68,45 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
 export type StopsQueryInput = {
     atcoCodes?: string[];
     naptanCodes?: string[];
+    commonNames?: string[];
+    adminAreaCode?: string;
     page?: number;
 };
 
 export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInput) => {
     logger.info("Starting getStops...");
 
-    const STOPS_PAGE_SIZE = 50;
+    const STOPS_PAGE_SIZE = 1000;
 
-    if (input.atcoCodes || input.naptanCodes) {
+    if (input.adminAreaCode) {
+        const stopsByAdminAreaCode = await dbClient
+            .selectFrom("stops")
+            .selectAll()
+            .$if(!!(input.atcoCodes || input.naptanCodes || input.commonNames), (qb) =>
+                qb
+                    .where("naptanCode", "in", input.naptanCodes ?? ["---"])
+                    .orWhere("atcoCode", "in", input.atcoCodes ?? ["---"])
+                    .orWhere("commonName", "in", input.commonNames ?? ["---"]),
+            )
+            .where("stops.administrativeAreaCode", "=", input.adminAreaCode)
+            .execute();
+
+        if (!stopsByAdminAreaCode) {
+            return null;
+        }
+
+        return stopsByAdminAreaCode;
+    }
+
+    if (input.atcoCodes || input.naptanCodes || input.commonNames) {
         return dbClient
             .selectFrom("stops")
             .selectAll()
             .where((qb) =>
                 qb
                     .where("naptanCode", "in", input.naptanCodes ?? ["---"])
-                    .orWhere("atcoCode", "in", input.atcoCodes ?? ["---"]),
+                    .orWhere("atcoCode", "in", input.atcoCodes ?? ["---"])
+                    .orWhere("commonName", "in", input.commonNames ?? ["---"]),
             )
             .offset((input.page || 0) * STOPS_PAGE_SIZE)
             .limit(STOPS_PAGE_SIZE)
