@@ -17,7 +17,7 @@ describe("get-stops", () => {
         it("handles commonName", () => {
             const event = {
                 queryStringParameters: {
-                    commonName: "test",
+                    search: "test",
                 },
             } as unknown as APIGatewayEvent;
 
@@ -52,7 +52,7 @@ describe("get-stops", () => {
         it("handles commonName and atcoCodes and naptanCodes", () => {
             const event = {
                 queryStringParameters: {
-                    commonName: "test",
+                    search: "test",
                     atcoCodes: "test123,test456",
                     naptanCodes: "abcde,fghij",
                 },
@@ -82,7 +82,7 @@ describe("get-stops", () => {
                     adminAreaCode: "009",
                 },
                 queryStringParameters: {
-                    commonName: "test",
+                    search: "test",
                 },
             } as unknown as APIGatewayEvent;
 

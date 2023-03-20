@@ -34,7 +34,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         throw new ClientError(`Only up to ${MAX_NAPTAN_CODES} NaPTAN codes can be provided`);
     }
 
-    const commonName = queryStringParameters?.["commonName"] ?? "";
+    const commonName = queryStringParameters?.["search"] ?? "";
 
     const page = Number(queryStringParameters?.["page"] ?? "1");
 
