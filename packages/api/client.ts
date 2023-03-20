@@ -90,6 +90,8 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                     .orWhere("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
             )
             .where("administrativeAreaCode", "=", input.adminAreaCode)
+            .offset((input.page || 0) * STOPS_PAGE_SIZE)
+            .limit(STOPS_PAGE_SIZE)
             .execute();
 
         if (!stopsByAdminAreaCode) {
