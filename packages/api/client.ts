@@ -75,7 +75,6 @@ export type StopsQueryInput = {
 
 export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInput) => {
     logger.info("Starting getStops...");
-    logger.info(process.env.NODE_ENV ?? "");
 
     const STOPS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
 
