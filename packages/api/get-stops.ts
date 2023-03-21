@@ -55,7 +55,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         ...(atcoCodes ? { atcoCodes: atcoCodesArray } : {}),
         ...(naptanCodes ? { naptanCodes: naptanCodesArray } : {}),
         ...(commonName ? { commonName } : {}),
-        ...(adminAreaCodes ? { adminAreaCodes } : {}),
+        ...(adminAreaCodes ? { adminAreaCodes: adminAreaCodeArray } : {}),
         page: page - 1,
     };
 };

@@ -68,25 +68,23 @@ describe("get-stops", () => {
 
         it("handles adminAreaCode", () => {
             const event = {
-                pathParameters: {
-                    adminAreaCode: "009",
+                queryStringParameters: {
+                    adminAreaCodes: "009,001",
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ adminAreaCode: "009", page: 0 });
+            expect(getQueryInput(event)).toEqual({ adminAreaCodes: ["009", "001"], page: 0 });
         });
 
         it("handles commonName and adminAreaCode", () => {
             const event = {
-                pathParameters: {
-                    adminAreaCode: "009",
-                },
                 queryStringParameters: {
                     search: "test",
+                    adminAreaCodes: "009",
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ commonName: "test", adminAreaCode: "009", page: 0 });
+            expect(getQueryInput(event)).toEqual({ commonName: "test", adminAreaCodes: ["009"], page: 0 });
         });
 
         it("handles atcoCodes and naptanCodes with trailing or leading spaces", () => {
