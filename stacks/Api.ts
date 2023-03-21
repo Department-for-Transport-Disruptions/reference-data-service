@@ -24,6 +24,8 @@ export function ApiStack({ stack }: StackContext) {
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
             MAX_ATCO_CODES: "50",
             MAX_NAPTAN_CODES: "50",
+            MAX_ADMIN_AREA_CODES: "50",
+            IS_LOCAL: !["test", "preprod", "prod"].includes(stack.stage) ? "true" : "false",
         },
         runtime: "nodejs18.x",
         logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
@@ -86,7 +88,6 @@ export function ApiStack({ stack }: StackContext) {
     const api = new Api(stack, "ref-data-service-api", {
         routes: {
             "GET /stops": stopsFunction,
-            "GET /stops/{adminAreaCode}": stopsFunction,
             "GET /operators": operatorsFunction,
             "GET /operators/{nocCode}": operatorsFunction,
             "GET /operators/{nocCode}/services": servicesFunction,

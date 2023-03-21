@@ -5,14 +5,23 @@ import { executeClient } from "./execute-client";
 
 const MAX_ATCO_CODES = process.env.MAX_ATCO_CODES || "5";
 const MAX_NAPTAN_CODES = process.env.MAX_NAPTAN_CODES || "5";
+const MAX_ADMIN_AREA_CODES = process.env.MAX_ADMIN_AREA_CODES || "5";
 
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     executeClient(event, getQueryInput, getStops);
 
 export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
-    const { pathParameters, queryStringParameters } = event;
+    const { queryStringParameters } = event;
 
-    const adminAreaCode = pathParameters?.adminAreaCode;
+    const adminAreaCodes = queryStringParameters?.["adminAreaCodes"] ?? "";
+    const adminAreaCodeArray = adminAreaCodes
+        .split(",")
+        .filter((atcoCode) => atcoCode)
+        .map((atcoCode) => atcoCode.trim());
+
+    if (adminAreaCodeArray.length > Number(MAX_ADMIN_AREA_CODES)) {
+        throw new ClientError(`Only up to ${MAX_ATCO_CODES} ATCO codes can be provided`);
+    }
 
     const atcoCodes = queryStringParameters?.["atcoCodes"] ?? "";
     const atcoCodesArray = atcoCodes
@@ -46,7 +55,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         ...(atcoCodes ? { atcoCodes: atcoCodesArray } : {}),
         ...(naptanCodes ? { naptanCodes: naptanCodesArray } : {}),
         ...(commonName ? { commonName } : {}),
-        ...(adminAreaCode ? { adminAreaCode } : {}),
+        ...(adminAreaCodes ? { adminAreaCodes } : {}),
         page: page - 1,
     };
 };

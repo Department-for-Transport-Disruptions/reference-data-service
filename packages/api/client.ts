@@ -69,60 +69,55 @@ export type StopsQueryInput = {
     atcoCodes?: string[];
     naptanCodes?: string[];
     commonName?: string;
-    adminAreaCode?: string;
+    adminAreaCodes?: string;
     page?: number;
 };
 
 export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInput) => {
     logger.info("Starting getStops...");
+    logger.info(process.env.NODE_ENV ?? "");
 
-    const STOPS_PAGE_SIZE = 1000;
+    const STOPS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
 
-    if (input.adminAreaCode) {
-        logger.info("Filtering by admin area code...");
-        const stopsByAdminAreaCode = await dbClient
-            .selectFrom("stops")
-            .selectAll()
-            .$if(!!(input.atcoCodes || input.naptanCodes || input.commonName), (qb) =>
-                qb
-                    .where("naptanCode", "in", input.naptanCodes ?? ["---"])
-                    .orWhere("atcoCode", "in", input.atcoCodes ?? ["---"])
-                    .orWhere("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
-            )
-            .where("administrativeAreaCode", "=", input.adminAreaCode)
-            .offset((input.page || 0) * STOPS_PAGE_SIZE)
-            .limit(STOPS_PAGE_SIZE)
-            .execute();
-
-        if (!stopsByAdminAreaCode) {
-            return null;
-        }
-
-        return stopsByAdminAreaCode;
-    }
-
-    if (input.atcoCodes || input.naptanCodes || input.commonName) {
-        logger.info("Filtering by other attributes...");
-        return dbClient
-            .selectFrom("stops")
-            .selectAll()
-            .where((qb) =>
-                qb
-                    .where("naptanCode", "in", input.naptanCodes ?? ["---"])
-                    .orWhere("atcoCode", "in", input.atcoCodes ?? ["---"])
-                    .orWhere("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
-            )
-            .offset((input.page || 0) * STOPS_PAGE_SIZE)
-            .limit(STOPS_PAGE_SIZE)
-            .execute();
-    }
-
-    return dbClient
+    logger.info("Filtering by admin area code...");
+    const stops = await dbClient
         .selectFrom("stops")
-        .selectAll()
+        .select([
+            "id",
+            "atcoCode",
+            "naptanCode",
+            "commonName",
+            "street",
+            "indicator",
+            "bearing",
+            "nptgLocalityCode",
+            "localityName",
+            "parentLocalityName",
+            "longitude",
+            "latitude",
+            "stopType",
+            "busStopType",
+            "timingStatus",
+            "administrativeAreaCode",
+            "status",
+        ])
+        .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
+        .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
+        .$if(!!input.commonName?.[0], (qb) =>
+            qb.where("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
+        )
+        .$if(!!input.adminAreaCodes?.[0], (qb) =>
+            qb.where("administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"]),
+        )
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
         .execute();
+
+    if (!stops) {
+        return null;
+    }
+
+    return stops;
 };
 
 export enum ServiceFields {

@@ -4,15 +4,14 @@ import { Kysely, sql } from "kysely";
  * @param db {Kysely<any>}
  */
 export async function up(db) {
-    await sql`ALTER TABLE stops ADD INDEX idx_commonName (commonName);`.execute(
-        db,
-    );
-    await sql`ALTER TABLE stops ADD INDEX idx_adminAreaCode (administrativeAreaCode);`.execute(
-        db,
-    );
+    await db.schema.createIndex("idx_commonName").on("stops").column("commonName").execute();
+    await db.schema.createIndex("idx_adminAreaCode").on("stops").column("administrativeAreaCode").execute();
 }
 
 /**
  * @param db {Kysely<any>}
  */
-export async function down(db) {}
+export async function down(db) {
+    await db.schema.dropIndex("idx_commonName").on("stops").execute();
+    await db.schema.dropIndex("idx_adminAreaCode").on("stops").execute();
+}
