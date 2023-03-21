@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { getServiceById, GetServiceByIdResponse, ServiceByIdQueryInput } from "./client";
+import { getServiceById, Service, ServiceByIdQueryInput } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 
@@ -78,7 +78,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceByIdQueryInput => 
     };
 };
 
-export const formatService = (service: GetServiceByIdResponse): ServiceResponse | null => {
+export const formatService = (service: Service): ServiceResponse | null => {
     return (
         service?.reduce<ServiceResponse>(
             (p, c) => {

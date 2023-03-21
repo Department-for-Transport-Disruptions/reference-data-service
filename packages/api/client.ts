@@ -65,6 +65,8 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
         .execute();
 };
 
+export type Operators = Awaited<ReturnType<typeof getOperators>>;
+
 export type StopsQueryInput = {
     atcoCodes?: string[];
     naptanCodes?: string[];
@@ -118,6 +120,8 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
     return stops;
 };
 
+export type Stops = Awaited<ReturnType<typeof getStops>>;
+
 export enum ServiceFields {
     nocCode = "nocCode",
     lineName = "lineName",
@@ -164,6 +168,8 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
 
     return query.execute();
 };
+
+export type Services = Awaited<ReturnType<typeof getServices>>;
 
 export type ServiceByIdQueryInput = {
     nocCode: string;
@@ -228,7 +234,4 @@ export const getServiceById = async (dbClient: Kysely<Database>, input: ServiceB
     return service;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ReturnedPromiseResolvedType<T> = T extends (...args: any[]) => Promise<infer R> ? R : never;
-
-export type GetServiceByIdResponse = ReturnedPromiseResolvedType<typeof getServiceById>;
+export type Service = Awaited<ReturnType<typeof getServiceById>>;
