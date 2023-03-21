@@ -14,6 +14,16 @@ describe("get-stops", () => {
             expect(getQueryInput(event)).toEqual({ atcoCodes: ["test123", "test456"], page: 0 });
         });
 
+        it("handles commonName", () => {
+            const event = {
+                queryStringParameters: {
+                    search: "test",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ commonName: "test", page: 0 });
+        });
+
         it("handles naptanCodes", () => {
             const event = {
                 queryStringParameters: {
@@ -37,6 +47,44 @@ describe("get-stops", () => {
                 naptanCodes: ["abcde", "fghij"],
                 page: 0,
             });
+        });
+
+        it("handles commonName and atcoCodes and naptanCodes", () => {
+            const event = {
+                queryStringParameters: {
+                    search: "test",
+                    atcoCodes: "test123,test456",
+                    naptanCodes: "abcde,fghij",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({
+                commonName: "test",
+                atcoCodes: ["test123", "test456"],
+                naptanCodes: ["abcde", "fghij"],
+                page: 0,
+            });
+        });
+
+        it("handles adminAreaCode", () => {
+            const event = {
+                queryStringParameters: {
+                    adminAreaCodes: "009,001",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ adminAreaCodes: ["009", "001"], page: 0 });
+        });
+
+        it("handles commonName and adminAreaCode", () => {
+            const event = {
+                queryStringParameters: {
+                    search: "test",
+                    adminAreaCodes: "009",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ commonName: "test", adminAreaCodes: ["009"], page: 0 });
         });
 
         it("handles atcoCodes and naptanCodes with trailing or leading spaces", () => {

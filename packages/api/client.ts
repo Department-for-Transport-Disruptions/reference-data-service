@@ -68,34 +68,54 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
 export type StopsQueryInput = {
     atcoCodes?: string[];
     naptanCodes?: string[];
+    commonName?: string;
+    adminAreaCodes?: string[];
     page?: number;
 };
 
 export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInput) => {
     logger.info("Starting getStops...");
 
-    const STOPS_PAGE_SIZE = 50;
+    const STOPS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
 
-    if (input.atcoCodes || input.naptanCodes) {
-        return dbClient
-            .selectFrom("stops")
-            .selectAll()
-            .where((qb) =>
-                qb
-                    .where("naptanCode", "in", input.naptanCodes ?? ["---"])
-                    .orWhere("atcoCode", "in", input.atcoCodes ?? ["---"]),
-            )
-            .offset((input.page || 0) * STOPS_PAGE_SIZE)
-            .limit(STOPS_PAGE_SIZE)
-            .execute();
-    }
-
-    return dbClient
+    const stops = await dbClient
         .selectFrom("stops")
-        .selectAll()
+        .select([
+            "id",
+            "atcoCode",
+            "naptanCode",
+            "commonName",
+            "street",
+            "indicator",
+            "bearing",
+            "nptgLocalityCode",
+            "localityName",
+            "parentLocalityName",
+            "longitude",
+            "latitude",
+            "stopType",
+            "busStopType",
+            "timingStatus",
+            "administrativeAreaCode",
+            "status",
+        ])
+        .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
+        .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
+        .$if(!!input.commonName?.[0], (qb) =>
+            qb.where("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
+        )
+        .$if(!!input.adminAreaCodes?.[0], (qb) =>
+            qb.where("administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"]),
+        )
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
         .execute();
+
+    if (!stops) {
+        return null;
+    }
+
+    return stops;
 };
 
 export enum ServiceFields {
