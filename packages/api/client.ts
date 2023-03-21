@@ -69,7 +69,7 @@ export type StopsQueryInput = {
     atcoCodes?: string[];
     naptanCodes?: string[];
     commonName?: string;
-    adminAreaCodes?: string;
+    adminAreaCodes?: string[];
     page?: number;
 };
 
