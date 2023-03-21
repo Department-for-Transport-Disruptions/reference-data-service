@@ -16,11 +16,11 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
     const adminAreaCodes = queryStringParameters?.["adminAreaCodes"] ?? "";
     const adminAreaCodeArray = adminAreaCodes
         .split(",")
-        .filter((atcoCode) => atcoCode)
-        .map((atcoCode) => atcoCode.trim());
+        .filter((adminAreaCode) => adminAreaCode)
+        .map((adminAreaCode) => adminAreaCode.trim());
 
     if (adminAreaCodeArray.length > Number(MAX_ADMIN_AREA_CODES)) {
-        throw new ClientError(`Only up to ${MAX_ATCO_CODES} ATCO codes can be provided`);
+        throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
     const atcoCodes = queryStringParameters?.["atcoCodes"] ?? "";

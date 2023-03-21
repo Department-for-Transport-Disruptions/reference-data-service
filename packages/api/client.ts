@@ -79,7 +79,6 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
 
     const STOPS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
 
-    logger.info("Filtering by admin area code...");
     const stops = await dbClient
         .selectFrom("stops")
         .select([
