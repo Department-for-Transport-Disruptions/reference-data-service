@@ -81,7 +81,7 @@ export function ApiStack({ stack }: StackContext) {
 
     const allowedOrigins = [`https://${stack.stage}.cdd.${rootDomain}`];
 
-    if (stack.stage === "test") {
+    if (!["preprod", "prod"].includes(stack.stage)) {
         allowedOrigins.push("http://localhost:3000");
     }
 
