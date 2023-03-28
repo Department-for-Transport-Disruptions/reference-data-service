@@ -166,6 +166,11 @@ export interface ServiceJourneyPatternLinksTable {
     toSequenceNumber: string | null;
 }
 
+export interface ServiceAdminAreaCodes {
+    serviceId: number;
+    adminAreaCode: string;
+}
+
 export interface Database {
     stops: StopsTable;
     stops_new?: StopsTable;
@@ -188,6 +193,9 @@ export interface Database {
     service_journey_pattern_links: ServiceJourneyPatternLinksTable;
     service_journey_pattern_links_new?: ServiceJourneyPatternLinksTable;
     service_journey_pattern_links_old?: ServiceJourneyPatternLinksTable;
+    service_admin_area_codes: ServiceAdminAreaCodes;
+    service_admin_area_codes_new?: ServiceAdminAreaCodes;
+    service_admin_area_codes_old?: ServiceAdminAreaCodes;
 }
 
 export type Tables =
@@ -197,7 +205,8 @@ export type Tables =
     | "operator_public_data"
     | "services"
     | "service_journey_patterns"
-    | "service_journey_pattern_links";
+    | "service_journey_pattern_links"
+    | "service_admin_area_codes";
 export type TablesNew =
     | "stops_new"
     | "operator_lines_new"
@@ -205,7 +214,8 @@ export type TablesNew =
     | "operator_public_data_new"
     | "services_new"
     | "service_journey_patterns_new"
-    | "service_journey_pattern_links_new";
+    | "service_journey_pattern_links_new"
+    | "service_admin_area_codes_new";
 export type TablesOld =
     | "stops_old"
     | "operator_lines_old"
@@ -213,7 +223,8 @@ export type TablesOld =
     | "operator_public_data_old"
     | "services_old"
     | "service_journey_patterns_old"
-    | "service_journey_pattern_links_old";
+    | "service_journey_pattern_links_old"
+    | "service_admin_area_codes_old";
 
 export const getDbClient = () => {
     const { DATABASE_NAME: dbName, DATABASE_SECRET_ARN: secretArn, DATABASE_RESOURCE_ARN: resourceArn } = process.env;
