@@ -187,10 +187,11 @@ def collect_journey_patterns(data: dict, service: dict):
     return journey_patterns
 
 
-def iterate_through_journey_patterns_and_run_insert_queries(
+def iterate_through_journey_patterns_and_run_insert_queries( 
     cursor, data: dict, operator_service_id: str, service: dict, logger
 ):
     journey_patterns = collect_journey_patterns(data, service)
+    admin_area_codes = set()
     for journey_pattern in journey_patterns:
         journey_pattern_info = journey_pattern["journey_pattern_info"]
         journey_pattern_section_refs: list = journey_pattern["journey_pattern_section_refs"]
@@ -206,11 +207,45 @@ def iterate_through_journey_patterns_and_run_insert_queries(
         )
 
         links = []
+        stop_codes = set()
         for journey_pattern_section in journey_pattern["journey_pattern_sections"]:
             for journey_pattern_timing_link in journey_pattern_section:
+                stop_codes.add(journey_pattern_timing_link["from_atco_code"])
+                stop_codes.add(journey_pattern_timing_link["to_atco_code"])
                 links.append(journey_pattern_timing_link)
 
         insert_into_txc_journey_pattern_link_table(cursor, links, journey_pattern_id)
+
+        admin_area_codes.update(get_admin_area_codes(cursor, stop_codes))
+    
+    insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
+
+
+def insert_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, area_codes, service_id):
+    codes_dict = {f"k{k}":v for k,v in enumerate(area_codes)}
+    query = "INSERT IGNORE INTO service_admin_area_codes_new (serviceId, adminAreaCode) VALUES %s"
+    keys = ", ".join(list([f"(:service_id, :{v})" for v in codes_dict.keys()]))
+    query = query % keys
+    codes_dict["service_id"] = service_id
+
+    cursor.execute(query, codes_dict)
+
+
+def get_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, stop_codes):
+    codes_dict = {f"k{k}":v for k,v in enumerate(stop_codes)}
+    query = "SELECT DISTINCT administrativeAreaCode FROM stops WHERE atcoCode IN (%s)"
+    keys = ", ".join(list([f":{v}" for v in codes_dict.keys()]))
+    query = query % keys
+
+    cursor.execute(
+        query,
+        codes_dict
+    )
+
+    result = cursor.fetchall()
+    admin_area_codes = list(sum(result, ())) if result and len(result) > 0 else None
+
+    return admin_area_codes
 
 
 def insert_into_txc_journey_pattern_table(

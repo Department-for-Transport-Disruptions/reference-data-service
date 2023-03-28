@@ -13,7 +13,7 @@ export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResul
 export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
     const { queryStringParameters } = event;
 
-    const adminAreaCodes = queryStringParameters?.["adminAreaCodes"] ?? "";
+    const adminAreaCodes = queryStringParameters?.adminAreaCodes ?? "";
     const adminAreaCodeArray = adminAreaCodes
         .split(",")
         .filter((adminAreaCode) => adminAreaCode)
@@ -23,7 +23,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
-    const atcoCodes = queryStringParameters?.["atcoCodes"] ?? "";
+    const atcoCodes = queryStringParameters?.atcoCodes ?? "";
     const atcoCodesArray = atcoCodes
         .split(",")
         .filter((atcoCode) => atcoCode)
@@ -33,7 +33,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         throw new ClientError(`Only up to ${MAX_ATCO_CODES} ATCO codes can be provided`);
     }
 
-    const naptanCodes = queryStringParameters?.["naptanCodes"] ?? "";
+    const naptanCodes = queryStringParameters?.naptanCodes ?? "";
     const naptanCodesArray = naptanCodes
         .split(",")
         .filter((naptanCode) => naptanCode)
@@ -43,9 +43,9 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         throw new ClientError(`Only up to ${MAX_NAPTAN_CODES} NaPTAN codes can be provided`);
     }
 
-    const commonName = queryStringParameters?.["search"] ?? "";
+    const commonName = queryStringParameters?.search ?? "";
 
-    const page = Number(queryStringParameters?.["page"] ?? "1");
+    const page = Number(queryStringParameters?.page ?? "1");
 
     if (isNaN(page)) {
         throw new ClientError("Provided page is not valid");

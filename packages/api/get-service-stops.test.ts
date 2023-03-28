@@ -1,36 +1,23 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
-import { formatService, getQueryInput } from "./get-service-by-id";
-import { serviceDbData } from "./test/testdata";
+import { formatStops, getQueryInput } from "./get-service-stops";
+import { stopsDbData } from "./test/testdata";
 
-describe("get-service-by-id", () => {
+describe("get-service-stops", () => {
     describe("input generation", () => {
-        it("handles nocCode and serviceId", () => {
-            const event = {
-                pathParameters: {
-                    nocCode: "TEST",
-                    serviceId: "234",
-                },
-            } as unknown as APIGatewayEvent;
-
-            expect(getQueryInput(event)).toEqual({ nocCode: "TEST", serviceId: 234 });
-        });
-
-        it("throws a ClientError if no nocCode provided", () => {
+        it("handles serviceId", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(() => getQueryInput(event)).toThrowError("NOC must be provided");
+            expect(getQueryInput(event)).toEqual({ serviceId: 234 });
         });
 
         it("throws a ClientError if no serviceId provided", () => {
             const event = {
-                pathParameters: {
-                    nocCode: "TEST",
-                },
+                pathParameters: {},
             } as unknown as APIGatewayEvent;
 
             expect(() => getQueryInput(event)).toThrowError("Service ID must be provided");
@@ -39,7 +26,6 @@ describe("get-service-by-id", () => {
         it("throws a ClientError if invalid serviceId provided", () => {
             const event = {
                 pathParameters: {
-                    nocCode: "TEST",
                     serviceId: "abc",
                 },
             } as unknown as APIGatewayEvent;
@@ -50,7 +36,7 @@ describe("get-service-by-id", () => {
 
     describe("format service", () => {
         it("correctly formats db response", () => {
-            const formattedService = formatService(serviceDbData);
+            const formattedService = formatStops(stopsDbData);
 
             expect(formattedService).toMatchSnapshot();
         });

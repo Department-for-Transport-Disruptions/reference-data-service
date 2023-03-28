@@ -47,19 +47,12 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
         };
     }
 
-    if (input.batchNocCodes) {
-        return dbClient
-            .selectFrom("operators")
-            .selectAll()
-            .where("nocCode", "in", input.batchNocCodes)
-            .offset((input.page || 0) * OPERATORS_PAGE_SIZE)
-            .limit(OPERATORS_PAGE_SIZE)
-            .execute();
-    }
-
     return dbClient
         .selectFrom("operators")
         .selectAll()
+        .$if(!!input.batchNocCodes && input.batchNocCodes.length > 0, (qb) =>
+            qb.where("nocCode", "in", input.batchNocCodes ?? []),
+        )
         .offset((input.page || 0) * OPERATORS_PAGE_SIZE)
         .limit(OPERATORS_PAGE_SIZE)
         .execute();
@@ -109,13 +102,10 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
             qb.where("administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"]),
         )
+        .where("status", "=", "active")
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
         .execute();
-
-    if (!stops) {
-        return null;
-    }
 
     return stops;
 };
@@ -144,32 +134,28 @@ export enum DataSource {
     tnds = "tnds",
 }
 
-export type ServicesQueryInput = {
+export type ServicesForOperatorQueryInput = {
     nocCode: string;
     dataSource: DataSource;
     modes?: string[];
 };
 
-export const getServices = async (dbClient: Kysely<Database>, input: ServicesQueryInput) => {
-    logger.info("Starting getServices...");
+export const getServicesForOperator = async (dbClient: Kysely<Database>, input: ServicesForOperatorQueryInput) => {
+    logger.info("Starting getServicesForOperator...");
 
-    let query = dbClient
+    return dbClient
         .selectFrom("services")
         .selectAll()
         .where("nocCode", "=", input.nocCode)
         .where("dataSource", "=", input.dataSource)
+        .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("mode", "in", input.modes ?? []))
         .where((qb) => qb.where("services.endDate", "is", null).orWhere("services.endDate", ">=", sql`CURDATE()`))
         .orderBy("lineName", "asc")
-        .orderBy("startDate", "asc");
-
-    if (input.modes) {
-        query = query.where("mode", "in", input.modes);
-    }
-
-    return query.execute();
+        .orderBy("startDate", "asc")
+        .execute();
 };
 
-export type Services = Awaited<ReturnType<typeof getServices>>;
+export type ServicesForOperator = Awaited<ReturnType<typeof getServicesForOperator>>;
 
 export type ServiceByIdQueryInput = {
     nocCode: string;
@@ -235,3 +221,97 @@ export const getServiceById = async (dbClient: Kysely<Database>, input: ServiceB
 };
 
 export type Service = Awaited<ReturnType<typeof getServiceById>>;
+
+export type ServicesQueryInput = {
+    dataSource: DataSource;
+    page: number;
+    adminAreaCodes?: string[];
+    modes?: string[];
+};
+
+export const getServices = async (dbClient: Kysely<Database>, input: ServicesQueryInput) => {
+    logger.info("Starting getServices...");
+
+    const SERVICES_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
+
+    const services = await dbClient
+        .selectFrom("services")
+        .selectAll(["services"])
+        .where("dataSource", "=", input.dataSource)
+        .$if(!!input.modes?.[0], (qb) => qb.where("mode", "in", input.modes ?? ["---"]))
+        .$if(!!input.adminAreaCodes?.[0], (qb) =>
+            qb
+                .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
+                .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
+        )
+        .offset((input.page || 0) * SERVICES_PAGE_SIZE)
+        .limit(SERVICES_PAGE_SIZE)
+        .execute();
+
+    return services;
+};
+
+export type Services = Awaited<ReturnType<typeof getServices>>;
+
+export type ServiceStopsQueryInput = {
+    serviceId: number;
+};
+
+export const getServiceStops = async (dbClient: Kysely<Database>, input: ServiceStopsQueryInput) => {
+    logger.info("Starting getServiceStops...");
+
+    const stops = await dbClient
+        .selectFrom("services")
+        .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
+        .innerJoin(
+            "service_journey_pattern_links",
+            "service_journey_pattern_links.journeyPatternId",
+            "service_journey_patterns.id",
+        )
+        .innerJoin("stops as fromStop", "fromStop.atcoCode", "service_journey_pattern_links.fromAtcoCode")
+        .innerJoin("stops as toStop", "toStop.atcoCode", "service_journey_pattern_links.toAtcoCode")
+        .select([
+            "fromStop.id as fromId",
+            "fromStop.atcoCode as fromAtcoCode",
+            "fromStop.naptanCode as fromNaptanCode",
+            "fromStop.commonName as fromCommonName",
+            "fromStop.street as fromStreet",
+            "fromStop.indicator as fromIndicator",
+            "fromStop.bearing as fromBearing",
+            "fromStop.nptgLocalityCode as fromNptgLocalityCode",
+            "fromStop.localityName as fromLocalityName",
+            "fromStop.parentLocalityName as fromParentLocalityName",
+            "fromStop.longitude as fromLongitude",
+            "fromStop.latitude as fromLatitude",
+            "fromStop.stopType as fromStopType",
+            "fromStop.busStopType as fromBusStopType",
+            "fromStop.timingStatus as fromTimingStatus",
+            "fromStop.administrativeAreaCode as fromAdministrativeAreaCode",
+            "fromStop.status as fromStatus",
+            "toStop.id as toId",
+            "toStop.atcoCode as toAtcoCode",
+            "toStop.naptanCode as toNaptanCode",
+            "toStop.commonName as toCommonName",
+            "toStop.street as toStreet",
+            "toStop.indicator as toIndicator",
+            "toStop.bearing as toBearing",
+            "toStop.nptgLocalityCode as toNptgLocalityCode",
+            "toStop.localityName as toLocalityName",
+            "toStop.parentLocalityName as toParentLocalityName",
+            "toStop.longitude as toLongitude",
+            "toStop.latitude as toLatitude",
+            "toStop.stopType as toStopType",
+            "toStop.busStopType as toBusStopType",
+            "toStop.timingStatus as toTimingStatus",
+            "toStop.administrativeAreaCode as toAdministrativeAreaCode",
+            "toStop.status as toStatus",
+        ])
+        .where("services.id", "=", input.serviceId)
+        .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
+        .orderBy("service_journey_pattern_links.fromSequenceNumber")
+        .execute();
+
+    return stops;
+};
+
+export type ServiceStops = Awaited<ReturnType<typeof getServiceStops>>;

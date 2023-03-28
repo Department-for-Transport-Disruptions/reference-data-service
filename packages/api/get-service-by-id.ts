@@ -56,20 +56,20 @@ export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResul
 export const getQueryInput = (event: APIGatewayEvent): ServiceByIdQueryInput => {
     const { pathParameters } = event;
 
-    const nocCode = pathParameters?.["nocCode"] ?? "";
+    const nocCode = pathParameters?.nocCode ?? "";
 
     if (!nocCode) {
         throw new ClientError("NOC must be provided");
     }
 
-    const serviceId = pathParameters?.["serviceId"] ?? "";
+    const serviceId = pathParameters?.serviceId;
 
     if (!serviceId) {
         throw new ClientError("Service ID must be provided");
     }
 
     if (isNaN(Number(serviceId))) {
-        throw new ClientError("Provided serviceId is not valid");
+        throw new ClientError("Provided service ID is not valid");
     }
 
     return {
