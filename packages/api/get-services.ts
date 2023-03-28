@@ -13,19 +13,19 @@ export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResul
 export const getQueryInput = (event: APIGatewayEvent): ServicesQueryInput => {
     const { queryStringParameters } = event;
 
-    const modes = queryStringParameters?.["modes"] ?? "";
+    const modes = queryStringParameters?.modes ?? "";
     const modesArray = modes
         .split(",")
         .filter((mode) => mode)
         .map((mode) => mode.trim());
 
-    const dataSourceInput = queryStringParameters?.["dataSource"] ?? DataSource.bods;
+    const dataSourceInput = queryStringParameters?.dataSource ?? DataSource.bods;
 
     if (!isDataSource(dataSourceInput)) {
         throw new ClientError("Provided dataSource must be tnds or bods");
     }
 
-    const adminAreaCodes = queryStringParameters?.["adminAreaCodes"] ?? "";
+    const adminAreaCodes = queryStringParameters?.adminAreaCodes ?? "";
     const adminAreaCodeArray = adminAreaCodes
         .split(",")
         .filter((adminAreaCode) => adminAreaCode)
@@ -35,7 +35,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServicesQueryInput => {
         throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
-    const page = Number(queryStringParameters?.["page"] ?? "1");
+    const page = Number(queryStringParameters?.page ?? "1");
 
     if (isNaN(page)) {
         throw new ClientError("Provided page is not valid");

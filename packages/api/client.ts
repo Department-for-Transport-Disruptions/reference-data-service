@@ -148,7 +148,7 @@ export const getServicesForOperator = async (dbClient: Kysely<Database>, input: 
         .selectAll()
         .where("nocCode", "=", input.nocCode)
         .where("dataSource", "=", input.dataSource)
-        .$if(!!input.modes && input.modes?.length > 0, (qb) => qb.where("mode", "in", input.modes ?? []))
+        .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("mode", "in", input.modes ?? []))
         .where((qb) => qb.where("services.endDate", "is", null).orWhere("services.endDate", ">=", sql`CURDATE()`))
         .orderBy("lineName", "asc")
         .orderBy("startDate", "asc")

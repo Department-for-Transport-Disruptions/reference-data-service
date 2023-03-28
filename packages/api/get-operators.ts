@@ -19,7 +19,7 @@ export const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
         };
     }
 
-    const batchNocCodes = queryStringParameters?.["nocCodes"] ?? "";
+    const batchNocCodes = queryStringParameters?.nocCodes ?? "";
     const batchNocCodesArray = batchNocCodes
         .split(",")
         .filter((nocCode) => nocCode)
@@ -29,7 +29,7 @@ export const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
         throw new ClientError(`Only up to ${MAX_NOC_CODES} NOC codes can be provided`);
     }
 
-    const page = Number(queryStringParameters?.["page"] ?? "1");
+    const page = Number(queryStringParameters?.page ?? "1");
 
     if (isNaN(page)) {
         throw new ClientError("Provided page is not valid");

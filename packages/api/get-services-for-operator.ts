@@ -11,19 +11,19 @@ export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResul
 export const getQueryInput = (event: APIGatewayEvent): ServicesForOperatorQueryInput => {
     const { pathParameters, queryStringParameters } = event;
 
-    const nocCode = pathParameters?.["nocCode"] ?? "";
+    const nocCode = pathParameters?.nocCode ?? "";
 
     if (!nocCode) {
         throw new ClientError("NOC must be provided");
     }
 
-    const modes = queryStringParameters?.["modes"] ?? "";
+    const modes = queryStringParameters?.modes ?? "";
     const modesArray = modes
         .split(",")
         .filter((mode) => mode)
         .map((mode) => mode.trim());
 
-    const dataSourceInput = queryStringParameters?.["dataSource"] ?? DataSource.bods;
+    const dataSourceInput = queryStringParameters?.dataSource ?? DataSource.bods;
 
     if (!isDataSource(dataSourceInput)) {
         throw new ClientError("Provided dataSource must be tnds or bods");
