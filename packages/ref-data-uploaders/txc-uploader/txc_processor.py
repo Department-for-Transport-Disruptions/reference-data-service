@@ -218,7 +218,8 @@ def iterate_through_journey_patterns_and_run_insert_queries(
 
         admin_area_codes.update(get_admin_area_codes(cursor, stop_codes))
     
-    insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
+    if admin_area_codes:
+        insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
 
 
 def insert_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, area_codes, service_id):
