@@ -41,6 +41,9 @@ export const executeClient = async <InputT, ResponseT, FormattedT>(
             return {
                 statusCode: 200,
                 body: JSON.stringify(formattedResult),
+                headers: {
+                    "content-type": "application/json",
+                },
             };
         }
 
@@ -53,6 +56,9 @@ export const executeClient = async <InputT, ResponseT, FormattedT>(
         return {
             statusCode: 200,
             body: JSON.stringify(result),
+            headers: {
+                "content-type": "application/json",
+            },
         };
     } catch (e) {
         if (e instanceof ClientError) {
