@@ -306,6 +306,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
             "toStop.administrativeAreaCode as toAdministrativeAreaCode",
             "toStop.status as toStatus",
         ])
+        .groupBy(["fromId", "toId"])
         .where("services.id", "=", input.serviceId)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
