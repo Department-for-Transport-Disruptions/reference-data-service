@@ -105,7 +105,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                 .where("administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"])
                 .$if(!!input.polygon, (qb) =>
                     qb.where(
-                        sql`ST_CONTAINS(ST_GEOMFROMTEXT('POLYGON((${input.polygon}))'), Point(stops.longitude, stops.latitude))`,
+                        sql`ST_CONTAINS(ST_GEOMFROMTEXT(${input.polygon}), Point(stops.longitude, stops.latitude))`,
                     ),
                 ),
         )
@@ -114,6 +114,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
         .limit(STOPS_PAGE_SIZE)
         .execute();
     // -1.4848897 53.3942186,-1.3818929 53.3876669,-1.4114186 53.4265529,-1.4848897 53.3942186
+    // esapcingggg issues so try lit val https://kysely-org.github.io/kysely/interfaces/Sql.html#val
     return stops;
 };
 

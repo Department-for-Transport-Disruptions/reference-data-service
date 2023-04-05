@@ -58,9 +58,9 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         // -1.4848897 53.3942186, -1.3818929 53.3876669,-1.4114186 53.4265529, -1.4848897 53.3942186
         return polygonToFormat.map((coordinate) => `${coordinate[0]} ${coordinate[1]}`).toString();
     };
-    const polygon = queryStringParameters?.polygon
-        ? formatPolygon(JSON.parse(queryStringParameters?.polygon) as number[][])
-        : "";
+    const polygon = `POLYGON((${
+        queryStringParameters?.polygon ? formatPolygon(JSON.parse(queryStringParameters?.polygon) as number[][]) : ""
+    }))`;
 
     console.log("polyyy", polygon);
     // [ [ -1.4848897, 53.3942186 ], [ -1.3818929, 53.3876669 ], [ -1.4114186, 53.4265529 ], [-1.4848897, 53.3942186 ] ]
