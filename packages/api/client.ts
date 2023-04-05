@@ -115,6 +115,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
         .execute();
     // -1.4848897 53.3942186,-1.3818929 53.3876669,-1.4114186 53.4265529,-1.4848897 53.3942186
     // esapcingggg issues so try lit val https://kysely-org.github.io/kysely/interfaces/Sql.html#val
+    //https://ruij3gt6v7.execute-api.eu-west-2.amazonaws.com/stops?adminAreaCodes=099&polygon=[[-1.4848897,53.3942186],[-1.3818929,53.3876669],[-1.4114186,53.4265529],[-1.4848897,53.3942186]]
     return stops;
 };
 
