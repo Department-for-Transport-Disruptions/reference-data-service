@@ -51,11 +51,26 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         throw new ClientError("Provided page is not valid");
     }
 
+    const formatPolygon = (polygonToFormat: number[][]): string => {
+        // [ [ 1, 1 ], [ 1, 2 ], [ 2, 2 ], [ 2, 1 ] ]
+        // [ [ -1.391749786242542, 53.421478425112554 ], [ -1.3731590588747054, 53.422524729977454 ], [ -1.3842102134763934, 53.41353797858062 ], [ -1.391749786242542, 53.42147842511255 ] ]
+        // [ [ -1.391749786242542, 53.421478425112554 ], [ -1.3731590588747054, 53.422524729977454 ], [ -1.3842102134763934, 53.41353797858062 ], [ -1.391749786242542, 53.42147842511255 ] ]
+        // -1.4848897 53.3942186, -1.3818929 53.3876669,-1.4114186 53.4265529, -1.4848897 53.3942186
+        return polygonToFormat.map((coordinate) => `${coordinate[0]} ${coordinate[1]}`).toString();
+    };
+    const polygon = queryStringParameters?.polygon
+        ? formatPolygon(JSON.parse(queryStringParameters?.polygon) as number[][])
+        : "";
+
+    console.log("polyyy", polygon);
+    // [ [ -1.4848897, 53.3942186 ], [ -1.3818929, 53.3876669 ], [ -1.4114186, 53.4265529 ], [-1.4848897, 53.3942186 ] ]
+    //[[-1.4848897,53.3942186],[-1.3818929,53.3876669],[-1.4114186,53.4265529],[-1.4848897,53.3942186]]
     return {
         ...(atcoCodes ? { atcoCodes: atcoCodesArray } : {}),
         ...(naptanCodes ? { naptanCodes: naptanCodesArray } : {}),
         ...(commonName ? { commonName } : {}),
         ...(adminAreaCodes ? { adminAreaCodes: adminAreaCodeArray } : {}),
+        ...(polygon ? { polygon } : {}),
         page: page - 1,
     };
 };
