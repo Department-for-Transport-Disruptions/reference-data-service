@@ -87,6 +87,23 @@ describe("get-stops", () => {
             expect(getQueryInput(event)).toEqual({ commonName: "test", adminAreaCodes: ["009"], page: 0 });
         });
 
+        it("handles polygons and adminAreaCode", () => {
+            const event = {
+                queryStringParameters: {
+                    polygon:
+                        "[[-1.4848897,53.3942186],[-1.3818929,53.3876669],[-1.4114186,53.4265529],[-1.4848897,53.3942186]]",
+                    adminAreaCodes: "009",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({
+                adminAreaCodes: ["009"],
+                polygon:
+                    "POLYGON((-1.4848897 53.3942186,-1.3818929 53.3876669,-1.4114186 53.4265529,-1.4848897 53.3942186))",
+                page: 0,
+            });
+        });
+
         it("handles atcoCodes and naptanCodes with trailing or leading spaces", () => {
             const event = {
                 queryStringParameters: {
