@@ -8,14 +8,12 @@
     "devDependencies": {
         "@types/lambda-log": "^2.2.1",
         "@types/node": "^18.13.0",
-        "sst": "^2.0.22",
         "vitest": "^0.28.5"
     },
     "dependencies": {
         "@reference-data-service/core": "file:../core",
         "axios": "^1.3.3",
         "basic-ftp": "^5.0.2",
-        "lambda-log": "^3.1.0",
-        "sst": "^2.0.22"
+        "lambda-log": "^3.1.0"
     }
 }
