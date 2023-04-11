@@ -66,6 +66,7 @@ export type StopsQueryInput = {
     commonName?: string;
     adminAreaCodes?: string[];
     page?: number;
+    polygon?: string;
 };
 
 export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInput) => {
@@ -96,11 +97,17 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
         ])
         .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
         .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
-        .$if(!!input.commonName?.[0], (qb) =>
+        .$if(!!input.commonName, (qb) =>
             qb.where("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
         )
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
-            qb.where("administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"]),
+            qb
+                .where("administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"])
+                .$if(!!input.polygon, (qb) =>
+                    qb.where(
+                        sql`ST_CONTAINS(ST_GEOMFROMTEXT(${input.polygon}), Point(stops.longitude, stops.latitude))`,
+                    ),
+                ),
         )
         .where("status", "=", "active")
         .offset((input.page || 0) * STOPS_PAGE_SIZE)

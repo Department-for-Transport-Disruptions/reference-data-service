@@ -1,9 +1,9 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import * as logger from "lambda-log";
-import crypto from "crypto";
 import { ClientError } from "./error";
 import { Database, getDbClient } from "@reference-data-service/core/db";
 import { Kysely } from "kysely";
+import { randomUUID } from "crypto";
 
 export const executeClient = async <InputT, ResponseT, FormattedT>(
     event: APIGatewayEvent,
@@ -20,7 +20,7 @@ export const executeClient = async <InputT, ResponseT, FormattedT>(
             method: event.httpMethod,
             pathParams: event.pathParameters,
             queryParams: event.queryStringParameters,
-            id: crypto.randomUUID(),
+            id: randomUUID(),
         };
 
         logger.info("Starting request");

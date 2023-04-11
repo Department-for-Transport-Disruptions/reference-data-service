@@ -87,6 +87,23 @@ describe("get-stops", () => {
             expect(getQueryInput(event)).toEqual({ commonName: "test", adminAreaCodes: ["009"], page: 0 });
         });
 
+        it("handles polygons and adminAreaCode", () => {
+            const event = {
+                queryStringParameters: {
+                    polygon:
+                        "[[-1.4848897,53.3942186],[-1.3818929,53.3876669],[-1.4114186,53.4265529],[-1.4848897,53.3942186]]",
+                    adminAreaCodes: "009",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({
+                adminAreaCodes: ["009"],
+                polygon:
+                    "POLYGON((-1.4848897 53.3942186,-1.3818929 53.3876669,-1.4114186 53.4265529,-1.4848897 53.3942186))",
+                page: 0,
+            });
+        });
+
         it("handles atcoCodes and naptanCodes with trailing or leading spaces", () => {
             const event = {
                 queryStringParameters: {
@@ -142,6 +159,42 @@ describe("get-stops", () => {
             } as unknown as APIGatewayEvent;
 
             expect(() => getQueryInput(event)).toThrowError("Provided page is not valid");
+        });
+
+        it("throws a ClientError if polygon provided without adminAreaCodes", () => {
+            const event = {
+                queryStringParameters: {
+                    polygon:
+                        "[[-1.4848897,53.3942186],[-1.3818929,53.3876669],[-1.4114186,53.4265529],[-1.4848897,53.3942186]]",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(() => getQueryInput(event)).toThrowError(
+                "Admin area codes must be provided when providing a polygon",
+            );
+        });
+
+        it("throws a ClientError if invalid polygon provided", () => {
+            const event = {
+                queryStringParameters: {
+                    adminAreaCodes: "099",
+                    polygon: "[[1, 2]]",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(() => getQueryInput(event)).toThrowError("Invalid polygon provided");
+        });
+
+        it("throws a ClientError if provided polygon is too large", () => {
+            const event = {
+                queryStringParameters: {
+                    adminAreaCodes: "099",
+                    polygon:
+                        "[[-1.4848897,53.3942186],[-1.0818929,53.3876669],[-1.0114186,53.4265529],[-0.4848897,70.3942186]]",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(() => getQueryInput(event)).toThrowError("Area of polygon must be below 100km2");
         });
     });
 });
