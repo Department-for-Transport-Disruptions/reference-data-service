@@ -119,6 +119,11 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
 
 export type Stops = Awaited<ReturnType<typeof getStops>>;
 
+export type ServiceStop = {
+    direction: string;
+    fromSequenceNumber: string;
+} & Stops[0];
+
 export enum ServiceFields {
     nocCode = "nocCode",
     lineName = "lineName",
@@ -312,11 +317,14 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
             "toStop.timingStatus as toTimingStatus",
             "toStop.administrativeAreaCode as toAdministrativeAreaCode",
             "toStop.status as toStatus",
+            "service_journey_pattern_links.fromSequenceNumber",
+            "service_journey_patterns.direction",
         ])
         .groupBy(["fromId", "toId"])
         .where("services.id", "=", input.serviceId)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
+        .orderBy("service_journey_patterns.direction")
         .execute();
 
     return stops;
