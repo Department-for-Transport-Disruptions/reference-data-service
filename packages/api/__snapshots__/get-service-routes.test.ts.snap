@@ -1,0 +1,8 @@
+// Vitest Snapshot v1
+
+exports[`get-service-routes > format service > correctly formats db response 1`] = `
+{
+  "inbound": [],
+  "outbound": [],
+}
+`;
