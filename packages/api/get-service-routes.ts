@@ -25,15 +25,16 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
     };
 };
 
+const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
+    return flattenedStops
+        .filter((stop) => stop.direction === direction)
+        .sort((a, b) => Number(a.sequenceNumber) - Number(b.sequenceNumber))
+        .filter((c, i) => c.atcoCode !== flattenedStops[i + 1].atcoCode);
+};
 export const formatStopsRoutes = (stops: ServiceStops): { outbound: ServiceStop[]; inbound: ServiceStop[] } => {
     const flattenedStops = flattenStops(stops);
-    const outbound = flattenedStops
-        .filter((stop) => stop.direction === "outbound")
-        .sort((a, b) => Number(a.sequenceNumber) - Number(b.sequenceNumber))
-        .filter((c, i) => c.atcoCode !== flattenedStops[i + 1].atcoCode);
-    const inbound = flattenedStops
-        .filter((stop) => stop.direction === "inbound")
-        .sort((a, b) => Number(a.sequenceNumber) - Number(b.sequenceNumber))
-        .filter((c, i) => c.atcoCode !== flattenedStops[i + 1].atcoCode);
+    const outbound = filterStops(flattenedStops, "outbound");
+
+    const inbound = filterStops(flattenedStops, "inbound");
     return { outbound, inbound };
 };
