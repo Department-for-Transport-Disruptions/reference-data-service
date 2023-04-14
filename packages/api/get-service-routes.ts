@@ -34,7 +34,6 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
 export const formatStopsRoutes = (stops: ServiceStops): { outbound: ServiceStop[]; inbound: ServiceStop[] } => {
     const flattenedStops = flattenStops(stops);
     const outbound = filterStops(flattenedStops, "outbound");
-
     const inbound = filterStops(flattenedStops, "inbound");
     return { outbound, inbound };
 };
