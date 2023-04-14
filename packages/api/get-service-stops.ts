@@ -47,7 +47,7 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
                 administrativeAreaCode: stop.fromAdministrativeAreaCode,
                 status: stop.fromStatus,
                 direction: stop.direction || "",
-                fromSequenceNumber: stop.fromSequenceNumber || "",
+                sequenceNumber: stop.fromSequenceNumber || "",
             });
         }
 
@@ -71,7 +71,7 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
                 administrativeAreaCode: stop.toAdministrativeAreaCode,
                 status: stop.toStatus,
                 direction: stop.direction || "",
-                fromSequenceNumber: stop.fromSequenceNumber || "",
+                sequenceNumber: stop.fromSequenceNumber || "",
             });
         }
 

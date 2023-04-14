@@ -121,7 +121,7 @@ export type Stops = Awaited<ReturnType<typeof getStops>>;
 
 export type ServiceStop = {
     direction: string;
-    fromSequenceNumber: string;
+    sequenceNumber: string;
 } & Stops[0];
 
 export enum ServiceFields {
