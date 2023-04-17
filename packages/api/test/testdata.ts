@@ -2718,6 +2718,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "OTH",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "outbound",
+        fromSequenceNumber: "1",
     },
     {
         fromId: 388498,
@@ -2754,6 +2756,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "OTH",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "outbound",
+        fromSequenceNumber: "2",
     },
     {
         fromId: 386465,
@@ -2790,6 +2794,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "TIP",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "outbound",
+        fromSequenceNumber: "3",
     },
     {
         fromId: 386465,
@@ -2826,6 +2832,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "TIP",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "inbound",
+        fromSequenceNumber: "1",
     },
     {
         fromId: 386465,
@@ -2862,6 +2870,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "TIP",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "inbound",
+        fromSequenceNumber: "2",
     },
     {
         fromId: 388501,
@@ -2898,6 +2908,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "OTH",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "inbound",
+        fromSequenceNumber: "3",
     },
     {
         fromId: 388501,
@@ -2934,6 +2946,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "OTH",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "inbound",
+        fromSequenceNumber: "4",
     },
     {
         fromId: 388501,
@@ -2970,6 +2984,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "OTH",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "inbound",
+        fromSequenceNumber: "5",
     },
     {
         fromId: 388501,
@@ -3006,6 +3022,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "OTH",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "inbound",
+        fromSequenceNumber: "6",
     },
     {
         fromId: 386459,
@@ -3042,6 +3060,8 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "OTH",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "inbound",
+        fromSequenceNumber: "7",
     },
     {
         fromId: 386459,
@@ -3078,5 +3098,7 @@ export const stopsDbData: ServiceStops = [
         toTimingStatus: "OTH",
         toAdministrativeAreaCode: "075",
         toStatus: "active",
+        direction: "inbound",
+        fromSequenceNumber: "8",
     },
 ];
