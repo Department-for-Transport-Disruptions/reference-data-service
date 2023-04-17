@@ -81,6 +81,6 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
 
 export const formatStops = (stops: ServiceStops): Stops => {
     return flattenStops(stops).filter(
-        (stop, index, self) => index === self.findIndex((t) => t.atcoCode === stop.atcoCode),
+        (flattenedStop, index, self) => index === self.findIndex((stop) => stop.atcoCode === flattenedStop.atcoCode),
     );
 };
