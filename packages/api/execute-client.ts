@@ -5,11 +5,13 @@ import { Database, getDbClient } from "@reference-data-service/core/db";
 import { Kysely } from "kysely";
 import { randomUUID } from "crypto";
 
-export const executeClient = async <InputT, ResponseT, FormattedT>(
+export const executeClient = async <InputT, ResponseT, FormattedT, SecondResponseT, SecondFormattedT>(
     event: APIGatewayEvent,
     getQueryInputFunction: (event: APIGatewayEvent) => InputT,
     clientFunction: (client: Kysely<Database>, input: InputT) => Promise<ResponseT>,
     formatterFunction?: (input: ResponseT) => FormattedT | null,
+    secondQuery?: (client: Kysely<Database>, input: FormattedT) => Promise<SecondResponseT>,
+    secondFormatterFunction?: (input: SecondResponseT) => SecondFormattedT | null,
 ): Promise<APIGatewayProxyResultV2> => {
     try {
         logger.options.dev = process.env.NODE_ENV !== "production";
@@ -38,6 +40,29 @@ export const executeClient = async <InputT, ResponseT, FormattedT>(
         if (formatterFunction) {
             const formattedResult = formatterFunction(result);
 
+            if (secondQuery && formattedResult) {
+                const resultSecond = await secondQuery(dbClient, formattedResult);
+
+                logger.info(`${secondQuery.name} called successfully`);
+
+                if (secondFormatterFunction && resultSecond) {
+                    const secondFormattedResult = secondFormatterFunction(resultSecond);
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify(secondFormattedResult),
+                        headers: {
+                            "content-type": "application/json",
+                        },
+                    };
+                }
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify(resultSecond),
+                    headers: {
+                        "content-type": "application/json",
+                    },
+                };
+            }
             return {
                 statusCode: 200,
                 body: JSON.stringify(formattedResult),

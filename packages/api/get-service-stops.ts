@@ -48,6 +48,7 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
                 status: stop.fromStatus,
                 direction: stop.direction || "",
                 sequenceNumber: stop.fromSequenceNumber || "",
+                serviceId: stop.serviceId,
             });
         }
 
@@ -72,6 +73,7 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
                 status: stop.toStatus,
                 direction: stop.direction || "",
                 sequenceNumber: stop.fromSequenceNumber || "",
+                serviceId: stop.serviceId,
             });
         }
 

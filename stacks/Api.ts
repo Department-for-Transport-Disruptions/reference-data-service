@@ -122,6 +122,21 @@ export function ApiStack({ stack }: StackContext) {
         logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
     });
 
+    const servicesByStopsFunction = new Function(stack, "ref-data-service-get-services-by-stops-function", {
+        bind: [cluster],
+        functionName: `ref-data-service-get-services-by-stops-function-${stack.stage}`,
+        handler: "packages/api/get-services-by-stops.main",
+        timeout: 30,
+        memorySize: 512,
+        environment: {
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
+        },
+        runtime: "nodejs18.x",
+        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+    });
+
     const subDomain = ["test", "preprod", "prod"].includes(stack.stage) ? "api" : `api.${stack.stage}`;
 
     const allowedOrigins = [`https://${stack.stage}.cdd.${rootDomain}`];
@@ -140,6 +155,7 @@ export function ApiStack({ stack }: StackContext) {
             "GET /services": servicesFunction,
             "GET /services/{serviceId}/stops": serviceStopsFunction,
             "GET /services/{serviceId}/routes": serviceRoutesFunction,
+            "GET /stops/services": servicesByStopsFunction,
         },
         customDomain: {
             domainName: `${subDomain}.${hostedZone.zoneName}`,

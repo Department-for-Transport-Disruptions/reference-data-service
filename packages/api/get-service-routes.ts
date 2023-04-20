@@ -25,7 +25,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
     };
 };
 
-const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
+export const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
     return flattenedStops
         .filter((stop) => stop.direction === direction)
         .sort((a, b) => Number(a.sequenceNumber) - Number(b.sequenceNumber))
