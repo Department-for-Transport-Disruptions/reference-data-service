@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { DataSource, getServices, ServicesQueryInput } from "./client";
+import { DataSource, getServices, isValidMode, ServicesQueryInput } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 
@@ -18,6 +18,12 @@ export const getQueryInput = (event: APIGatewayEvent): ServicesQueryInput => {
         .split(",")
         .filter((mode) => mode)
         .map((mode) => mode.trim());
+
+    const filteredModesArray = modesArray.filter(isValidMode);
+
+    if (filteredModesArray.length !== modesArray.length) {
+        throw new ClientError("Invalid mode provided");
+    }
 
     const dataSourceInput = queryStringParameters?.dataSource ?? DataSource.bods;
 
@@ -45,6 +51,6 @@ export const getQueryInput = (event: APIGatewayEvent): ServicesQueryInput => {
         dataSource: dataSourceInput,
         page: page - 1,
         ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
-        ...(modesArray && modesArray.length > 0 ? { modes: modesArray } : {}),
+        ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
     };
 };

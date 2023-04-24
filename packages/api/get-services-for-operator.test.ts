@@ -75,5 +75,18 @@ describe("get-services-for-operator", () => {
 
             expect(() => getQueryInput(event)).toThrowError("Provided dataSource must be tnds or bods");
         });
+
+        it("throws a ClientError for invalid mode", () => {
+            const event = {
+                pathParameters: {
+                    nocCode: "TEST",
+                },
+                queryStringParameters: {
+                    modes: "bus,invalid",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(() => getQueryInput(event)).toThrowError("Invalid mode provided");
+        });
     });
 });
