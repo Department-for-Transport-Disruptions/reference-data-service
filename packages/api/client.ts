@@ -5,13 +5,14 @@ import { Database } from "@reference-data-service/core/db";
 export type OperatorQueryInput = {
     nocCode?: string;
     batchNocCodes?: string[];
+    adminAreaCodes?: string[];
     page?: number;
 };
 
 export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQueryInput) => {
     logger.info("Starting getOperators...");
 
-    const OPERATORS_PAGE_SIZE = 100;
+    const OPERATORS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
 
     if (input.nocCode) {
         const services = await dbClient
@@ -49,10 +50,18 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
 
     return dbClient
         .selectFrom("operators")
-        .selectAll()
+        .selectAll("operators")
         .$if(!!input.batchNocCodes && input.batchNocCodes.length > 0, (qb) =>
             qb.where("nocCode", "in", input.batchNocCodes ?? []),
         )
+        .$if(!!input.adminAreaCodes && input.adminAreaCodes.length > 0, (qb) =>
+            qb
+                .innerJoin("services", "services.nocCode", "operators.nocCode")
+                .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
+                .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
+        )
+        .distinct()
+        .orderBy("operators.id")
         .offset((input.page || 0) * OPERATORS_PAGE_SIZE)
         .limit(OPERATORS_PAGE_SIZE)
         .execute();

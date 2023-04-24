@@ -4,6 +4,7 @@ import { getOperators, OperatorQueryInput } from "./client";
 import { executeClient } from "./execute-client";
 
 const MAX_NOC_CODES = process.env.MAX_NOC_CODES || "5";
+const MAX_ADMIN_AREA_CODES = process.env.MAX_ADMIN_AREA_CODES || "5";
 
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     executeClient(event, getQueryInput, getOperators);
@@ -29,6 +30,16 @@ export const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
         throw new ClientError(`Only up to ${MAX_NOC_CODES} NOC codes can be provided`);
     }
 
+    const adminAreaCodes = queryStringParameters?.adminAreaCodes ?? "";
+    const adminAreaCodeArray = adminAreaCodes
+        .split(",")
+        .filter((adminAreaCode) => adminAreaCode)
+        .map((adminAreaCode) => adminAreaCode.trim());
+
+    if (adminAreaCodeArray.length > Number(MAX_ADMIN_AREA_CODES)) {
+        throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
+    }
+
     const page = Number(queryStringParameters?.page ?? "1");
 
     if (isNaN(page)) {
@@ -37,6 +48,7 @@ export const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
 
     return {
         ...(batchNocCodes ? { batchNocCodes: batchNocCodesArray } : {}),
+        ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
         page: page - 1,
     };
 };

@@ -49,6 +49,19 @@ describe("get-operators", () => {
             });
         });
 
+        it("handles admin area codes", () => {
+            const event = {
+                queryStringParameters: {
+                    adminAreaCodes: "099,080",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({
+                adminAreaCodes: ["099", "080"],
+                page: 0,
+            });
+        });
+
         it("throws a ClientError for too many nocCodes", () => {
             const event = {
                 queryStringParameters: {
@@ -67,6 +80,16 @@ describe("get-operators", () => {
             } as unknown as APIGatewayEvent;
 
             expect(() => getQueryInput(event)).toThrowError("Provided page is not valid");
+        });
+
+        it("throws a client error for too many admin area codes", () => {
+            const event = {
+                queryStringParameters: {
+                    adminAreaCodes: "099,080,001,002,003,004",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(() => getQueryInput(event)).toThrowError("Only up to 5 administrative area codes can be provided");
         });
     });
 });
