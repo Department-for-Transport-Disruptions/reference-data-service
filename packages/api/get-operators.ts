@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import { ClientError } from "./error";
-import { getOperators, OperatorQueryInput } from "./client";
+import { getOperators, isValidMode, OperatorQueryInput } from "./client";
 import { executeClient } from "./execute-client";
 
 const MAX_NOC_CODES = process.env.MAX_NOC_CODES || "5";
@@ -40,6 +40,18 @@ export const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
         throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
+    const modes = queryStringParameters?.modes ?? "";
+    const modesArray = modes
+        .split(",")
+        .filter((mode) => mode)
+        .map((mode) => mode.trim());
+
+    const filteredModesArray = modesArray.filter(isValidMode);
+
+    if (filteredModesArray.length !== modesArray.length) {
+        throw new ClientError("Invalid mode provided");
+    }
+
     const page = Number(queryStringParameters?.page ?? "1");
 
     if (isNaN(page)) {
@@ -47,8 +59,9 @@ export const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
     }
 
     return {
-        ...(batchNocCodes ? { batchNocCodes: batchNocCodesArray } : {}),
-        ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
+        ...(batchNocCodesArray && batchNocCodesArray.length > 0 ? { batchNocCodes: batchNocCodesArray } : {}),
+        ...(adminAreaCodeArray && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
+        ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         page: page - 1,
     };
 };

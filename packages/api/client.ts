@@ -2,10 +2,23 @@ import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { Database } from "@reference-data-service/core/db";
 
+export enum VehicleMode {
+    bus = "bus",
+    tram = "tram",
+    coach = "coach",
+    ferry = "ferry",
+    underground = "underground",
+    rail = "rail",
+    metro = "metro",
+}
+
+export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
+
 export type OperatorQueryInput = {
     nocCode?: string;
     batchNocCodes?: string[];
     adminAreaCodes?: string[];
+    modes?: VehicleMode[];
     page?: number;
 };
 
@@ -51,15 +64,16 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
     return dbClient
         .selectFrom("operators")
         .selectAll("operators")
+        .innerJoin("services", "services.nocCode", "operators.nocCode")
         .$if(!!input.batchNocCodes && input.batchNocCodes.length > 0, (qb) =>
             qb.where("nocCode", "in", input.batchNocCodes ?? []),
         )
         .$if(!!input.adminAreaCodes && input.adminAreaCodes.length > 0, (qb) =>
             qb
-                .innerJoin("services", "services.nocCode", "operators.nocCode")
                 .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
                 .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
         )
+        .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("services.mode", "in", input.modes ?? []))
         .distinct()
         .orderBy("operators.id")
         .offset((input.page || 0) * OPERATORS_PAGE_SIZE)
@@ -158,7 +172,7 @@ export enum DataSource {
 export type ServicesForOperatorQueryInput = {
     nocCode: string;
     dataSource: DataSource;
-    modes?: string[];
+    modes?: VehicleMode[];
 };
 
 export const getServicesForOperator = async (dbClient: Kysely<Database>, input: ServicesForOperatorQueryInput) => {
@@ -247,7 +261,7 @@ export type ServicesQueryInput = {
     dataSource: DataSource;
     page: number;
     adminAreaCodes?: string[];
-    modes?: string[];
+    modes?: VehicleMode[];
 };
 
 export const getServices = async (dbClient: Kysely<Database>, input: ServicesQueryInput) => {

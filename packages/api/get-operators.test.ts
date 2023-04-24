@@ -62,6 +62,19 @@ describe("get-operators", () => {
             });
         });
 
+        it("handles modes", () => {
+            const event = {
+                queryStringParameters: {
+                    modes: "bus,tram",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({
+                modes: ["bus", "tram"],
+                page: 0,
+            });
+        });
+
         it("throws a ClientError for too many nocCodes", () => {
             const event = {
                 queryStringParameters: {
@@ -82,7 +95,7 @@ describe("get-operators", () => {
             expect(() => getQueryInput(event)).toThrowError("Provided page is not valid");
         });
 
-        it("throws a client error for too many admin area codes", () => {
+        it("throws a ClientError for too many admin area codes", () => {
             const event = {
                 queryStringParameters: {
                     adminAreaCodes: "099,080,001,002,003,004",
@@ -90,6 +103,16 @@ describe("get-operators", () => {
             } as unknown as APIGatewayEvent;
 
             expect(() => getQueryInput(event)).toThrowError("Only up to 5 administrative area codes can be provided");
+        });
+
+        it("throws a ClientError for invalid mode", () => {
+            const event = {
+                queryStringParameters: {
+                    modes: "bus,invalid",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(() => getQueryInput(event)).toThrowError("Invalid mode provided");
         });
     });
 });

@@ -76,5 +76,15 @@ describe("get-services", () => {
 
             expect(() => getQueryInput(event)).toThrowError("Provided page is not valid");
         });
+
+        it("throws a ClientError for invalid mode", () => {
+            const event = {
+                queryStringParameters: {
+                    modes: "bus,invalid",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(() => getQueryInput(event)).toThrowError("Invalid mode provided");
+        });
     });
 });
