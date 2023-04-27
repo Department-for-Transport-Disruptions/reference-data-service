@@ -78,7 +78,8 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceByIdQueryInput => 
     };
 };
 
-export const formatService = (service: Service): ServiceResponse | null => {
+// eslint-disable-next-line @typescript-eslint/require-await
+export const formatService = async (service: Service): Promise<ServiceResponse | null> => {
     return (
         service?.reduce<ServiceResponse>(
             (p, c) => {

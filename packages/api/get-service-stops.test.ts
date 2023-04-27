@@ -35,8 +35,8 @@ describe("get-service-stops", () => {
     });
 
     describe("format service", () => {
-        it("correctly formats db response", () => {
-            const formattedService = formatStops(stopsDbData);
+        it("correctly formats db response", async () => {
+            const formattedService = await formatStops(stopsDbData);
 
             expect(formattedService).toMatchSnapshot();
         });

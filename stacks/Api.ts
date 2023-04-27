@@ -87,6 +87,7 @@ export function ApiStack({ stack }: StackContext) {
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
+            MAX_ATCO_CODES: "100",
         },
         runtime: "nodejs18.x",
         logRetention: stack.stage === "production" ? "three_months" : "two_weeks",

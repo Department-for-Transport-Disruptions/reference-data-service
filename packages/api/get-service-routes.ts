@@ -31,7 +31,10 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
         .sort((a, b) => Number(a.sequenceNumber) - Number(b.sequenceNumber))
         .filter((c, i) => c.atcoCode !== flattenedStops[i + 1].atcoCode);
 };
-export const formatStopsRoutes = (stops: ServiceStops): { outbound: ServiceStop[]; inbound: ServiceStop[] } => {
+export const formatStopsRoutes = async (
+    stops: ServiceStops,
+    // eslint-disable-next-line @typescript-eslint/require-await
+): Promise<{ outbound: ServiceStop[]; inbound: ServiceStop[] }> => {
     const flattenedStops = flattenStops(stops);
     const outbound = filterStops(flattenedStops, "outbound");
     const inbound = filterStops(flattenedStops, "inbound");

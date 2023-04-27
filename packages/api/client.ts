@@ -95,7 +95,7 @@ export type StopsQueryInput = {
 export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInput) => {
     logger.info("Starting getStops...");
 
-    const STOPS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
+    const STOPS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 100 : 1000;
 
     const stops = await dbClient
         .selectFrom("stops")
@@ -306,6 +306,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .innerJoin("stops as fromStop", "fromStop.atcoCode", "service_journey_pattern_links.fromAtcoCode")
         .innerJoin("stops as toStop", "toStop.atcoCode", "service_journey_pattern_links.toAtcoCode")
         .select([
+            "services.id as serviceId",
             "fromStop.id as fromId",
             "fromStop.atcoCode as fromAtcoCode",
             "fromStop.naptanCode as fromNaptanCode",
@@ -354,3 +355,36 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
 };
 
 export type ServiceStops = Awaited<ReturnType<typeof getServiceStops>>;
+
+export type ServicesByStopsQueryInput = {
+    dataSource: DataSource;
+    page: number;
+    stops: string[];
+    modes?: VehicleMode[];
+    includeRoutes: boolean;
+};
+
+export const getServicesByStops = async (dbClient: Kysely<Database>, input: ServicesByStopsQueryInput) => {
+    logger.info("Starting getServicesByStops...");
+
+    const services = await dbClient
+        .selectFrom("services")
+        .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
+        .innerJoin(
+            "service_journey_pattern_links",
+            "service_journey_pattern_links.journeyPatternId",
+            "service_journey_patterns.id",
+        )
+        .selectAll("services")
+        .select(["fromAtcoCode", "toAtcoCode"])
+        .where((qb) => qb.where("fromAtcoCode", "in", input.stops).orWhere("toAtcoCode", "in", input.stops))
+        .where("dataSource", "=", input.dataSource)
+        .groupBy(["fromAtcoCode", "toAtcoCode"])
+        .orderBy("service_journey_pattern_links.fromSequenceNumber")
+        .orderBy("service_journey_patterns.direction")
+        .execute();
+
+    return services;
+};
+
+export type ServicesByStops = Awaited<ReturnType<typeof getServicesByStops>>;
