@@ -1,7 +1,5 @@
 import { Duration } from "aws-cdk-lib";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
-import { Bucket, EventType } from "aws-cdk-lib/aws-s3";
-import { LambdaDestination } from "aws-cdk-lib/aws-s3-notifications";
 import { Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
 import { S3Stack } from "./S3";
@@ -9,9 +7,6 @@ import { S3Stack } from "./S3";
 export function UploadersStack({ stack }: StackContext) {
     const { csvBucket, txcBucket } = use(S3Stack);
     const { cluster } = use(DatabaseStack);
-
-    const csvBucketCdk = Bucket.fromBucketName(stack, "ref-data-service-csv-bucket", csvBucket.bucketName);
-    const txcBucketCdk = Bucket.fromBucketName(stack, "ref-data-service-txc-bucket", txcBucket.bucketName);
 
     const csvUploader = new Function(stack, `ref-data-service-csv-uploader`, {
         bind: [cluster],
@@ -38,7 +33,12 @@ export function UploadersStack({ stack }: StackContext) {
         ],
     });
 
-    csvBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(csvUploader));
+    csvBucket.addNotifications(stack, {
+        objectCreated: {
+            events: ["object_created"],
+            function: csvUploader,
+        },
+    });
 
     const txcUploader = new Function(stack, "ref-data-service-txc-uploader", {
         bind: [cluster],
@@ -68,5 +68,10 @@ export function UploadersStack({ stack }: StackContext) {
         maxEventAge: Duration.hours(3),
     });
 
-    txcBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(txcUploader));
+    txcBucket.addNotifications(stack, {
+        objectCreated: {
+            events: ["object_created"],
+            function: txcUploader,
+        },
+    });
 }

@@ -1,7 +1,5 @@
 import { Schedule } from "aws-cdk-lib/aws-events";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
-import { Bucket, EventType } from "aws-cdk-lib/aws-s3";
-import { LambdaDestination } from "aws-cdk-lib/aws-s3-notifications";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Cron, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
@@ -12,12 +10,6 @@ export function RetrieversStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
 
     const enableSchedule = stack.stage === "prod" || stack.stage === "preprod";
-
-    const txcZippedBucketCdk = Bucket.fromBucketName(
-        stack,
-        "ref-data-service-txc-zipped-bucket",
-        txcZippedBucket.bucketName,
-    );
 
     const nocRetriever = new Function(stack, `ref-data-service-noc-retriever`, {
         functionName: `ref-data-service-noc-retriever-${stack.stage}`,
@@ -206,5 +198,10 @@ export function RetrieversStack({ stack }: StackContext) {
         enableLiveDev: false,
     });
 
-    txcZippedBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(unzipper));
+    txcZippedBucket.addNotifications(stack, {
+        objectCreated: {
+            events: ["object_created"],
+            function: unzipper,
+        },
+    });
 }
