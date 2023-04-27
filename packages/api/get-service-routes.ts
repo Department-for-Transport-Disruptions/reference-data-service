@@ -26,10 +26,11 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
 };
 
 const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
-    return flattenedStops
+    const sortedStops = flattenedStops
         .filter((stop) => stop.direction === direction)
-        .sort((a, b) => Number(a.sequenceNumber) - Number(b.sequenceNumber))
-        .filter((c, i) => c.atcoCode !== flattenedStops[i + 1].atcoCode);
+        .sort((a, b) => Number(a.sequenceNumber) - Number(b.sequenceNumber));
+
+    return sortedStops.filter((c, i) => (i > 0 ? c.atcoCode !== sortedStops[i - 1].atcoCode : true));
 };
 export const formatStopsRoutes = async (
     stops: ServiceStops,
