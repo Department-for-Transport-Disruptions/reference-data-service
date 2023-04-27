@@ -36,9 +36,10 @@ describe("get-service-routes", () => {
     });
 
     describe("format service", () => {
-        it("correctly formats db response", () => {
-            const formattedService: { outbound: ServiceStop[]; inbound: ServiceStop[] } =
-                formatStopsRoutes(stopsDbData);
+        it("correctly formats db response", async () => {
+            const formattedService: { outbound: ServiceStop[]; inbound: ServiceStop[] } = await formatStopsRoutes(
+                stopsDbData,
+            );
 
             expect(formattedService).toMatchSnapshot();
         });

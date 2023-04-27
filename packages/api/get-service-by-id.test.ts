@@ -49,8 +49,8 @@ describe("get-service-by-id", () => {
     });
 
     describe("format service", () => {
-        it("correctly formats db response", () => {
-            const formattedService = formatService(serviceDbData);
+        it("correctly formats db response", async () => {
+            const formattedService = await formatService(serviceDbData);
 
             expect(formattedService).toMatchSnapshot();
         });

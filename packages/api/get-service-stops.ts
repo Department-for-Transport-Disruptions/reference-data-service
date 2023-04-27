@@ -79,7 +79,8 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
     });
 };
 
-export const formatStops = (stops: ServiceStops): Stops => {
+// eslint-disable-next-line @typescript-eslint/require-await
+export const formatStops = async (stops: ServiceStops): Promise<Stops> => {
     return flattenStops(stops).filter(
         (flattenedStop, index, self) => index === self.findIndex((stop) => stop.atcoCode === flattenedStop.atcoCode),
     );

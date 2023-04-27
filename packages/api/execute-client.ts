@@ -9,7 +9,11 @@ export const executeClient = async <InputT, ResponseT, FormattedT>(
     event: APIGatewayEvent,
     getQueryInputFunction: (event: APIGatewayEvent) => InputT,
     clientFunction: (client: Kysely<Database>, input: InputT) => Promise<ResponseT>,
-    formatterFunction?: (input: ResponseT) => FormattedT | null,
+    formatterFunction?: (
+        clientResponse: ResponseT,
+        input?: InputT,
+        client?: Kysely<Database>,
+    ) => Promise<FormattedT | null>,
 ): Promise<APIGatewayProxyResultV2> => {
     try {
         logger.options.dev = process.env.NODE_ENV !== "production";
@@ -36,7 +40,7 @@ export const executeClient = async <InputT, ResponseT, FormattedT>(
         logger.info(`${clientFunction.name} called successfully`);
 
         if (formatterFunction) {
-            const formattedResult = formatterFunction(result);
+            const formattedResult = await formatterFunction(result, input, dbClient);
 
             return {
                 statusCode: 200,
