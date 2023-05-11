@@ -5,7 +5,7 @@ export function DatabaseStack({ stack }: StackContext) {
         preprod: {
             minCapacity: "ACU_2",
             maxCapacity: "ACU_4",
-            autoPause: 60,
+            autoPause: false,
         },
         prod: {
             minCapacity: "ACU_2",
