@@ -5,6 +5,7 @@ import { Promise } from "bluebird";
 import { randomUUID } from "crypto";
 import { RawBuilder, sql } from "kysely";
 import * as logger from "lambda-log";
+import OsPoint from "ospoint";
 import { parse } from "papaparse";
 
 const dbClient = getDbClient();
@@ -63,7 +64,7 @@ export const main = async (event: S3Event) => {
 
         const body = (await file.Body?.transformToString()) || "";
 
-        const { data } = parse(body, {
+        let { data } = parse(body, {
             skipEmptyLines: "greedy",
             header: true,
             transformHeader: (header) => {
@@ -86,6 +87,36 @@ export const main = async (event: S3Event) => {
         const numRows = data.length;
 
         const batches = [];
+
+        if (key === "Stops.csv") {
+            data = (
+                data as {
+                    longitude: string;
+                    latitude: string;
+                    easting: string;
+                    northing: string;
+                }[]
+            ).map((item) => {
+                if ((!item.longitude || !item.latitude) && item.easting && item.northing) {
+                    const osPoint = new OsPoint(item.northing, item.easting);
+
+                    const wgs84 = osPoint?.toWGS84();
+
+                    if (wgs84) {
+                        return {
+                            ...item,
+                            longitude: wgs84.longitude,
+                            latitude: wgs84.latitude,
+                        };
+                    }
+                }
+
+                return {
+                    ...item,
+                };
+            });
+        }
+
         while (data.length > 0) {
             const chunk = data.splice(0, 200);
             batches.push(chunk);
