@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - prod-pipeline
 
 jobs:
   build:
@@ -23,23 +22,27 @@ jobs:
       - name: Install packages
         run: npm ci
 
-      # - name: Lint
-      #   run: npm run lint
+      - name: Lint
+        run: npm run lint
 
-      # - name: Test TypeScript compiles
-      #   run: npm run tsc:build
+      - name: Test TypeScript compiles
+        run: npm run tsc:build
 
-      # - name: Test API
-      #   run: npm run test:unit -w @reference-data-service/api
+      - name: Test API
+        run: npm run test:unit -w @reference-data-service/api
+
+      - name: Zip artifact
+        run: zip build.zip ./* -rq
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: build
-          path: .
+          path: ./build.zip
 
   deploy_to_test:
-    name: Build and Deploy to Test env
+    needs: ['build']
+    name: Deploy to Test
     runs-on: ubuntu-22.04
     environment: REF_DATA_TEST
     permissions:
@@ -52,6 +55,9 @@ jobs:
           name: build
           path: .
 
+      - name: Unzip artifact
+        run: unzip -q build.zip
+
       - uses: actions/setup-node@v3
         with:
           node-version: '18.15.x'
@@ -63,57 +69,71 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ref-data-service-github-actions-role-eu-west-2
           aws-region: ${{ vars.AWS_DEFAULT_REGION }}
 
-      - name: Test
+      - name: Deploy to test
+        env:
+          ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
         run: |
-          ls
+          npm run sst -- deploy --stage test
 
-      # - name: Deploy to test
-      #   env:
-      #     ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
-      #   run: |
-      #     npm run sst -- deploy --stage test
+  deploy_to_preprod:
+    needs: ['deploy_to_test']
+    name: Deploy to Pre-Prod
+    runs-on: ubuntu-22.04
+    environment: REF_DATA_PREPROD
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: .
 
-  # build_and_deploy_to_preprod:
-  #   needs: ['build_and_deploy_to_test']
-  #   name: Build and Deploy to Pre-Prod env
-  #   runs-on: ubuntu-22.04
-  #   environment: REF_DATA_PREPROD
-  #   permissions:
-  #     contents: write
-  #     id-token: write
-  #   steps:
-  #     - uses: actions/checkout@v3
+      - name: Unzip artifact
+        run: unzip -q build.zip
 
-  #     - name: Assume role using OIDC
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ref-data-service-github-actions-role-eu-west-2
-  #         aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.15.x'
+          cache: 'npm'
 
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '18.15.x'
-  #         cache: 'npm'
+      - name: Assume role using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ref-data-service-github-actions-role-eu-west-2
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
 
-  #     - name: Install packages
-  #       run: npm ci
+      - name: Deploy to pre-prod
+        env:
+          ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
+        run: |
+          npm run sst -- deploy --stage preprod
 
-  #     - name: Bump version and push tag
-  #       id: tag_version
-  #       uses: mathieudutour/github-tag-action@v6.1
-  #       with:
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  create_draft_release:
+    needs: ['deploy_to_test']
+    name: Create draft release
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: .
 
-  #     - name: Create a GitHub release
-  #       uses: ncipollo/release-action@v1
-  #       with:
-  #         tag: ${{ steps.tag_version.outputs.new_tag }}
-  #         name: Release ${{ steps.tag_version.outputs.new_tag }}
-  #         body: ${{ steps.tag_version.outputs.changelog }}
-  #         prerelease: true
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  #     - name: Deploy to pre-prod
-  #       env:
-  #         ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
-  #       run: |
-  #         npm run sst -- deploy --stage preprod
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          draft: true
+          files: build.zip
