@@ -23,6 +23,15 @@ jobs:
       - name: Unzip artifact
         run: unzip -q build.zip
 
+      - name: Setup Node.js and cache
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.15.x'
+          cache: 'npm'
+
+      - name: Rebuild npm
+        run: npm rebuild
+
       - name: Assume role using OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
