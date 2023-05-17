@@ -6,23 +6,15 @@ on:
       - main
 
 jobs:
-  build_and_deploy_to_test:
-    name: Build and Deploy to Test env
+  build:
+    name: Build
     runs-on: ubuntu-22.04
-    environment: REF_DATA_TEST
-    permissions:
-      contents: write
-      id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Assume role using OIDC
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/ref-data-service-github-actions-role-eu-west-2
-          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
-
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js and cache
+        uses: actions/setup-node@v3
         with:
           node-version: '18.15.x'
           cache: 'npm'
@@ -33,22 +25,49 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test TypeScript compiles
+        run: npm run tsc:build
+
       - name: Test API
         run: npm run test:unit -w @reference-data-service/api
 
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Zip artifact
+        run: zip build.zip ./* -rq
 
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
-          prerelease: true
+          name: build
+          path: ./build.zip
+
+  deploy_to_test:
+    needs: ['build']
+    name: Deploy to Test
+    runs-on: ubuntu-22.04
+    environment: REF_DATA_TEST
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: .
+
+      - name: Unzip artifact
+        run: unzip -q build.zip
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.15.x'
+          cache: 'npm'
+
+      - name: Assume role using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ref-data-service-github-actions-role-eu-west-2
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
 
       - name: Deploy to test
         env:
@@ -56,30 +75,53 @@ jobs:
         run: |
           npm run sst -- deploy --stage test
 
-  build_and_deploy_to_preprod:
-    needs: ['build_and_deploy_to_test']
-    name: Build and Deploy to Pre-Prod env
+  deploy_to_preprod:
+    needs: ['deploy_to_test']
+    name: Deploy to Pre-Prod
     runs-on: ubuntu-22.04
     environment: REF_DATA_PREPROD
     permissions:
-      contents: write
+      contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Assume role using OIDC
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
         with:
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/ref-data-service-github-actions-role-eu-west-2
-          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+          name: build
+          path: .
+
+      - name: Unzip artifact
+        run: unzip -q build.zip
 
       - uses: actions/setup-node@v3
         with:
           node-version: '18.15.x'
           cache: 'npm'
 
-      - name: Install packages
-        run: npm ci
+      - name: Assume role using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ref-data-service-github-actions-role-eu-west-2
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+
+      - name: Deploy to pre-prod
+        env:
+          ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
+        run: |
+          npm run sst -- deploy --stage preprod
+
+  create_draft_release:
+    needs: ['deploy_to_test']
+    name: Create draft release
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: .
 
       - name: Bump version and push tag
         id: tag_version
@@ -87,16 +129,11 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
+      - name: Create release
+        uses: softprops/action-gh-release@v1
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-          prerelease: true
-
-      - name: Deploy to pre-prod
-        env:
-          ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
-        run: |
-          npm run sst -- deploy --stage preprod
+          draft: true
+          files: build.zip
