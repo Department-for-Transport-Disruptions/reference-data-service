@@ -14,6 +14,8 @@ export enum VehicleMode {
 
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
 
+const ignoredStopTypes = ["FTD", "LSE", "RSE", "TMU"];
+
 export type OperatorQueryInput = {
     nocCode?: string;
     batchNocCodes?: string[];
@@ -132,6 +134,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                     ),
                 ),
         )
+        .where("stopType", "not in", ignoredStopTypes)
         .where("status", "=", "active")
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
@@ -244,6 +247,8 @@ export const getServiceById = async (dbClient: Kysely<Database>, input: ServiceB
         ])
         .where("services.nocCode", "=", input.nocCode)
         .where("services.id", "=", input.serviceId)
+        .where("fromStop.stopType", "not in", ignoredStopTypes)
+        .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("services.endDate", "is", null).orWhere("services.endDate", ">=", sql`CURDATE()`))
         .orderBy("services.startDate", "asc")
         .execute();
@@ -346,6 +351,8 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         ])
         .groupBy(["fromId", "toId"])
         .where("services.id", "=", input.serviceId)
+        .where("fromStop.stopType", "not in", ignoredStopTypes)
+        .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
         .orderBy("service_journey_patterns.direction")
