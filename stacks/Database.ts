@@ -12,6 +12,11 @@ export function DatabaseStack({ stack }: StackContext) {
             maxCapacity: "ACU_4",
             autoPause: false,
         },
+        test: {
+            minCapacity: "ACU_2",
+            maxCapacity: "ACU_4",
+            autoPause: false,
+        },
     };
 
     const cluster = new RDS(stack, `ref-data-service-db-cluster`, {
