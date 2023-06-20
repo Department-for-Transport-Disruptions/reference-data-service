@@ -395,3 +395,13 @@ export const getServicesByStops = async (dbClient: Kysely<Database>, input: Serv
 };
 
 export type ServicesByStops = Awaited<ReturnType<typeof getServicesByStops>>;
+
+export const getAdminAreaCodes = async (dbClient: Kysely<Database>) => {
+    logger.info("Starting getAdminAreaCodes...");
+
+    const areaCodes = await dbClient.selectFrom("stops").select("administrativeAreaCode").distinct().execute();
+
+    return areaCodes;
+};
+
+export type AdminAreaCodes = Awaited<ReturnType<typeof getAdminAreaCodes>>;
