@@ -224,6 +224,5 @@ export function RetrieversStack({ stack }: StackContext) {
     new StringParameter(stack, "disableTableRenamer", {
         parameterName: "/scheduled/disable-table-renamer",
         stringValue: "false",
-        Overwrite: true,
     });
 }

@@ -17,7 +17,8 @@ export const main = async () => {
                 Name: "/scheduled/disable-table-renamer",
             };
             const command = new GetParameterCommand(input);
-            disableRenamer = await ssm.send(command);
+            const ssmOutput = await ssm.send(command);
+            disableRenamer = ssmOutput.Parameter.Value;
         } catch (error) {
             if (error instanceof Error) {
                 throw new Error(`Failed to get parameter from ssm: ${error.stack || ""}`);
@@ -73,7 +74,9 @@ const putParameter = async (key: string, value: string) => {
         const command = new PutParameterCommand(input);
         await ssm.send(command);
     } catch (error) {
-        logger.error(error);
+        if (error instanceof Error) {
+            logger.error(error);
+        }
     }
 };
 

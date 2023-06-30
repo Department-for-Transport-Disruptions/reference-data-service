@@ -206,6 +206,8 @@ const putParameter = async (key: string, value: string) => {
         const command = new PutParameterCommand(input);
         await ssm.send(command);
     } catch (error) {
-        logger.error(error);
+        if (error instanceof Error) {
+            logger.error(error);
+        }
     }
 };
