@@ -11,14 +11,14 @@ export const main = async () => {
 
         const dbClient = getDbClient();
 
-        let disableRenamer = "true";
+        let disableRenamer: string | undefined = "true";
         try {
             const input = {
                 Name: "/scheduled/disable-table-renamer",
             };
             const command = new GetParameterCommand(input);
             const ssmOutput = await ssm.send(command);
-            disableRenamer = ssmOutput.Parameter.Value;
+            disableRenamer = ssmOutput.Parameter?.Value;
         } catch (error) {
             if (error instanceof Error) {
                 throw new Error(`Failed to get parameter from ssm: ${error.stack || ""}`);
