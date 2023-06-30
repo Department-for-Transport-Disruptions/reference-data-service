@@ -6,6 +6,7 @@ import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Cron, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
 import { S3Stack } from "./S3";
+import { StringParameter } from "aws-cdk-lib/aws-ssm";
 
 export function RetrieversStack({ stack }: StackContext) {
     const { csvBucket, txcBucket, txcZippedBucket } = use(S3Stack);
@@ -124,6 +125,10 @@ export function RetrieversStack({ stack }: StackContext) {
                 actions: ["secretsmanager:GetSecretValue"],
                 resources: [`${ftpSecret.secretArn}-??????`],
             }),
+            new PolicyStatement({
+                actions: ["ssm:PutParameter"],
+                resources: ["*"],
+            }),
         ],
         enableLiveDev: false,
     });
@@ -156,6 +161,10 @@ export function RetrieversStack({ stack }: StackContext) {
             }),
             new PolicyStatement({
                 actions: ["cloudwatch:PutMetricData"],
+                resources: ["*"],
+            }),
+            new PolicyStatement({
+                actions: ["ssm:PutParameter"],
                 resources: ["*"],
             }),
         ],
@@ -202,9 +211,19 @@ export function RetrieversStack({ stack }: StackContext) {
                 actions: ["cloudwatch:PutMetricData"],
                 resources: ["*"],
             }),
+            new PolicyStatement({
+                actions: ["ssm:PutParameter"],
+                resources: ["*"],
+            }),
         ],
         enableLiveDev: false,
     });
 
     txcZippedBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(unzipper));
+
+    new StringParameter(stack, "disableTableRenamer", {
+        parameterName: "/scheduled/disable-table-renamer",
+        stringValue: "false",
+        Overwrite: true,
+    });
 }

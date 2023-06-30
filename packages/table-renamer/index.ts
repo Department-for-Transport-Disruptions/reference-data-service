@@ -1,6 +1,9 @@
 import { Database, getDbClient, Tables } from "@reference-data-service/core/db";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
+import { SSMClient, PutParameterCommand, GetParameterCommand } from "@aws-sdk/client-ssm";
+
+const ssm = new SSMClient({ region: "eu-west-2" });
 
 export const main = async () => {
     try {
@@ -8,13 +11,37 @@ export const main = async () => {
 
         const dbClient = getDbClient();
 
-        await checkReferenceDataImportHasCompleted("operator_lines", dbClient);
-        await checkReferenceDataImportHasCompleted("operator_public_data", dbClient);
-        await checkReferenceDataImportHasCompleted("operators", dbClient);
-        await checkReferenceDataImportHasCompleted("stops", dbClient);
+        let disableRenamer = "true";
+        try {
+            const input = {
+                Name: "/scheduled/disable-table-renamer",
+            };
+            const command = new GetParameterCommand(input);
+            disableRenamer = await ssm.send(command);
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(`Failed to get parameter from ssm: ${error.stack || ""}`);
+            }
 
-        await deleteAndRenameTables(dbClient);
+            throw error;
+        }
+
+        if (disableRenamer === "false") {
+            await checkReferenceDataImportHasCompleted("operator_lines", dbClient);
+            await checkReferenceDataImportHasCompleted("operator_public_data", dbClient);
+            await checkReferenceDataImportHasCompleted("operators", dbClient);
+            await checkReferenceDataImportHasCompleted("stops", dbClient);
+            await checkReferenceDataImportHasCompleted("services", dbClient);
+
+            await deleteAndRenameTables(dbClient);
+        } else {
+            throw new Error(
+                "The SSM Parameter used to check for errors in the scheduled job has returned TRUE indicating an issue",
+            );
+        }
+        await putParameter("/scheduled/disable-table-renamer", "false");
     } catch (e) {
+        await putParameter("/scheduled/disable-table-renamer", "false");
         if (e instanceof Error) {
             logger.error(e);
 
@@ -35,7 +62,23 @@ export const main = async () => {
     }
 };
 
+const putParameter = async (key: string, value: string) => {
+    try {
+        const input = {
+            Name: key,
+            Value: value,
+            Type: "String",
+            Overwrite: true,
+        };
+        const command = new PutParameterCommand(input);
+        await ssm.send(command);
+    } catch (error) {
+        logger.error(error);
+    }
+};
+
 export const checkReferenceDataImportHasCompleted = async (tableName: Tables, db: Kysely<Database>): Promise<void> => {
+    logger.info(`Check if reference data import has completed for table ${tableName}`);
     const [newCount] = await db.selectFrom(`${tableName}_new`).select(db.fn.count("id").as("count")).execute();
 
     if (newCount.count === 0) {

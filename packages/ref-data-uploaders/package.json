@@ -12,6 +12,7 @@
         "vitest": "^0.28.5"
     },
     "dependencies": {
+        "@aws-sdk/client-ssm": "^3.362.0",
         "@reference-data-service/core": "file:../core",
         "bluebird": "^3.7.2",
         "ospoint": "^0.2.1",
