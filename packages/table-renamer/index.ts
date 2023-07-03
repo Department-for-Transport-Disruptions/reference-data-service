@@ -36,11 +36,11 @@ export const main = async () => {
 
             await deleteAndRenameTables(dbClient);
         } else {
+            await putParameter("/scheduled/disable-table-renamer", "false");
             throw new Error(
                 "The SSM Parameter used to check for errors in the scheduled job has returned TRUE indicating an issue",
             );
         }
-        await putParameter("/scheduled/disable-table-renamer", "false");
     } catch (e) {
         await putParameter("/scheduled/disable-table-renamer", "false");
         if (e instanceof Error) {
