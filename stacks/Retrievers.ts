@@ -211,10 +211,6 @@ export function RetrieversStack({ stack }: StackContext) {
                 actions: ["cloudwatch:PutMetricData"],
                 resources: ["*"],
             }),
-            new PolicyStatement({
-                actions: ["ssm:PutParameter"],
-                resources: ["*"],
-            }),
         ],
         enableLiveDev: false,
     });
