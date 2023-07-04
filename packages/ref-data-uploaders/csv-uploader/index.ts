@@ -7,9 +7,11 @@ import { RawBuilder, sql } from "kysely";
 import * as logger from "lambda-log";
 import OsPoint from "ospoint";
 import { parse } from "papaparse";
+import { SSMClient, PutParameterCommand } from "@aws-sdk/client-ssm";
 
 const dbClient = getDbClient();
 const s3Client = new S3Client({ region: "eu-west-2" });
+const ssm = new SSMClient({ region: "eu-west-2" });
 
 const wait_for_db = async () => {
     const delay = 5;
@@ -171,6 +173,8 @@ export const main = async (event: S3Event) => {
             },
         );
     } catch (e) {
+        await putParameter("/scheduled/disable-table-renamer", "true");
+
         if (e instanceof Error) {
             logger.error(e);
 
@@ -188,5 +192,22 @@ export const main = async (event: S3Event) => {
                 error: "There was a problem with the csv uploader",
             }),
         };
+    }
+};
+
+const putParameter = async (key: string, value: string) => {
+    try {
+        const input = {
+            Name: key,
+            Value: value,
+            Type: "String",
+            Overwrite: true,
+        };
+        const command = new PutParameterCommand(input);
+        await ssm.send(command);
+    } catch (error) {
+        if (error instanceof Error) {
+            logger.error(error);
+        }
     }
 };

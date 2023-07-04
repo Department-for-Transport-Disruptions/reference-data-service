@@ -1,6 +1,7 @@
 import { Schedule } from "aws-cdk-lib/aws-events";
 import { Cron, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 export function TableRenamerStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
@@ -20,6 +21,12 @@ export function TableRenamerStack({ stack }: StackContext) {
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
         },
         logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        permissions: [
+            new PolicyStatement({
+                actions: ["ssm:PutParameter", "ssm:GetParameter"],
+                resources: ["*"],
+            }),
+        ],
     });
 
     new Cron(stack, "ref-data-service-table-renamer-cron", {

@@ -18,6 +18,7 @@ s3 = boto3.resource("s3")
 sm = boto3.client("secretsmanager")
 cloudwatch = boto3.client("cloudwatch")
 lambda_client = boto3.client("lambda")
+ssm_client = boto3.client("ssm")
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -183,5 +184,11 @@ def main(event, context):
             upload_tnds_data_to_s3()
 
     except Exception as e:
+        ssm_client.put_parameter(
+            Name="/scheduled/disable-table-renamer",
+            Value="true",
+            Type="String",
+            Overwrite=True
+        )
         logger.error(e)
         raise e

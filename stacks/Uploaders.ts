@@ -35,6 +35,10 @@ export function UploadersStack({ stack }: StackContext) {
                 actions: ["cloudwatch:PutMetricData"],
                 resources: ["*"],
             }),
+            new PolicyStatement({
+                actions: ["ssm:PutParameter"],
+                resources: ["*"],
+            }),
         ],
     });
 
@@ -61,6 +65,10 @@ export function UploadersStack({ stack }: StackContext) {
             }),
             new PolicyStatement({
                 actions: ["cloudwatch:PutMetricData"],
+                resources: ["*"],
+            }),
+            new PolicyStatement({
+                actions: ["ssm:PutParameter"],
                 resources: ["*"],
             }),
         ],
