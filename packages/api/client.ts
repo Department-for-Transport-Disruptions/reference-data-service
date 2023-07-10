@@ -65,7 +65,6 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
 
     return dbClient
         .selectFrom("operators")
-        .selectAll("operators")
         .innerJoin("services", "services.nocCode", "operators.nocCode")
         .$if(!!input.batchNocCodes && input.batchNocCodes.length > 0, (qb) =>
             qb.where("nocCode", "in", input.batchNocCodes ?? []),
@@ -76,6 +75,21 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
                 .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("services.mode", "in", input.modes ?? []))
+        .select([
+            "operators.id",
+            "operators.nocCode",
+            "operatorPublicName",
+            "operators.vosaPsvLicenseName",
+            "operators.opId",
+            "operators.pubNmId",
+            "operators.nocCdQual",
+            "operators.changeDate",
+            "operators.changeAgent",
+            "operators.changeComment",
+            "operators.dateCeased",
+            "operators.dataOwner",
+            "services.mode",
+        ])
         .distinct()
         .orderBy("operators.id")
         .offset((input.page || 0) * OPERATORS_PAGE_SIZE)
