@@ -96,6 +96,7 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
             "operators.dateCeased",
             "operators.dataOwner",
             "services.mode",
+            "services.dataSource",
         ])
         .distinct()
         .orderBy("operators.id")
