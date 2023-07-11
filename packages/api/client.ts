@@ -22,6 +22,7 @@ export type OperatorQueryInput = {
     adminAreaCodes?: string[];
     modes?: VehicleMode[];
     page?: number;
+    dataSource?: DataSource;
 };
 
 export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQueryInput) => {
@@ -75,6 +76,7 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
                 .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("services.mode", "in", input.modes ?? []))
+        .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
         .select([
             "operators.id",
             "operators.nocCode",
@@ -89,6 +91,7 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
             "operators.dateCeased",
             "operators.dataOwner",
             "services.mode",
+            "services.dataSource",
         ])
         .distinct()
         .orderBy("operators.id")
