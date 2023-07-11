@@ -12,11 +12,6 @@ export enum VehicleMode {
     metro = "metro",
 }
 
-export enum DataSourceMode {
-    bods = "bods",
-    tnds = "tnds",
-}
-
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
 
 const ignoredStopTypes = ["FTD", "LSE", "RSE", "TMU"];
