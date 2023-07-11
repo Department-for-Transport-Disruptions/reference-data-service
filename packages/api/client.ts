@@ -12,6 +12,11 @@ export enum VehicleMode {
     metro = "metro",
 }
 
+export enum DataSourceMode {
+    bods = "bods",
+    tnds = "tnds",
+}
+
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
 
 const ignoredStopTypes = ["FTD", "LSE", "RSE", "TMU"];
@@ -22,6 +27,7 @@ export type OperatorQueryInput = {
     adminAreaCodes?: string[];
     modes?: VehicleMode[];
     page?: number;
+    dataSource?: DataSourceMode;
 };
 
 export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQueryInput) => {
@@ -75,6 +81,7 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
                 .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("services.mode", "in", input.modes ?? []))
+        .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource))
         .select([
             "operators.id",
             "operators.nocCode",
