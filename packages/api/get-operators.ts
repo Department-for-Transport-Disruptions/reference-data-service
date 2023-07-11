@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import { ClientError } from "./error";
-import { getOperators, isValidMode, OperatorQueryInput } from "./client";
+import { DataSource, getOperators, isValidMode, OperatorQueryInput } from "./client";
 import { executeClient } from "./execute-client";
 
 const MAX_NOC_CODES = process.env.MAX_NOC_CODES || "5";
