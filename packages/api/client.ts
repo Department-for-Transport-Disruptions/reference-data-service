@@ -81,7 +81,7 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
                 .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("services.mode", "in", input.modes ?? []))
-        .$if(input.dataSource && !!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource))
+        .$if(input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource))
         .select([
             "operators.id",
             "operators.nocCode",
