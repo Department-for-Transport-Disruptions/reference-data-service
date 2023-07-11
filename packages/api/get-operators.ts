@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import { ClientError } from "./error";
-import { DataSourceMode, getOperators, isValidMode, OperatorQueryInput } from "./client";
+import { getOperators, isValidMode, OperatorQueryInput } from "./client";
 import { executeClient } from "./execute-client";
 
 const MAX_NOC_CODES = process.env.MAX_NOC_CODES || "5";
@@ -64,7 +64,7 @@ export const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
         ...(batchNocCodesArray && batchNocCodesArray.length > 0 ? { batchNocCodes: batchNocCodesArray } : {}),
         ...(adminAreaCodeArray && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
-        ...(dataSourceInput ? { dataSource: dataSourceInput as DataSourceMode } : {}),
+        ...(dataSourceInput ? { dataSource: dataSourceInput as DataSource } : {}),
         page: page - 1,
     };
 };
