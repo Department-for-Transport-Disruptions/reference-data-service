@@ -2,10 +2,11 @@ import { Database, getDbClient, Tables } from "@reference-data-service/core/db";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { SSMClient, PutParameterCommand, GetParameterCommand } from "@aws-sdk/client-ssm";
+import { StackContext } from "sst/constructs";
 
 const ssm = new SSMClient({ region: "eu-west-2" });
 
-export const main = async () => {
+export const main = async ({ stack }: StackContext) => {
     try {
         logger.info("Table Renamer starting... ");
 
@@ -14,7 +15,7 @@ export const main = async () => {
         let disableRenamer: string | undefined = "true";
         try {
             const input = {
-                Name: "/scheduled/disable-table-renamer",
+                Name: `/scheduled/disable-table-renamer-${stack.stage}`,
             };
             const command = new GetParameterCommand(input);
             const ssmOutput = await ssm.send(command);
@@ -33,16 +34,17 @@ export const main = async () => {
             await checkReferenceDataImportHasCompleted("operators", dbClient);
             await checkReferenceDataImportHasCompleted("stops", dbClient);
             await checkReferenceDataImportHasCompleted("services", dbClient);
+            await checkReferenceDataImportHasCompleted("localities", dbClient);
 
             await deleteAndRenameTables(dbClient);
         } else {
-            await putParameter("/scheduled/disable-table-renamer", "false");
+            await putParameter(`/scheduled/disable-table-renamer-${stack.stage}`, "false");
             throw new Error(
                 "The SSM Parameter used to check for errors in the scheduled job has returned TRUE indicating an issue",
             );
         }
     } catch (e) {
-        await putParameter("/scheduled/disable-table-renamer", "false");
+        await putParameter(`/scheduled/disable-table-renamer-${stack.stage}`, "false");
         if (e instanceof Error) {
             logger.error(e);
 
@@ -108,6 +110,7 @@ const tables = [
     "service_journey_patterns",
     "service_journey_pattern_links",
     "service_admin_area_codes",
+    "localities",
 ];
 
 export const deleteAndRenameTables = async (db: Kysely<Database>): Promise<void> => {

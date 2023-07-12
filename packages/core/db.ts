@@ -171,6 +171,29 @@ export interface ServiceAdminAreaCodes {
     adminAreaCode: string;
 }
 
+export interface LocalitiesTable {
+    nptgLocalityCode: string;
+    localityName: string | null;
+    localityNameLang: string | null;
+    shortName: string | null;
+    shortNameLang: string | null;
+    qualifierName: string | null;
+    qualifierNameLang: string | null;
+    qualifierLocalityRef: string | null;
+    qualifierDistrictRef: string | null;
+    parentLocalityName: string | null;
+    parentLocalityNameLang: string | null;
+    administrativeAreaCode: string;
+    nptgDistrictCode: string | null;
+    sourceLocalityType: string | null;
+    gridType: string | null;
+    easting: string | null;
+    northing: string | null;
+    creationDateTime: string | null;
+    modificationDateTime: string | null;
+    revisionNumber: string | null;
+    modification: string | null;
+}
 export interface Database {
     stops: StopsTable;
     stops_new?: StopsTable;
@@ -196,6 +219,9 @@ export interface Database {
     service_admin_area_codes: ServiceAdminAreaCodes;
     service_admin_area_codes_new?: ServiceAdminAreaCodes;
     service_admin_area_codes_old?: ServiceAdminAreaCodes;
+    localities: LocalitiesTable;
+    localities_new?: LocalitiesTable;
+    localities_old?: LocalitiesTable;
 }
 
 export type Tables =
@@ -206,7 +232,8 @@ export type Tables =
     | "services"
     | "service_journey_patterns"
     | "service_journey_pattern_links"
-    | "service_admin_area_codes";
+    | "service_admin_area_codes"
+    | "localities";
 export type TablesNew =
     | "stops_new"
     | "operator_lines_new"
@@ -215,7 +242,8 @@ export type TablesNew =
     | "services_new"
     | "service_journey_patterns_new"
     | "service_journey_pattern_links_new"
-    | "service_admin_area_codes_new";
+    | "service_admin_area_codes_new"
+    | "localities_new";
 export type TablesOld =
     | "stops_old"
     | "operator_lines_old"
@@ -224,7 +252,8 @@ export type TablesOld =
     | "services_old"
     | "service_journey_patterns_old"
     | "service_journey_pattern_links_old"
-    | "service_admin_area_codes_old";
+    | "service_admin_area_codes_old"
+    | "localities_old";
 
 export const getDbClient = () => {
     const { DATABASE_NAME: dbName, DATABASE_SECRET_ARN: secretArn, DATABASE_RESOURCE_ARN: resourceArn } = process.env;

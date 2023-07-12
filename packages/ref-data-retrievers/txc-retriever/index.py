@@ -184,11 +184,12 @@ def main(event, context):
             upload_tnds_data_to_s3()
 
     except Exception as e:
-        ssm_client.put_parameter(
-            Name="/scheduled/disable-table-renamer",
-            Value="true",
-            Type="String",
-            Overwrite=True
-        )
+        if os.getenv("STAGE") is not None:
+            ssm_client.put_parameter(
+                Name="/scheduled/disable-table-renamer-" + os.getenv("STAGE"),
+                Value="true",
+                Type="String",
+                Overwrite=True
+            )
         logger.error(e)
         raise e
