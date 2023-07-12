@@ -21,7 +21,7 @@ describe("get-services", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ modes: ["bus", "tram"], dataSource: "bods", page: 0 });
+            expect(getQueryInput(event)).toEqual({ modes: ["bus", "tram", ""], dataSource: "bods", page: 0 });
         });
 
         it("handles modes with trailing or leading spaces", () => {
@@ -31,7 +31,7 @@ describe("get-services", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ modes: ["bus", "tram"], dataSource: "bods", page: 0 });
+            expect(getQueryInput(event)).toEqual({ modes: ["bus", "tram", ""], dataSource: "bods", page: 0 });
         });
 
         it("handles dataSource", () => {
@@ -107,7 +107,7 @@ describe("get-services", () => {
             } as unknown as APIGatewayEvent;
 
             expect(getServicesByStopsQueryInput(event)).toEqual({
-                modes: ["bus", "tram"],
+                modes: ["bus", "tram", ""],
                 includeRoutes: false,
                 stops: [],
                 dataSource: "bods",

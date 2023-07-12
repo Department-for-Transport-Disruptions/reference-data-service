@@ -10,6 +10,7 @@ export enum VehicleMode {
     underground = "underground",
     rail = "rail",
     metro = "metro",
+    blank = "",
 }
 
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
