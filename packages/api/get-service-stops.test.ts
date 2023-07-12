@@ -2,7 +2,7 @@ import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
 import { formatStops, getQueryInput } from "./get-service-stops";
 import { stopsDbData } from "./test/testdata";
-import {  VehicleMode } from "./client";
+import { VehicleMode } from "./client";
 
 describe("get-service-stops", () => {
     describe("input generation", () => {
