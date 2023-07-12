@@ -90,6 +90,41 @@ export function RetrieversStack({ stack }: StackContext) {
         },
     });
 
+    const nptgLocalitiesRetriever = new Function(stack, `ref-data-service-localities-retriever`, {
+        functionName: `ref-data-service-localities-retriever-${stack.stage}`,
+        handler: "packages/ref-data-retrievers/csv-retriever/index.main",
+        runtime: "nodejs18.x",
+        timeout: 60,
+        memorySize: 512,
+        environment: {
+            DATA_URL: "https://naptan.api.dft.gov.uk/v1/nptg/localities",
+            BUCKET_NAME: csvBucket.bucketName,
+            CONTENT_TYPE: "text/csv",
+            TARGET_FILE: "Localities.csv",
+        },
+        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        permissions: [
+            new PolicyStatement({
+                actions: ["s3:PutObject"],
+                resources: [`${csvBucket.bucketArn}/*`],
+            }),
+            new PolicyStatement({
+                actions: ["cloudwatch:PutMetricData"],
+                resources: ["*"],
+            }),
+        ],
+    });
+
+    new Cron(stack, "ref-data-service-localities-retriever-cron", {
+        job: nptgLocalitiesRetriever,
+        enabled: enableSchedule,
+        cdk: {
+            rule: {
+                schedule: Schedule.cron({ minute: "0", hour: "2" }),
+            },
+        },
+    });
+
     const ftpSecret = Secret.fromSecretNameV2(
         stack,
         `reference-data-service-tnds-ftp-credentials-secret`,
@@ -148,6 +183,7 @@ export function RetrieversStack({ stack }: StackContext) {
             CLUSTER_ARN: cluster.clusterArn,
             BODS_URL: "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive",
             TNDS_FUNCTION: tndsRetriever.functionName,
+            STAGE: stack.stage,
         },
         logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
         permissions: [
@@ -218,7 +254,7 @@ export function RetrieversStack({ stack }: StackContext) {
     txcZippedBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(unzipper));
 
     new StringParameter(stack, "disableTableRenamer", {
-        parameterName: "/scheduled/disable-table-renamer",
+        parameterName: `/scheduled/disable-table-renamer-${stack.stage}`,
         stringValue: "false",
     });
 }

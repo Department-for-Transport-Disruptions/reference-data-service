@@ -51,6 +51,8 @@ export const main = async (event: S3Event) => {
         id: randomUUID(),
     };
 
+    const { STAGE: stage } = process.env;
+
     try {
         await wait_for_db();
         const key = event.Records[0].s3.object.key;
@@ -150,6 +152,11 @@ export const main = async (event: S3Event) => {
                 sqlString = sql`CREATE TABLE operator_public_data_new LIKE operator_public_data`;
                 break;
 
+            case "Localities.csv":
+                table = "localities";
+                sqlString = sql`CREATE TABLE localities_new LIKE localities`;
+                break;
+
             default:
                 throw new Error("Unknown file");
         }
@@ -173,8 +180,9 @@ export const main = async (event: S3Event) => {
             },
         );
     } catch (e) {
-        await putParameter("/scheduled/disable-table-renamer", "true");
-
+        if (stage) {
+            await putParameter(`/scheduled/disable-table-renamer-${stage}`, "true");
+        }
         if (e instanceof Error) {
             logger.error(e);
 
