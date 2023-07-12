@@ -10,18 +10,16 @@ describe("get-service-stops", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
-                    dataSource: DataSource.bods,
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ serviceId: 234, dataSource: DataSource.bods });
+            expect(getQueryInput(event)).toEqual({ serviceId: 234});
         });
 
         it("handles serviceId, stopTypes, busStopType and modes", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
-                    dataSource: DataSource.bods,
                     stopTypes: "BCT",
                     busStopType: "MKD",
                     modes: VehicleMode.bus,
@@ -30,7 +28,6 @@ describe("get-service-stops", () => {
 
             expect(getQueryInput(event)).toEqual({
                 serviceId: 234,
-                dataSource: DataSource.bods,
                 stopTypes: ["BCT"],
                 busStopType: "MKD",
                 modes: [VehicleMode.bus],

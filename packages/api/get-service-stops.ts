@@ -28,12 +28,6 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Provided service ID is not valid");
     }
 
-    const dataSourceInput = pathParameters?.dataSource ?? DataSource.bods;
-
-    if (!isDataSource(dataSourceInput)) {
-        throw new ClientError("Provided dataSource must be tnds or bods");
-    }
-
     const stopTypes = pathParameters.stopTypes || "";
     const stopTypesArray = stopTypes
         .split(",")
@@ -54,7 +48,6 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
 
     return {
         serviceId: Number(serviceId),
-        dataSource: dataSourceInput,
         ...(pathParameters?.busStopType ? { busStopType: pathParameters.busStopType } : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),

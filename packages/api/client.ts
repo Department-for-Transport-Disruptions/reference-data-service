@@ -315,7 +315,6 @@ export type Services = Awaited<ReturnType<typeof getServices>>;
 
 export type ServiceStopsQueryInput = {
     serviceId: number;
-    dataSource: DataSource;
     modes?: VehicleMode[];
     busStopType?: string;
     stopTypes?: string[];
