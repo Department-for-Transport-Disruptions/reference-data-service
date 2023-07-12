@@ -8,6 +8,7 @@ import {
     ServicesByStops,
     ServicesByStopsQueryInput,
     ServicesQueryInput,
+    VehicleMode,
 } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
@@ -40,6 +41,10 @@ export const getQueryInput = (event: APIGatewayEvent): ServicesQueryInput => {
 
     if (filteredModesArray.length !== modesArray.length) {
         throw new ClientError("Invalid mode provided");
+    }
+
+    if (filteredModesArray.includes(VehicleMode.bus)) {
+        filteredModesArray.push(VehicleMode.blank);
     }
 
     const dataSourceInput = queryStringParameters?.dataSource ?? DataSource.bods;
