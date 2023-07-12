@@ -1,12 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import {
-    getServiceStops,
-    isValidMode,
-    ServiceStop,
-    ServiceStops,
-    ServiceStopsQueryInput,
-    Stops,
-} from "./client";
+import { getServiceStops, isValidMode, ServiceStop, ServiceStops, ServiceStopsQueryInput, Stops } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 
