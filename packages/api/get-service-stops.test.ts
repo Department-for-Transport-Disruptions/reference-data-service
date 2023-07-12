@@ -2,6 +2,7 @@ import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
 import { formatStops, getQueryInput } from "./get-service-stops";
 import { stopsDbData } from "./test/testdata";
+import { DataSource, VehicleMode } from "./client";
 
 describe("get-service-stops", () => {
     describe("input generation", () => {
@@ -9,10 +10,31 @@ describe("get-service-stops", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
+                    dataSource: DataSource.bods,
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ serviceId: 234 });
+            expect(getQueryInput(event)).toEqual({ serviceId: 234, dataSource: DataSource.bods });
+        });
+
+        it("handles serviceId, stopTypes, busStopType and modes", () => {
+            const event = {
+                pathParameters: {
+                    serviceId: "234",
+                    dataSource: DataSource.bods,
+                    stopTypes: "BCT",
+                    busStopType: "MKD",
+                    modes: VehicleMode.bus,
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({
+                serviceId: 234,
+                dataSource: DataSource.bods,
+                stopTypes: ["BCT"],
+                busStopType: "MKD",
+                modes: [VehicleMode.bus],
+            });
         });
 
         it("throws a ClientError if no serviceId provided", () => {
@@ -27,6 +49,7 @@ describe("get-service-stops", () => {
             const event = {
                 pathParameters: {
                     serviceId: "abc",
+                    dataSource: DataSource.bods,
                 },
             } as unknown as APIGatewayEvent;
 

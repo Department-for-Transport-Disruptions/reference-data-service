@@ -15,6 +15,8 @@ export enum VehicleMode {
 
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
 
+export const isDataSource = (input: string): input is DataSource => input in DataSource;
+
 const ignoredStopTypes = ["FTD", "LSE", "RSE", "TMU"];
 
 export type OperatorQueryInput = {
@@ -313,6 +315,10 @@ export type Services = Awaited<ReturnType<typeof getServices>>;
 
 export type ServiceStopsQueryInput = {
     serviceId: number;
+    dataSource: DataSource;
+    modes?: VehicleMode[];
+    busStopType?: string;
+    stopTypes?: string[];
 };
 
 export const getServiceStops = async (dbClient: Kysely<Database>, input: ServiceStopsQueryInput) => {
@@ -369,9 +375,13 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         ])
         .groupBy(["fromId", "toId"])
         .where("services.id", "=", input.serviceId)
+        .where("services.dataSource", "=", input.dataSource)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
+        .$if(!!input.modes?.[0], (qb) => qb.where("mode", "in", input.modes ?? ["---"]))
+        .$if(!!input.stopTypes?.[0], (qb) => qb.where("stopType", "in", input.stopTypes ?? ["---"]))
+        .$if(!!input.busStopType, (qb) => qb.where("busStopType", "=", input.busStopType ?? "---"))
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
         .orderBy("service_journey_patterns.direction")
         .execute();
