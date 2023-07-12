@@ -374,7 +374,6 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         ])
         .groupBy(["fromId", "toId"])
         .where("services.id", "=", input.serviceId)
-        .where("services.dataSource", "=", input.dataSource)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
