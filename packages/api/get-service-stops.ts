@@ -1,8 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
-    DataSource,
     getServiceStops,
-    isDataSource,
     isValidMode,
     ServiceStop,
     ServiceStops,
