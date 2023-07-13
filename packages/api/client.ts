@@ -112,6 +112,8 @@ export type StopsQueryInput = {
     adminAreaCodes?: string[];
     page?: number;
     polygon?: string;
+    busStopType?: string;
+    stopTypes?: string[];
 };
 
 export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInput) => {
