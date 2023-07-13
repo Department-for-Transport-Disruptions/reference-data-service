@@ -2721,6 +2721,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "outbound",
         fromSequenceNumber: "1",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -2760,6 +2761,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "outbound",
         fromSequenceNumber: "2",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -2799,6 +2801,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "outbound",
         fromSequenceNumber: "3",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -2838,6 +2841,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "inbound",
         fromSequenceNumber: "1",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -2877,6 +2881,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "inbound",
         fromSequenceNumber: "2",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -2916,6 +2921,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "inbound",
         fromSequenceNumber: "3",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -2955,6 +2961,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "inbound",
         fromSequenceNumber: "4",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -2994,6 +3001,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "inbound",
         fromSequenceNumber: "5",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -3033,6 +3041,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "inbound",
         fromSequenceNumber: "6",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -3072,6 +3081,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "inbound",
         fromSequenceNumber: "7",
+        dataSource: DataSource.bods,
     },
     {
         serviceId: 1,
@@ -3111,6 +3121,7 @@ export const stopsDbData: ServiceStops = [
         toStatus: "active",
         direction: "inbound",
         fromSequenceNumber: "8",
+        dataSource: DataSource.bods,
     },
 ];
 
