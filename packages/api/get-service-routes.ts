@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import { getServiceStops, ServiceStop, ServiceStops, ServiceStopsQueryInput } from "./client";
 import { ClientError } from "./error";
