@@ -1,5 +1,13 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { getServiceStops, isValidMode, ServiceStop, ServiceStops, ServiceStopsQueryInput, Stops } from "./client";
+import {
+    DataSource,
+    getServiceStops,
+    isValidMode,
+    ServiceStop,
+    ServiceStops,
+    ServiceStopsQueryInput,
+    Stops,
+} from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 
@@ -37,11 +45,14 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid mode provided");
     }
 
+    const dataSourceInput = pathParameters?.dataSource;
+
     return {
         serviceId: Number(serviceId),
         ...(pathParameters?.busStopType ? { busStopType: pathParameters.busStopType } : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
+        ...(dataSourceInput ? { dataSource: dataSourceInput as DataSource } : {}),
     };
 };
 

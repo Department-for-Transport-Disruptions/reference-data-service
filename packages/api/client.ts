@@ -318,6 +318,7 @@ export type ServiceStopsQueryInput = {
     modes?: VehicleMode[];
     busStopType?: string;
     stopTypes?: string[];
+    dataSource?: DataSource;
 };
 
 export const getServiceStops = async (dbClient: Kysely<Database>, input: ServiceStopsQueryInput) => {
@@ -388,6 +389,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
                 .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
                 .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
         )
+        .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
         .orderBy("service_journey_patterns.direction")
         .execute();
