@@ -4,6 +4,7 @@ import {
     getServices,
     getServicesByStops,
     getServiceStops,
+    isDataSource,
     isValidMode,
     ServicesByStops,
     ServicesByStopsQueryInput,
@@ -20,8 +21,6 @@ import { Optional, notEmpty } from "./utils";
 
 const MAX_ADMIN_AREA_CODES = process.env.MAX_ADMIN_AREA_CODES || "5";
 const MAX_ATCO_CODES = process.env.MAX_ATCO_CODES || "5";
-
-const isDataSource = (input: string): input is DataSource => input in DataSource;
 
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     event.queryStringParameters?.atcoCodes

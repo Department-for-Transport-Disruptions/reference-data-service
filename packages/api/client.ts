@@ -15,6 +15,8 @@ export enum VehicleMode {
 
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
 
+export const isDataSource = (input: string): input is DataSource => input in DataSource;
+
 const ignoredStopTypes = ["FTD", "LSE", "RSE", "TMU"];
 
 export type OperatorQueryInput = {
@@ -110,6 +112,8 @@ export type StopsQueryInput = {
     adminAreaCodes?: string[];
     page?: number;
     polygon?: string;
+    busStopType?: string;
+    stopTypes?: string[];
 };
 
 export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInput) => {
@@ -313,6 +317,10 @@ export type Services = Awaited<ReturnType<typeof getServices>>;
 
 export type ServiceStopsQueryInput = {
     serviceId: number;
+    modes?: VehicleMode[];
+    busStopType?: string;
+    stopTypes?: string[];
+    dataSource?: DataSource;
 };
 
 export const getServiceStops = async (dbClient: Kysely<Database>, input: ServiceStopsQueryInput) => {
@@ -330,6 +338,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .innerJoin("stops as toStop", "toStop.atcoCode", "service_journey_pattern_links.toAtcoCode")
         .select([
             "services.id as serviceId",
+            "services.dataSource as dataSource",
             "fromStop.id as fromId",
             "fromStop.atcoCode as fromAtcoCode",
             "fromStop.naptanCode as fromNaptanCode",
@@ -372,6 +381,18 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
+        .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
+        .$if(!!input.busStopType, (qb) =>
+            qb
+                .where("toStop.busStopType", "=", input.busStopType ?? "---")
+                .where("fromStop.busStopType", "=", input.busStopType ?? "---"),
+        )
+        .$if(!!input.stopTypes?.[0], (qb) =>
+            qb
+                .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
+                .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
+        )
+        .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
         .orderBy("service_journey_patterns.direction")
         .execute();

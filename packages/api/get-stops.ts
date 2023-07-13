@@ -65,12 +65,20 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         sqlPolygon = getPolygon(polygon, MAX_POLYGON_AREA);
     }
 
+    const stopTypes = queryStringParameters?.stopTypes || "";
+    const stopTypesArray = stopTypes
+        .split(",")
+        .filter((stop) => stop)
+        .map((stop) => stop.trim());
+
     return {
         ...(atcoCodes ? { atcoCodes: atcoCodesArray } : {}),
         ...(naptanCodes ? { naptanCodes: naptanCodesArray } : {}),
         ...(commonName ? { commonName } : {}),
         ...(adminAreaCodes ? { adminAreaCodes: adminAreaCodeArray } : {}),
         ...(sqlPolygon ? { polygon: sqlPolygon } : {}),
+        ...(queryStringParameters?.busStopType ? { busStopType: queryStringParameters?.busStopType } : {}),
+        ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         page: page - 1,
     };
 };
