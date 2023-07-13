@@ -378,10 +378,16 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
         .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
-        .$if(!!input.stopTypes?.[0], (qb) => qb.where("toStop.stopType", "in", input.stopTypes ?? ["---"]))
-        .$if(!!input.busStopType, (qb) => qb.where("toStop.busStopType", "=", input.busStopType ?? "---"))
-        .$if(!!input.stopTypes?.[0], (qb) => qb.where("fromStop.stopType", "in", input.stopTypes ?? ["---"]))
-        .$if(!!input.busStopType, (qb) => qb.where("fromStop.busStopType", "=", input.busStopType ?? "---"))
+        .$if(!!input.busStopType, (qb) =>
+            qb
+                .where("toStop.busStopType", "=", input.busStopType ?? "---")
+                .orWhere("fromStop.busStopType", "=", input.busStopType ?? "---"),
+        )
+        .$if(!!input.stopTypes?.[0], (qb) =>
+            qb
+                .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
+                .orWhere("toStop.stopType", "in", input.stopTypes ?? ["---"]),
+        )
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
         .orderBy("service_journey_patterns.direction")
         .execute();
