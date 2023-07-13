@@ -338,6 +338,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .innerJoin("stops as toStop", "toStop.atcoCode", "service_journey_pattern_links.toAtcoCode")
         .select([
             "services.id as serviceId",
+            "services.dataSource as dataSource",
             "fromStop.id as fromId",
             "fromStop.atcoCode as fromAtcoCode",
             "fromStop.naptanCode as fromNaptanCode",
