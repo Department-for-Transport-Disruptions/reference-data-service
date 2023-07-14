@@ -143,17 +143,10 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
             "localities.administrativeAreaCode",
             "stops.status",
         ])
-<<<<<<< HEAD
-        .where("stops.stopType", "not in", ignoredStopTypes)
-        .where("stops.status", "=", "active")
-        .$if(!!input.atcoCodes?.[0], (qb) => qb.where("stops.atcoCode", "in", input.atcoCodes ?? ["---"]))
-        .$if(!!input.naptanCodes?.[0], (qb) => qb.where("stops.naptanCode", "in", input.naptanCodes ?? ["---"]))
-=======
         .where("stopType", "not in", ignoredStopTypes)
         .where("status", "=", "active")
         .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
         .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
->>>>>>> e5c0e02eb8954983d32c620b770cb9241a18a212
         .$if(!!input.commonName, (qb) =>
             qb.where("stops.commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
         )
@@ -166,13 +159,8 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                     ),
                 ),
         )
-<<<<<<< HEAD
-        .$if(!!input.stopTypes?.[0], (qb) => qb.where("stops.stopType", "in", input.stopTypes ?? ["---"]))
-        .$if(!!input.busStopType, (qb) => qb.where("stops.busStopType", "=", input.busStopType ?? "---"))
-=======
         .$if(!!input.stopTypes?.[0], (qb) => qb.where("stopType", "in", input.stopTypes ?? ["---"]))
         .$if(!!input.busStopType, (qb) => qb.where("busStopType", "=", input.busStopType ?? "---"))
->>>>>>> e5c0e02eb8954983d32c620b770cb9241a18a212
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
         .execute();
