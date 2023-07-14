@@ -123,43 +123,44 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
 
     const stops = await dbClient
         .selectFrom("stops")
+        .innerJoin("localities", "localities.nptgLocalityCode", "stops.nptgLocalityCode")
         .select([
-            "id",
-            "atcoCode",
-            "naptanCode",
-            "commonName",
-            "street",
-            "indicator",
-            "bearing",
-            "nptgLocalityCode",
-            "localityName",
-            "parentLocalityName",
-            "longitude",
-            "latitude",
-            "stopType",
-            "busStopType",
-            "timingStatus",
-            "administrativeAreaCode",
-            "status",
+            "stops.id",
+            "stops.atcoCode",
+            "stops.naptanCode",
+            "stops.commonName",
+            "stops.street",
+            "stops.indicator",
+            "stops.bearing",
+            "stops.nptgLocalityCode",
+            "stops.localityName",
+            "stops.parentLocalityName",
+            "stops.longitude",
+            "stops.latitude",
+            "stops.stopType",
+            "stops.busStopType",
+            "stops.timingStatus",
+            "localities.administrativeAreaCode",
+            "stops.status",
         ])
-        .where("stopType", "not in", ignoredStopTypes)
-        .where("status", "=", "active")
-        .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
-        .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
+        .where("stops.stopType", "not in", ignoredStopTypes)
+        .where("stops.status", "=", "active")
+        .$if(!!input.atcoCodes?.[0], (qb) => qb.where("stops.atcoCode", "in", input.atcoCodes ?? ["---"]))
+        .$if(!!input.naptanCodes?.[0], (qb) => qb.where("stops.naptanCode", "in", input.naptanCodes ?? ["---"]))
         .$if(!!input.commonName, (qb) =>
-            qb.where("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
+            qb.where("stops.commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
         )
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
             qb
-                .where("administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"])
+                .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"])
                 .$if(!!input.polygon, (qb) =>
                     qb.where(
                         sql`ST_CONTAINS(ST_GEOMFROMTEXT(${input.polygon}), Point(stops.longitude, stops.latitude))`,
                     ),
                 ),
         )
-        .$if(!!input.stopTypes?.[0], (qb) => qb.where("stopType", "in", input.stopTypes ?? ["---"]))
-        .$if(!!input.busStopType, (qb) => qb.where("busStopType", "=", input.busStopType ?? "---"))
+        .$if(!!input.stopTypes?.[0], (qb) => qb.where("stops.stopType", "in", input.stopTypes ?? ["---"]))
+        .$if(!!input.busStopType, (qb) => qb.where("stops.busStopType", "=", input.busStopType ?? "---"))
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
         .execute();
@@ -324,8 +325,15 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
         .$if(!!input.modes?.[0], (qb) => qb.where("mode", "in", input.modes ?? ["---"]))
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
             qb
-                .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
-                .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
+                .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
+                .innerJoin(
+                    "service_journey_pattern_links",
+                    "service_journey_pattern_links.journeyPatternId",
+                    "service_journey_patterns.id",
+                )
+                .innerJoin("stops", "stops.atcoCode", "service_journey_pattern_links.fromAtcoCode")
+                .innerJoin("localities", "localities.nptgLocalityCode", "stops.nptgLocalityCode")
+                .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .offset((input.page || 0) * SERVICES_PAGE_SIZE)
         .limit(SERVICES_PAGE_SIZE)
@@ -342,6 +350,7 @@ export type ServiceStopsQueryInput = {
     busStopType?: string;
     stopTypes?: string[];
     dataSource?: DataSource;
+    adminAreaCodes?: string[];
 };
 
 export const getServiceStops = async (dbClient: Kysely<Database>, input: ServiceStopsQueryInput) => {
@@ -403,17 +412,23 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
         .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
-        .$if(!!input.busStopType, (qb) =>
-            qb
-                .where("toStop.busStopType", "=", input.busStopType ?? "---")
-                .where("fromStop.busStopType", "=", input.busStopType ?? "---"),
-        )
         .$if(!!input.stopTypes?.[0], (qb) =>
             qb
                 .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
-                .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
+                .where("toStop.stopType", "in", input.stopTypes ?? ["---"])
+                .$if(!!input.busStopType, (qb) =>
+                    qb
+                        .where("toStop.busStopType", "=", input.busStopType ?? "---")
+                        .where("fromStop.busStopType", "=", input.busStopType ?? "---"),
+                ),
         )
         .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
+        .$if(!!input.adminAreaCodes?.[0], (qb) =>
+            qb
+                .innerJoin("localities", "localities.nptgLocalityCode", "fromStop.nptgLocalityCode")
+                .innerJoin("localities", "localities.nptgLocalityCode", "toStop.nptgLocalityCode")
+                .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? []),
+        )
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
         .orderBy("service_journey_patterns.direction")
         .execute();
@@ -421,7 +436,9 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
     return stops;
 };
 
-export type ServiceStops = Awaited<ReturnType<typeof getServiceStops>>;
+export type ServiceStops = UnwrapPromise<ReturnType<typeof getServiceStops>>;
+
+type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
 export type ServicesByStopsQueryInput = {
     dataSource: DataSource;
@@ -429,6 +446,7 @@ export type ServicesByStopsQueryInput = {
     stops: string[];
     modes?: VehicleMode[];
     includeRoutes: boolean;
+    adminAreaCodes?: string[];
 };
 
 export const getServicesByStops = async (dbClient: Kysely<Database>, input: ServicesByStopsQueryInput) => {
@@ -446,6 +464,14 @@ export const getServicesByStops = async (dbClient: Kysely<Database>, input: Serv
         .select(["fromAtcoCode", "toAtcoCode"])
         .where((qb) => qb.where("fromAtcoCode", "in", input.stops).orWhere("toAtcoCode", "in", input.stops))
         .where("dataSource", "=", input.dataSource)
+        .$if(!!input.adminAreaCodes?.[0], (qb) =>
+            qb
+                .innerJoin("stops as fromStop", "fromStop.atcoCode", "service_journey_pattern_links.fromAtcoCode")
+                .innerJoin("stops as toStop", "toStop.atcoCode", "service_journey_pattern_links.toAtcoCode")
+                .innerJoin("localities", "localities.nptgLocalityCode", "fromStop.nptgLocalityCode")
+                .innerJoin("localities", "localities.nptgLocalityCode", "toStop.nptgLocalityCode")
+                .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? []),
+        )
         .groupBy(["fromAtcoCode", "toAtcoCode"])
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
         .orderBy("service_journey_patterns.direction")
