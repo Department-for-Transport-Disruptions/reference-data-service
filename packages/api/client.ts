@@ -167,7 +167,25 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
     return stops;
 };
 
-export type Stops = Awaited<ReturnType<typeof getStops>>;
+export type Stops = {
+    id: number;
+    atcoCode: string | null;
+    naptanCode: string | null;
+    commonName: string | null;
+    street: string | null;
+    indicator: string | null;
+    bearing: string | null;
+    nptgLocalityCode: string | null;
+    localityName: string | null;
+    parentLocalityName: string | null;
+    longitude: string | null;
+    latitude: string | null;
+    stopType: string | null;
+    busStopType: string | null;
+    timingStatus: string | null;
+    administrativeAreaCode: string | null;
+    status: string | null;
+}[];
 
 export type ServiceStop = {
     direction: string;
