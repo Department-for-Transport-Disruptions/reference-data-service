@@ -167,6 +167,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
     return stops;
 };
 
+// export type Stops = Awaited<ReturnType<typeof getStops>>; removed as failing lint
 export type Stops = {
     id: number;
     atcoCode: string | null;
