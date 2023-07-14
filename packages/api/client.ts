@@ -142,6 +142,8 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
             "administrativeAreaCode",
             "status",
         ])
+        .where("stopType", "not in", ignoredStopTypes)
+        .where("status", "=", "active")
         .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
         .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
         .$if(!!input.commonName, (qb) =>
@@ -156,8 +158,8 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                     ),
                 ),
         )
-        .where("stopType", "not in", ignoredStopTypes)
-        .where("status", "=", "active")
+        .$if(!!input.stopTypes?.[0], (qb) => qb.where("stopType", "in", input.stopTypes ?? ["---"]))
+        .$if(!!input.busStopType, (qb) => qb.where("busStopType", "=", input.busStopType ?? "---"))
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
         .execute();
@@ -165,7 +167,26 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
     return stops;
 };
 
-export type Stops = Awaited<ReturnType<typeof getStops>>;
+// export type Stops = Awaited<ReturnType<typeof getStops>>; removed as failing lint when there are more than 4 if statements
+export type Stops = {
+    id: number;
+    atcoCode: string | null;
+    naptanCode: string | null;
+    commonName: string | null;
+    street: string | null;
+    indicator: string | null;
+    bearing: string | null;
+    nptgLocalityCode: string | null;
+    localityName: string | null;
+    parentLocalityName: string | null;
+    longitude: string | null;
+    latitude: string | null;
+    stopType: string | null;
+    busStopType: string | null;
+    timingStatus: string | null;
+    administrativeAreaCode: string | null;
+    status: string | null;
+}[];
 
 export type ServiceStop = {
     direction: string;
