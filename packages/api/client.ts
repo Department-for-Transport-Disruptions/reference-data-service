@@ -436,9 +436,46 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
     return stops;
 };
 
-export type ServiceStops = UnwrapPromise<ReturnType<typeof getServiceStops>>;
-
-type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+export type ServiceStops = {
+    serviceId: number;
+    dataSource: "bods" | "tnds";
+    fromId: number;
+    fromAtcoCode: string;
+    fromNaptanCode: string | null;
+    fromCommonName: string | null;
+    fromStreet: string | null;
+    fromIndicator: string | null;
+    fromBearing: string | null;
+    fromNptgLocalityCode: string | null;
+    fromLocalityName: string | null;
+    fromParentLocalityName: string | null;
+    fromLongitude: string | null;
+    fromLatitude: string | null;
+    fromStopType: string | null;
+    fromBusStopType: string | null;
+    fromTimingStatus: string | null;
+    fromAdministrativeAreaCode: string | null;
+    fromStatus: string | null;
+    toId: number;
+    toAtcoCode: string;
+    toNaptanCode: string | null;
+    toCommonName: string | null;
+    toStreet: string | null;
+    toIndicator: string | null;
+    toBearing: string | null;
+    toNptgLocalityCode: string | null;
+    toLocalityName: string | null;
+    toParentLocalityName: string | null;
+    toLongitude: string | null;
+    toLatitude: string | null;
+    toStopType: string | null;
+    toBusStopType: string | null;
+    toTimingStatus: string | null;
+    toAdministrativeAreaCode: string | null;
+    toStatus: string | null;
+    fromSequenceNumber: string | null;
+    direction: string | null;
+}[];
 
 export type ServicesByStopsQueryInput = {
     dataSource: DataSource;

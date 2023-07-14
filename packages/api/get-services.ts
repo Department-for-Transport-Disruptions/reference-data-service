@@ -135,7 +135,7 @@ export const formatServicesWithStops = async (
                 return {
                     ...cleanService,
                     stops: stops.filter(notEmpty),
-                };
+                } as FilteredServiceAndStops;
             },
         );
 
@@ -155,13 +155,14 @@ export const formatServicesWithStops = async (
             return groupedServices;
         }
 
-        const serviceRoutePromises = groupedServices.map((service) =>
-            getServiceStops(dbClient, {
-                serviceId: service.id,
-            }),
+        const serviceRoutePromises = groupedServices.map(
+            (service) =>
+                getServiceStops(dbClient, {
+                    serviceId: service.id,
+                }) as Promise<ServiceStops>,
         );
 
-        const serviceRoutes = (await Promise.all(serviceRoutePromises)) as ServiceStops[];
+        const serviceRoutes = await Promise.all(serviceRoutePromises);
 
         const pointSchema = z.object({
             longitude: z.coerce.number().optional(),
