@@ -436,6 +436,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
     return stops;
 };
 
+// Unable to use Awaited due to error: Type instantiation is excessively deep and possibly infinite.
 export type ServiceStops = {
     serviceId: number;
     dataSource: "bods" | "tnds";
