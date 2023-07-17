@@ -30,7 +30,7 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
         flattenedStops
             // filter stops by direction
             .filter((stop) => stop.direction === direction)
-            // remove any duplicates on stopPointRef and sequence number
+            // remove any duplicates on atcoCode and sequence number
             .filter(
                 (stop, index, self) =>
                     self.findIndex(
