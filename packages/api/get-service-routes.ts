@@ -30,7 +30,14 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
         .filter((stop) => stop.direction === direction)
         .sort((a, b) => Number(a.sequenceNumber) - Number(b.sequenceNumber));
 
-    return sortedStops.filter((c, i) => (i > 0 ? c.atcoCode !== sortedStops[i - 1].atcoCode : true));
+    return sortedStops
+        .filter(
+            (stop, index, self) =>
+                self.findIndex(
+                    (other) => stop.atcoCode === other.atcoCode && stop.sequenceNumber === other.sequenceNumber,
+                ) === index,
+        )
+        .filter((c, i) => (i > 0 ? c.atcoCode !== sortedStops[i - 1].atcoCode : true));
 };
 export const formatStopsRoutes = async (
     stops: ServiceStops,

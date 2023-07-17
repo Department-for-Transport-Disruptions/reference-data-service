@@ -394,6 +394,8 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
             "toStop.timingStatus as toTimingStatus",
             "toStop.administrativeAreaCode as toAdministrativeAreaCode",
             "toStop.status as toStatus",
+            "service_journey_pattern_links.toSequenceNumber",
+            "service_journey_pattern_links.orderInSequence",
             "service_journey_pattern_links.fromSequenceNumber",
             "service_journey_patterns.direction",
         ])
@@ -414,7 +416,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
                 .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
         )
         .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
-        .orderBy("service_journey_pattern_links.fromSequenceNumber")
+        .orderBy("service_journey_pattern_links.orderInSequence")
         .orderBy("service_journey_patterns.direction")
         .execute();
 
