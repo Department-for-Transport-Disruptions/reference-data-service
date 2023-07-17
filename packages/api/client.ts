@@ -397,6 +397,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
             "service_journey_pattern_links.toSequenceNumber",
             "service_journey_pattern_links.orderInSequence",
             "service_journey_pattern_links.fromSequenceNumber",
+            "service_journey_pattern_links.journeyPatternId",
             "service_journey_patterns.direction",
         ])
         .groupBy(["fromId", "toId"])
@@ -417,7 +418,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         )
         .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
         .orderBy("service_journey_pattern_links.orderInSequence")
-        .orderBy("service_journey_patterns.direction")
+        .orderBy("service_journey_pattern_links.journeyPatternId")
         .execute();
 
     return stops;

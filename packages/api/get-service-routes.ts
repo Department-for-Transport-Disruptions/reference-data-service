@@ -26,19 +26,24 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
 };
 
 const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
-    const sortedStops = flattenedStops
-        .filter((stop) => stop.direction === direction)
-        .sort((a, b) => Number(a.sequenceNumber) - Number(b.sequenceNumber));
-
-    return sortedStops
-        .filter(
-            (stop, index, self) =>
-                self.findIndex(
-                    (other) => stop.atcoCode === other.atcoCode && stop.sequenceNumber === other.sequenceNumber,
-                ) === index,
-        )
-        .filter((c, i) => (i > 0 ? c.atcoCode !== sortedStops[i - 1].atcoCode : true));
+    return (
+        flattenedStops
+            // filter stops by direction
+            .filter((stop) => stop.direction === direction)
+            // remove any duplicates on stopPointRef and sequence number
+            .filter(
+                (stop, index, self) =>
+                    self.findIndex(
+                        (other) => stop.atcoCode === other.atcoCode && stop.sequenceNumber === other.sequenceNumber,
+                    ) === index,
+            )
+            // sort stops by sequence number
+            .sort((stop, other) => Number(stop.sequenceNumber) - Number(other.sequenceNumber))
+            // remove duplicate adjacent stops
+            .filter((stop, i) => (i > 0 ? stop.atcoCode !== flattenedStops[i - 1].atcoCode : true))
+    );
 };
+
 export const formatStopsRoutes = async (
     stops: ServiceStops,
     // eslint-disable-next-line @typescript-eslint/require-await
