@@ -41,6 +41,8 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
             .sort((stop, other) => Number(stop.sequenceNumber) - Number(other.sequenceNumber))
             // remove duplicate adjacent stops
             .filter((stop, i) => (i > 0 ? stop.atcoCode !== flattenedStops[i - 1].atcoCode : true))
+            // sort stops by journey pattern id
+            .sort((stop, other) => stop.journeyPatternId - other.journeyPatternId)
     );
 };
 

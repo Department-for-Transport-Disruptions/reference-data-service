@@ -191,6 +191,7 @@ export type Stops = {
 export type ServiceStop = {
     direction: string;
     sequenceNumber: string;
+    journeyPatternId: number;
 } & Stops[0];
 
 export enum ServiceFields {
