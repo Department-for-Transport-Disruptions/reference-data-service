@@ -484,6 +484,9 @@ export type ServiceStops = {
     toAdministrativeAreaCode: string | null;
     toStatus: string | null;
     fromSequenceNumber: string | null;
+    toSequenceNumber: string | null;
+    journeyPatternId: number;
+    orderInSequence: string | null;
     direction: string | null;
 }[];
 
