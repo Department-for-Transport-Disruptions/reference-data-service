@@ -331,8 +331,13 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
                     "service_journey_pattern_links.journeyPatternId",
                     "service_journey_patterns.id",
                 )
-                .innerJoin("stops", "stops.atcoCode", "service_journey_pattern_links.fromAtcoCode")
-                .innerJoin("localities", "localities.nptgLocalityCode", "stops.nptgLocalityCode")
+                .innerJoin("stops as fromStop", "fromStop.atcoCode", "service_journey_pattern_links.fromAtcoCode")
+                .innerJoin("stops as toStop", "toStop.atcoCode", "service_journey_pattern_links.toAtcoCode")
+                .innerJoin("localities", (join) =>
+                    join
+                        .onRef("localities.nptgLocalityCode", "=", "fromStop.nptgLocalityCode")
+                        .orOn("localities.nptgLocalityCode", "=", "toStop.nptgLocalityCode"),
+                )
                 .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .offset((input.page || 0) * SERVICES_PAGE_SIZE)
@@ -506,8 +511,11 @@ export const getServicesByStops = async (dbClient: Kysely<Database>, input: Serv
             qb
                 .innerJoin("stops as fromStop", "fromStop.atcoCode", "service_journey_pattern_links.fromAtcoCode")
                 .innerJoin("stops as toStop", "toStop.atcoCode", "service_journey_pattern_links.toAtcoCode")
-                .innerJoin("localities", "localities.nptgLocalityCode", "fromStop.nptgLocalityCode")
-                .innerJoin("localities", "localities.nptgLocalityCode", "toStop.nptgLocalityCode")
+                .innerJoin("localities", (join) =>
+                    join
+                        .onRef("localities.nptgLocalityCode", "=", "fromStop.nptgLocalityCode")
+                        .orOn("localities.nptgLocalityCode", "=", "toStop.nptgLocalityCode"),
+                )
                 .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .groupBy(["fromAtcoCode", "toAtcoCode"])
