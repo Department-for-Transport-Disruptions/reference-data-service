@@ -434,8 +434,11 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
             qb
-                .innerJoin("localities", "localities.nptgLocalityCode", "fromStop.nptgLocalityCode")
-                .innerJoin("localities", "localities.nptgLocalityCode", "toStop.nptgLocalityCode")
+                .innerJoin("localities", (join) =>
+                    join
+                        .onRef("localities.nptgLocalityCode", "=", "fromStop.nptgLocalityCode")
+                        .orOn("localities.nptgLocalityCode", "=", "toStop.nptgLocalityCode"),
+                )
                 .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .orderBy("service_journey_pattern_links.orderInSequence")
