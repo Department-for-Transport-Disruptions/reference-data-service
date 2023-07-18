@@ -135,7 +135,7 @@ export const formatServicesWithStops = async (
                 return {
                     ...cleanService,
                     stops: stops.filter(notEmpty),
-                } as FilteredServiceAndStops;
+                };
             },
         );
 
