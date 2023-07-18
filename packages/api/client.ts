@@ -424,12 +424,12 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .$if(!!input.stopTypes?.[0], (qb) =>
             qb
                 .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
-                .where("toStop.stopType", "in", input.stopTypes ?? ["---"])
-                .$if(!!input.busStopType, (qb) =>
-                    qb
-                        .where("toStop.busStopType", "=", input.busStopType ?? "---")
-                        .where("fromStop.busStopType", "=", input.busStopType ?? "---"),
-                ),
+                .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
+        )
+        .$if(!!input.busStopType, (qb) =>
+            qb
+                .where("toStop.busStopType", "=", input.busStopType ?? "---")
+                .where("fromStop.busStopType", "=", input.busStopType ?? "---"),
         )
         .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
