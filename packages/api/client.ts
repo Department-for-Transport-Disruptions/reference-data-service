@@ -192,6 +192,7 @@ export type Stops = {
 export type ServiceStop = {
     direction: string;
     sequenceNumber: string;
+    journeyPatternId: number;
 } & Stops[0];
 
 export enum ServiceFields {
@@ -408,7 +409,10 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
             "toStop.timingStatus as toTimingStatus",
             "toStop.administrativeAreaCode as toAdministrativeAreaCode",
             "toStop.status as toStatus",
+            "service_journey_pattern_links.toSequenceNumber",
+            "service_journey_pattern_links.orderInSequence",
             "service_journey_pattern_links.fromSequenceNumber",
+            "service_journey_pattern_links.journeyPatternId",
             "service_journey_patterns.direction",
         ])
         .groupBy(["fromId", "toId"])
@@ -434,8 +438,8 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
                 .innerJoin("localities", "localities.nptgLocalityCode", "toStop.nptgLocalityCode")
                 .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? []),
         )
-        .orderBy("service_journey_pattern_links.fromSequenceNumber")
-        .orderBy("service_journey_patterns.direction")
+        .orderBy("service_journey_pattern_links.orderInSequence")
+        .orderBy("service_journey_pattern_links.journeyPatternId")
         .execute();
 
     return stops;

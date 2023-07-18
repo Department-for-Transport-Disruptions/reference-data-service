@@ -2722,6 +2722,9 @@ export const stopsDbData: ServiceStops = [
         direction: "outbound",
         fromSequenceNumber: "1",
         dataSource: DataSource.bods,
+        orderInSequence: 1,
+        toSequenceNumber: "2",
+        journeyPatternId: 108,
     },
     {
         serviceId: 1,
@@ -2762,6 +2765,9 @@ export const stopsDbData: ServiceStops = [
         direction: "outbound",
         fromSequenceNumber: "2",
         dataSource: DataSource.bods,
+        orderInSequence: 2,
+        toSequenceNumber: "3",
+        journeyPatternId: 108,
     },
     {
         serviceId: 1,
@@ -2802,6 +2808,9 @@ export const stopsDbData: ServiceStops = [
         direction: "outbound",
         fromSequenceNumber: "3",
         dataSource: DataSource.bods,
+        orderInSequence: 3,
+        toSequenceNumber: "4",
+        journeyPatternId: 108,
     },
     {
         serviceId: 1,
@@ -2842,6 +2851,9 @@ export const stopsDbData: ServiceStops = [
         direction: "inbound",
         fromSequenceNumber: "1",
         dataSource: DataSource.bods,
+        orderInSequence: 4,
+        toSequenceNumber: "2",
+        journeyPatternId: 107,
     },
     {
         serviceId: 1,
@@ -2882,6 +2894,9 @@ export const stopsDbData: ServiceStops = [
         direction: "inbound",
         fromSequenceNumber: "2",
         dataSource: DataSource.bods,
+        orderInSequence: 5,
+        toSequenceNumber: "3",
+        journeyPatternId: 107,
     },
     {
         serviceId: 1,
@@ -2922,6 +2937,9 @@ export const stopsDbData: ServiceStops = [
         direction: "inbound",
         fromSequenceNumber: "3",
         dataSource: DataSource.bods,
+        orderInSequence: 6,
+        toSequenceNumber: "4",
+        journeyPatternId: 107,
     },
     {
         serviceId: 1,
@@ -2962,6 +2980,9 @@ export const stopsDbData: ServiceStops = [
         direction: "inbound",
         fromSequenceNumber: "4",
         dataSource: DataSource.bods,
+        orderInSequence: 7,
+        toSequenceNumber: "5",
+        journeyPatternId: 107,
     },
     {
         serviceId: 1,
@@ -3002,6 +3023,9 @@ export const stopsDbData: ServiceStops = [
         direction: "inbound",
         fromSequenceNumber: "5",
         dataSource: DataSource.bods,
+        orderInSequence: 8,
+        toSequenceNumber: "6",
+        journeyPatternId: 107,
     },
     {
         serviceId: 1,
@@ -3042,6 +3066,9 @@ export const stopsDbData: ServiceStops = [
         direction: "inbound",
         fromSequenceNumber: "6",
         dataSource: DataSource.bods,
+        orderInSequence: 9,
+        toSequenceNumber: "7",
+        journeyPatternId: 107,
     },
     {
         serviceId: 1,
@@ -3082,6 +3109,9 @@ export const stopsDbData: ServiceStops = [
         direction: "inbound",
         fromSequenceNumber: "7",
         dataSource: DataSource.bods,
+        orderInSequence: 10,
+        toSequenceNumber: "8",
+        journeyPatternId: 107,
     },
     {
         serviceId: 1,
@@ -3122,6 +3152,9 @@ export const stopsDbData: ServiceStops = [
         direction: "inbound",
         fromSequenceNumber: "8",
         dataSource: DataSource.bods,
+        orderInSequence: 11,
+        toSequenceNumber: "9",
+        journeyPatternId: 107,
     },
 ];
 
@@ -3341,7 +3374,6 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
                 { longitude: -1.626806, latitude: 53.257401 },
                 { longitude: -1.629153, latitude: 53.261588 },
                 { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.698976, latitude: 53.358629 },
                 { longitude: -1.698678, latitude: 53.360453 },
                 { longitude: -1.698976, latitude: 53.358629 },
                 { longitude: -1.698678, latitude: 53.360453 },
@@ -3388,7 +3420,6 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
                 { longitude: -1.626806, latitude: 53.257401 },
                 { longitude: -1.629153, latitude: 53.261588 },
                 { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.698976, latitude: 53.358629 },
                 { longitude: -1.698678, latitude: 53.360453 },
                 { longitude: -1.698976, latitude: 53.358629 },
                 { longitude: -1.698678, latitude: 53.360453 },
@@ -3435,7 +3466,6 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
                 { longitude: -1.626806, latitude: 53.257401 },
                 { longitude: -1.629153, latitude: 53.261588 },
                 { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.698976, latitude: 53.358629 },
                 { longitude: -1.698678, latitude: 53.360453 },
                 { longitude: -1.698976, latitude: 53.358629 },
                 { longitude: -1.698678, latitude: 53.360453 },
