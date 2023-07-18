@@ -486,7 +486,7 @@ export type ServiceStops = {
     fromSequenceNumber: string | null;
     toSequenceNumber: string | null;
     journeyPatternId: number;
-    orderInSequence: string | null;
+    orderInSequence: number;
     direction: string | null;
 }[];
 
