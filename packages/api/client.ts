@@ -322,8 +322,8 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
     const services = await dbClient
         .selectFrom("services")
         .selectAll(["services"])
-        .where("dataSource", "=", input.dataSource)
-        .$if(!!input.modes?.[0], (qb) => qb.where("mode", "in", input.modes ?? ["---"]))
+        .where("services.dataSource", "=", input.dataSource)
+        .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
             qb
                 .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
@@ -360,6 +360,11 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         )
         .innerJoin("stops as fromStop", "fromStop.atcoCode", "service_journey_pattern_links.fromAtcoCode")
         .innerJoin("stops as toStop", "toStop.atcoCode", "service_journey_pattern_links.toAtcoCode")
+        .$if(!!input.adminAreaCodes?.[0], (qb) =>
+            qb
+                .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
+                .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
+        )
         .select([
             "services.id as serviceId",
             "services.dataSource as dataSource",
@@ -491,6 +496,11 @@ export const getServicesByStops = async (dbClient: Kysely<Database>, input: Serv
             "service_journey_pattern_links",
             "service_journey_pattern_links.journeyPatternId",
             "service_journey_patterns.id",
+        )
+        .$if(!!input.adminAreaCodes?.[0], (qb) =>
+            qb
+                .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
+                .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .selectAll("services")
         .select(["fromAtcoCode", "toAtcoCode"])

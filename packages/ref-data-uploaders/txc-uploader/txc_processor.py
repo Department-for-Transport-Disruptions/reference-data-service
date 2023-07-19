@@ -234,7 +234,7 @@ def insert_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, area_co
 
 def get_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, stop_codes):
     codes_dict = {f"k{k}":v for k,v in enumerate(stop_codes)}
-    query = "SELECT DISTINCT administrativeAreaCode FROM stops_new WHERE atcoCode IN (%s)"
+    query = "SELECT DISTINCT localities.administrativeAreaCode from localities_new as localities inner join stops_new as stops on localities.nptgLocalityCode = stops.nptgLocalityCode WHERE stops.atcoCode IN (%s)"
     keys = ", ".join(list([f":{v}" for v in codes_dict.keys()]))
     query = query % keys
 
