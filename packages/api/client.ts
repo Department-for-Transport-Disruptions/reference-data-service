@@ -123,35 +123,36 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
 
     const stops = await dbClient
         .selectFrom("stops")
+        .innerJoin("localities", "localities.nptgLocalityCode", "stops.nptgLocalityCode")
         .select([
-            "id",
-            "atcoCode",
-            "naptanCode",
-            "commonName",
-            "street",
-            "indicator",
-            "bearing",
-            "nptgLocalityCode",
-            "localityName",
-            "parentLocalityName",
-            "longitude",
-            "latitude",
-            "stopType",
-            "busStopType",
-            "timingStatus",
-            "administrativeAreaCode",
-            "status",
+            "stops.id",
+            "stops.atcoCode",
+            "stops.naptanCode",
+            "stops.commonName",
+            "stops.street",
+            "stops.indicator",
+            "stops.bearing",
+            "stops.nptgLocalityCode",
+            "stops.localityName",
+            "stops.parentLocalityName",
+            "stops.longitude",
+            "stops.latitude",
+            "stops.stopType",
+            "stops.busStopType",
+            "stops.timingStatus",
+            "localities.administrativeAreaCode",
+            "stops.status",
         ])
         .where("stopType", "not in", ignoredStopTypes)
         .where("status", "=", "active")
         .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
         .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
         .$if(!!input.commonName, (qb) =>
-            qb.where("commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
+            qb.where("stops.commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
         )
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
             qb
-                .where("administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"])
+                .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"])
                 .$if(!!input.polygon, (qb) =>
                     qb.where(
                         sql`ST_CONTAINS(ST_GEOMFROMTEXT(${input.polygon}), Point(stops.longitude, stops.latitude))`,
@@ -343,6 +344,7 @@ export type ServiceStopsQueryInput = {
     busStopType?: string;
     stopTypes?: string[];
     dataSource?: DataSource;
+    adminAreaCodes?: string[];
 };
 
 export const getServiceStops = async (dbClient: Kysely<Database>, input: ServiceStopsQueryInput) => {
@@ -407,15 +409,15 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
         .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
-        .$if(!!input.busStopType, (qb) =>
-            qb
-                .where("toStop.busStopType", "=", input.busStopType ?? "---")
-                .where("fromStop.busStopType", "=", input.busStopType ?? "---"),
-        )
         .$if(!!input.stopTypes?.[0], (qb) =>
             qb
                 .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
                 .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
+        )
+        .$if(!!input.busStopType, (qb) =>
+            qb
+                .where("toStop.busStopType", "=", input.busStopType ?? "---")
+                .where("fromStop.busStopType", "=", input.busStopType ?? "---"),
         )
         .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
         .orderBy("service_journey_pattern_links.orderInSequence")
@@ -425,7 +427,50 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
     return stops;
 };
 
-export type ServiceStops = Awaited<ReturnType<typeof getServiceStops>>;
+// Unable to use Awaited due to error: Type instantiation is excessively deep and possibly infinite.
+export type ServiceStops = {
+    serviceId: number;
+    dataSource: "bods" | "tnds";
+    fromId: number;
+    fromAtcoCode: string;
+    fromNaptanCode: string | null;
+    fromCommonName: string | null;
+    fromStreet: string | null;
+    fromIndicator: string | null;
+    fromBearing: string | null;
+    fromNptgLocalityCode: string | null;
+    fromLocalityName: string | null;
+    fromParentLocalityName: string | null;
+    fromLongitude: string | null;
+    fromLatitude: string | null;
+    fromStopType: string | null;
+    fromBusStopType: string | null;
+    fromTimingStatus: string | null;
+    fromAdministrativeAreaCode: string | null;
+    fromStatus: string | null;
+    toId: number;
+    toAtcoCode: string;
+    toNaptanCode: string | null;
+    toCommonName: string | null;
+    toStreet: string | null;
+    toIndicator: string | null;
+    toBearing: string | null;
+    toNptgLocalityCode: string | null;
+    toLocalityName: string | null;
+    toParentLocalityName: string | null;
+    toLongitude: string | null;
+    toLatitude: string | null;
+    toStopType: string | null;
+    toBusStopType: string | null;
+    toTimingStatus: string | null;
+    toAdministrativeAreaCode: string | null;
+    toStatus: string | null;
+    fromSequenceNumber: string | null;
+    toSequenceNumber: string | null;
+    journeyPatternId: number;
+    orderInSequence: number;
+    direction: string | null;
+}[];
 
 export type ServicesByStopsQueryInput = {
     dataSource: DataSource;
@@ -433,6 +478,7 @@ export type ServicesByStopsQueryInput = {
     stops: string[];
     modes?: VehicleMode[];
     includeRoutes: boolean;
+    adminAreaCodes?: string[];
 };
 
 export const getServicesByStops = async (dbClient: Kysely<Database>, input: ServicesByStopsQueryInput) => {

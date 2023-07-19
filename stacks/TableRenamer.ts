@@ -19,6 +19,7 @@ export function TableRenamerStack({ stack }: StackContext) {
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
+            STAGE: stack.stage,
         },
         logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
         permissions: [

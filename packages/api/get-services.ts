@@ -9,6 +9,7 @@ import {
     ServicesByStops,
     ServicesByStopsQueryInput,
     ServicesQueryInput,
+    ServiceStops,
     VehicleMode,
 } from "./client";
 import { ClientError } from "./error";
@@ -92,12 +93,23 @@ export const getServicesByStopsQueryInput = (event: APIGatewayEvent): ServicesBy
         throw new ClientError(`Only up to ${MAX_ATCO_CODES} ATCO codes can be provided`);
     }
 
+    const adminAreaCodes = queryStringParameters?.adminAreaCodes ?? "";
+    const adminAreaCodeArray = adminAreaCodes
+        .split(",")
+        .filter((adminAreaCode) => adminAreaCode)
+        .map((adminAreaCode) => adminAreaCode.trim());
+
+    if (adminAreaCodeArray.length > Number(MAX_ADMIN_AREA_CODES)) {
+        throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
+    }
+
     const includeRoutes = queryStringParameters?.includeRoutes === "true";
 
     return {
         ...inputs,
         includeRoutes,
         stops: atcoCodesArray,
+        ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
     };
 };
 
@@ -143,10 +155,11 @@ export const formatServicesWithStops = async (
             return groupedServices;
         }
 
-        const serviceRoutePromises = groupedServices.map((service) =>
-            getServiceStops(dbClient, {
-                serviceId: service.id,
-            }),
+        const serviceRoutePromises = groupedServices.map(
+            (service) =>
+                getServiceStops(dbClient, {
+                    serviceId: service.id,
+                }) as Promise<ServiceStops>,
         );
 
         const serviceRoutes = await Promise.all(serviceRoutePromises);
