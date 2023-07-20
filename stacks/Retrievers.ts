@@ -12,7 +12,7 @@ export function RetrieversStack({ stack }: StackContext) {
     const { csvBucket, txcBucket, txcZippedBucket } = use(S3Stack);
     const { cluster } = use(DatabaseStack);
 
-    const enableSchedule = stack.stage === "prod" || stack.stage === "preprod";
+    const enableSchedule = stack.stage === "prod" || stack.stage === "preprod" || stack.stage === "test";
 
     const txcZippedBucketCdk = Bucket.fromBucketName(
         stack,
