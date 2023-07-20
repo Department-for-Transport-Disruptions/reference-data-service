@@ -57,6 +57,13 @@ def get_services_for_operator(data_dict, operator):
         return services_for_operator
 
 
+def get_vehicle_journeys(data_dict):
+    if "VehicleJourneys" in data_dict["TransXChange"]:
+        vehicle_journeys = make_list(data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"])
+        
+        return vehicle_journeys
+
+    
 def get_lines_for_service(service):
     return make_list(service["Lines"]["Line"])
 
@@ -105,6 +112,9 @@ def collect_journey_pattern_section_refs_and_info(raw_journey_patterns):
             if "DestinationDisplay" in raw_journey_pattern
             else None,
             "route_ref": raw_journey_pattern["RouteRef"] if "RouteRef" in raw_journey_pattern else None,
+            "journey_pattern_ref": raw_journey_pattern["@id"]
+            if "@id" in raw_journey_pattern
+            else None,
         }
 
         raw_journey_pattern_section_refs = raw_journey_pattern[
@@ -120,6 +130,21 @@ def collect_journey_pattern_section_refs_and_info(raw_journey_patterns):
         )
 
     return journey_patterns
+
+
+def collect_vehicle_journey(vehicle):
+    vehicle_journey_info = {
+            "vehicle_journey_code": vehicle["VehicleJourneyCode"]
+            if "VehicleJourneyCode" in vehicle
+            else None,
+            "service_ref": vehicle["ServiceRef"]
+            if "ServiceRef" in vehicle
+            else None,
+            "line_ref": vehicle["LineRef"] if "LineRef" in vehicle else None,
+            "journey_pattern_ref": vehicle["JourneyPatternRef"] if "JourneyPatternRef" in vehicle else None,
+        }
+    print(vehicle_journey_info)
+    return vehicle_journey_info
 
 
 def process_journey_pattern_sections(
@@ -221,6 +246,17 @@ def iterate_through_journey_patterns_and_run_insert_queries(
     if admin_area_codes:
         insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
 
+def vehicle_journeys_and_run_insert_queries( 
+    cursor, vehicle: dict, logger
+):
+    vehicle_journey = collect_vehicle_journey(vehicle)
+   
+    if check_vehicle_journey_exists(cursor, vehicle_journey["vehicle_journey_code"],  vehicle_journey["service_ref"],  vehicle_journey["line_ref"],  vehicle_journey["journey_pattern_ref"], logger):
+        return
+    insert_into_txc_vehicle_journey_table(
+            cursor, vehicle_journey,
+        )
+
 
 def insert_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, area_codes, service_id):
     codes_dict = {f"k{k}":v for k,v in enumerate(area_codes)}
@@ -252,7 +288,7 @@ def get_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, stop_codes
 def insert_into_txc_journey_pattern_table(
     cursor: aurora_data_api.AuroraDataAPICursor, operator_service_id, journey_pattern_info, joined_section_refs
 ):
-    query = "INSERT INTO service_journey_patterns_new (operatorServiceId, destinationDisplay, direction, routeRef, sectionRefs) VALUES (:op_service_id, :destination_display, :direction, :route_ref, :section_refs)"
+    query = "INSERT INTO service_journey_patterns_new (operatorServiceId, destinationDisplay, direction, routeRef, journeyPatternRef, sectionRefs) VALUES (:op_service_id, :destination_display, :direction, :route_ref, :journey_pattern_ref, :section_refs)"
     cursor.execute(
         query,
         {
@@ -260,12 +296,28 @@ def insert_into_txc_journey_pattern_table(
             "destination_display": journey_pattern_info["destination_display"],
             "direction": journey_pattern_info["direction"],
             "route_ref": journey_pattern_info["route_ref"],
+            "journey_pattern_ref": journey_pattern_info["journey_pattern_ref"],
             "section_refs": joined_section_refs
         },
     )
     journey_pattern_id = cursor.lastrowid
     return journey_pattern_id
 
+def insert_into_txc_vehicle_journey_table(
+    cursor: aurora_data_api.AuroraDataAPICursor, vehicle_journey_info
+):
+    query = "INSERT INTO vehicle_journeys_new (vehicleJourneyCode, serviceRef, lineRef, journeyPatternRef) VALUES (:vehicle_journey_code, :service_ref, :line_ref, :journey_pattern_ref)"
+    cursor.execute(
+        query,
+        {
+            "vehicle_journey_code": vehicle_journey_info["vehicle_journey_code"],
+            "service_ref": vehicle_journey_info["service_ref"],
+            "line_ref": vehicle_journey_info["line_ref"],
+            "journey_pattern_ref": vehicle_journey_info["journey_pattern_ref"],
+        },
+    )
+    vehicle_journey_id = cursor.lastrowid
+    return vehicle_journey_id
 
 def insert_into_txc_journey_pattern_link_table(cursor: aurora_data_api.AuroraDataAPICursor, links, journey_pattern_id):
     values = [
@@ -376,6 +428,36 @@ def check_journey_pattern_exists(
     return True if journey_pattern_id else False
 
 
+
+def check_vehicle_journey_exists(
+    cursor: aurora_data_api.AuroraDataAPICursor, vehicle_journey_code, service_ref, line_ref, journey_pattern_ref, logger
+):
+    query = """
+        SELECT id FROM vehicle_journeys_new
+        WHERE vehicleJourneyCode <=> :vehicle_journey_code AND serviceRef <=> :vehicle_journey_code AND lineRef <=> :line_ref AND journeyPatternRef <=> :journey_pattern_ref
+        LIMIT 1
+    """
+
+    cursor.execute(
+        query,
+        {
+            "vehicle_journey_code": vehicle_journey_code,
+            "service_ref": service_ref,
+            "line_ref": line_ref,
+            "journey_pattern_ref": journey_pattern_ref,
+        }
+    )
+    result = cursor.fetchone()
+
+    vehicle_journey_id = result[0] if result and len(result) > 0 else None
+    if vehicle_journey_id:
+        logger.info(
+            f"Existing vehicle journey found - '{vehicle_journey_code}' - '{service_ref}' - '{line_ref}' - '{journey_pattern_ref}'"
+        )
+
+    return True if vehicle_journey_id else False
+
+
 def check_txc_line_exists(
     cursor: aurora_data_api.AuroraDataAPICursor, operator, service, line, data_source, cloudwatch, logger
 ):
@@ -439,7 +521,7 @@ def check_file_has_usable_data(data: dict, service: dict) -> bool:
                 if not len(jps):
                     return False
         return True
-
+    
     return (
         service_has_journey_patterns(service)
         and data_has_journey_pattern_sections(data)
@@ -447,6 +529,8 @@ def check_file_has_usable_data(data: dict, service: dict) -> bool:
         and all_journey_pattern_sections_are_not_empty(data, service)
     )
 
+def data_has_vehicle_journeys(data: dict) -> bool:
+        return "VehicleJourneys" in data.get("TransXChange")  # type: ignore
 
 def write_to_database(
     data: dict,
@@ -482,6 +566,7 @@ def write_to_database(
                 valid_noc = True
 
                 services = get_services_for_operator(data, operator)
+                vehicle_journeys = get_vehicle_journeys(data)
                 noc = operator.get("NationalOperatorCode", "")
                 if not services:
                     logger.info(
@@ -540,6 +625,18 @@ def write_to_database(
                                 service,
                                 logger
                             )
+                print('here')
+                file_has_vehicle_journeys = True
+                file_has_usable_vehicle_data = data_has_vehicle_journeys(data)
+                for vehicle in vehicle_journeys:
+                    if not valid_noc:
+                        break
+                    if file_has_usable_vehicle_data:
+                        vehicle_journeys_and_run_insert_queries(
+                                cursor,
+                                vehicle,
+                                logger
+                            )
 
             if not file_has_nocs:
                 db_connection.rollback()
@@ -557,6 +654,14 @@ def write_to_database(
                 )
                 return False
 
+            if not file_has_vehicle_journeys:
+                db_connection.rollback()
+                logger.info(f"No vehicle journeys data found in TXC file: '{key}'")
+                put_metric_data_by_data_source(
+                    cloudwatch, data_source, "NoVehicleJourneysDataInFile", 1
+                )
+                return False
+            
             if not file_has_lines:
                 db_connection.rollback()
                 logger.info(f"No line data found in TXC file: '{key}'")
@@ -570,6 +675,14 @@ def write_to_database(
                 logger.info(f"No useable data found in TXC file: '{key}'")
                 put_metric_data_by_data_source(
                     cloudwatch, data_source, "NoUseableDataInFile", 1
+                )
+                return False
+
+            if not file_has_usable_vehicle_data:
+                db_connection.rollback()
+                logger.info(f"No useable vehicle journeys data found in TXC file: '{key}'")
+                put_metric_data_by_data_source(
+                    cloudwatch, data_source, "NoUseableVehicleJourneysDataInFile", 1
                 )
                 return False
 

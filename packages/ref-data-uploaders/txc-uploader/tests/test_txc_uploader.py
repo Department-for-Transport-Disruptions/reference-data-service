@@ -10,7 +10,8 @@ from txc_uploader.txc_processor import (
     collect_journey_patterns,
     iterate_through_journey_patterns_and_run_insert_queries,
     check_file_has_usable_data,
-    create_unique_line_id
+    create_unique_line_id,
+    collect_vehicle_journey
 )
 
 from tests.helpers import test_xml_helpers
@@ -125,6 +126,13 @@ class TestDataCollectionFunctionality:
             collect_journey_patterns(mock_data_dict, service)
             == test_data.expected_list_of_journey_patterns
         )
+
+    def test_collect_vehicle_journey(self):
+        assert (
+            collect_vehicle_journey(mock_data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"][0])
+            == test_data.expected_vehicle_journey
+        )
+
 
 
 class TestMainFunctionality:
