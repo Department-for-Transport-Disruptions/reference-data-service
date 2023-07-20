@@ -143,7 +143,7 @@ def collect_vehicle_journey(vehicle):
             "line_ref": vehicle["LineRef"] if "LineRef" in vehicle else None,
             "journey_pattern_ref": vehicle["JourneyPatternRef"] if "JourneyPatternRef" in vehicle else None,
         }
-    print(vehicle_journey_info)
+
     return vehicle_journey_info
 
 
@@ -625,7 +625,7 @@ def write_to_database(
                                 service,
                                 logger
                             )
-                print('here')
+
                 file_has_vehicle_journeys = True
                 file_has_usable_vehicle_data = data_has_vehicle_journeys(data)
                 for vehicle in vehicle_journeys:
