@@ -14,6 +14,8 @@ import { executeClient } from "./execute-client";
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     executeClient(event, getQueryInput, getServiceStops, formatStops);
 
+const MAX_ADMIN_AREA_CODES = process.env.MAX_ADMIN_AREA_CODES || "5";
+
 export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput => {
     const { pathParameters } = event;
 
@@ -45,6 +47,16 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid mode provided");
     }
 
+    const adminAreaCodes = pathParameters?.adminAreaCodes ?? "";
+    const adminAreaCodeArray = adminAreaCodes
+        .split(",")
+        .filter((adminAreaCode) => adminAreaCode)
+        .map((adminAreaCode) => adminAreaCode.trim());
+
+    if (adminAreaCodeArray.length > Number(MAX_ADMIN_AREA_CODES)) {
+        throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
+    }
+
     const dataSourceInput = pathParameters?.dataSource;
 
     return {
@@ -53,6 +65,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         ...(dataSourceInput ? { dataSource: dataSourceInput as DataSource } : {}),
+        ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
     };
 };
 

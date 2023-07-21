@@ -2,20 +2,25 @@ import { Database, getDbClient, Tables } from "@reference-data-service/core/db";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { SSMClient, PutParameterCommand, GetParameterCommand } from "@aws-sdk/client-ssm";
-import { StackContext } from "sst/constructs";
 
 const ssm = new SSMClient({ region: "eu-west-2" });
 
-export const main = async ({ stack }: StackContext) => {
+export const main = async () => {
+    const { STAGE: stage } = process.env;
     try {
         logger.info("Table Renamer starting... ");
 
         const dbClient = getDbClient();
 
         let disableRenamer: string | undefined = "true";
+
+        if (!stage) {
+            throw new Error("Stage env not found");
+        }
+
         try {
             const input = {
-                Name: `/scheduled/disable-table-renamer-${stack.stage}`,
+                Name: `/scheduled/disable-table-renamer-${stage}`,
             };
             const command = new GetParameterCommand(input);
             const ssmOutput = await ssm.send(command);
@@ -38,13 +43,13 @@ export const main = async ({ stack }: StackContext) => {
 
             await deleteAndRenameTables(dbClient);
         } else {
-            await putParameter(`/scheduled/disable-table-renamer-${stack.stage}`, "false");
+            await putParameter(`/scheduled/disable-table-renamer-${stage}`, "false");
             throw new Error(
                 "The SSM Parameter used to check for errors in the scheduled job has returned TRUE indicating an issue",
             );
         }
     } catch (e) {
-        await putParameter(`/scheduled/disable-table-renamer-${stack.stage}`, "false");
+        if (stage) await putParameter(`/scheduled/disable-table-renamer-${stage}`, "false");
         if (e instanceof Error) {
             logger.error(e);
 

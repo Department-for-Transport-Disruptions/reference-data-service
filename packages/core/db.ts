@@ -181,6 +181,7 @@ export interface VehicleJourneysTable {
 }
 
 export interface LocalitiesTable {
+    id: Generated<number>;
     nptgLocalityCode: string;
     localityName: string | null;
     localityNameLang: string | null;
