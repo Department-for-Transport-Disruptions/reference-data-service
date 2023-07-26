@@ -3362,29 +3362,96 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
         stops: ["370023899"],
         routes: {
             outbound: [
-                { longitude: -1.695986, latitude: 53.354415 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.695986, latitude: 53.354415 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.629153, latitude: 53.261588 },
-                { longitude: -1.626806, latitude: 53.257401 },
+                {
+                    longitude: -1.695986,
+                    latitude: 53.354415,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.695986,
+                    latitude: 53.354415,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.629153,
+                    latitude: 53.261588,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
             ],
             inbound: [
-                { longitude: -1.629153, latitude: 53.261588 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.629153, latitude: 53.261588 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.626567, latitude: 53.250479 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.626567, latitude: 53.250479 },
+                {
+                    longitude: -1.629153,
+                    latitude: 53.261588,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.629153,
+                    latitude: 53.261588,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.626567,
+                    latitude: 53.250479,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.626567,
+                    latitude: 53.250479,
+                },
             ],
         },
     },
@@ -3408,29 +3475,96 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
         stops: ["370025036"],
         routes: {
             outbound: [
-                { longitude: -1.695986, latitude: 53.354415 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.695986, latitude: 53.354415 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.629153, latitude: 53.261588 },
-                { longitude: -1.626806, latitude: 53.257401 },
+                {
+                    longitude: -1.695986,
+                    latitude: 53.354415,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.695986,
+                    latitude: 53.354415,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.629153,
+                    latitude: 53.261588,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
             ],
             inbound: [
-                { longitude: -1.629153, latitude: 53.261588 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.629153, latitude: 53.261588 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.626567, latitude: 53.250479 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.626567, latitude: 53.250479 },
+                {
+                    longitude: -1.629153,
+                    latitude: 53.261588,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.629153,
+                    latitude: 53.261588,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.626567,
+                    latitude: 53.250479,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.626567,
+                    latitude: 53.250479,
+                },
             ],
         },
     },
@@ -3454,29 +3588,96 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
         stops: ["370025036"],
         routes: {
             outbound: [
-                { longitude: -1.695986, latitude: 53.354415 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.695986, latitude: 53.354415 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.629153, latitude: 53.261588 },
-                { longitude: -1.626806, latitude: 53.257401 },
+                {
+                    longitude: -1.695986,
+                    latitude: 53.354415,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.695986,
+                    latitude: 53.354415,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.629153,
+                    latitude: 53.261588,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
             ],
             inbound: [
-                { longitude: -1.629153, latitude: 53.261588 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.629153, latitude: 53.261588 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.698976, latitude: 53.358629 },
-                { longitude: -1.698678, latitude: 53.360453 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.626567, latitude: 53.250479 },
-                { longitude: -1.626806, latitude: 53.257401 },
-                { longitude: -1.626567, latitude: 53.250479 },
+                {
+                    longitude: -1.629153,
+                    latitude: 53.261588,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.629153,
+                    latitude: 53.261588,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.698976,
+                    latitude: 53.358629,
+                },
+                {
+                    longitude: -1.698678,
+                    latitude: 53.360453,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.626567,
+                    latitude: 53.250479,
+                },
+                {
+                    longitude: -1.626806,
+                    latitude: 53.257401,
+                },
+                {
+                    longitude: -1.626567,
+                    latitude: 53.250479,
+                },
             ],
         },
     },

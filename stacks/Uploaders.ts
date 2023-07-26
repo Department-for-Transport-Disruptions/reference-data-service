@@ -73,7 +73,7 @@ export function UploadersStack({ stack }: StackContext) {
                 resources: ["*"],
             }),
         ],
-        enableLiveDev: true,
+        enableLiveDev: false,
         maxEventAge: Duration.hours(3),
     });
 

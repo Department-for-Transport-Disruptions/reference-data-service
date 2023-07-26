@@ -352,7 +352,12 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
 
     const stops = await dbClient
         .selectFrom("services")
-        .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
+        .innerJoin("vehicle_journeys", "vehicle_journeys.lineRef", "services.lineId")
+        .innerJoin(
+            "service_journey_patterns",
+            "service_journey_patterns.journeyPatternRef",
+            "vehicle_journeys.journeyPatternRef",
+        )
         .innerJoin(
             "service_journey_pattern_links",
             "service_journey_pattern_links.journeyPatternId",
@@ -408,8 +413,10 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
             "service_journey_pattern_links.journeyPatternId",
             "service_journey_patterns.direction",
         ])
+        .distinct()
         .groupBy(["fromId", "toId"])
         .where("services.id", "=", input.serviceId)
+        .where("service_journey_patterns.operatorServiceId", "=", input.serviceId)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))

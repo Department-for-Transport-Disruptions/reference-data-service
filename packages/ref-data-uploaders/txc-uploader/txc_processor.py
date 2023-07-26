@@ -246,16 +246,14 @@ def iterate_through_journey_patterns_and_run_insert_queries(
     if admin_area_codes:
         insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
 
-def vehicle_journeys_and_run_insert_queries( 
+def collect_vehicle_journeys_and_run_insert_queries(
     cursor, vehicle: dict, logger
 ):
     vehicle_journey = collect_vehicle_journey(vehicle)
    
-    if check_vehicle_journey_exists(cursor, vehicle_journey["vehicle_journey_code"],  vehicle_journey["service_ref"],  vehicle_journey["line_ref"],  vehicle_journey["journey_pattern_ref"], logger):
-        return
     insert_into_txc_vehicle_journey_table(
-            cursor, vehicle_journey,
-        )
+        cursor, vehicle_journey,
+    )
 
 
 def insert_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, area_codes, service_id):
@@ -428,36 +426,6 @@ def check_journey_pattern_exists(
     return True if journey_pattern_id else False
 
 
-
-def check_vehicle_journey_exists(
-    cursor: aurora_data_api.AuroraDataAPICursor, vehicle_journey_code, service_ref, line_ref, journey_pattern_ref, logger
-):
-    query = """
-        SELECT id FROM vehicle_journeys_new
-        WHERE vehicleJourneyCode <=> :vehicle_journey_code AND serviceRef <=> :vehicle_journey_code AND lineRef <=> :line_ref AND journeyPatternRef <=> :journey_pattern_ref
-        LIMIT 1
-    """
-
-    cursor.execute(
-        query,
-        {
-            "vehicle_journey_code": vehicle_journey_code,
-            "service_ref": service_ref,
-            "line_ref": line_ref,
-            "journey_pattern_ref": journey_pattern_ref,
-        }
-    )
-    result = cursor.fetchone()
-
-    vehicle_journey_id = result[0] if result and len(result) > 0 else None
-    if vehicle_journey_id:
-        logger.info(
-            f"Existing vehicle journey found - '{vehicle_journey_code}' - '{service_ref}' - '{line_ref}' - '{journey_pattern_ref}'"
-        )
-
-    return True if vehicle_journey_id else False
-
-
 def check_txc_line_exists(
     cursor: aurora_data_api.AuroraDataAPICursor, operator, service, line, data_source, cloudwatch, logger
 ):
@@ -529,8 +497,6 @@ def check_file_has_usable_data(data: dict, service: dict) -> bool:
         and all_journey_pattern_sections_are_not_empty(data, service)
     )
 
-def data_has_vehicle_journeys(data: dict) -> bool:
-        return "VehicleJourneys" in data.get("TransXChange")  # type: ignore
 
 def write_to_database(
     data: dict,
@@ -555,6 +521,7 @@ def write_to_database(
             file_has_services: bool = False
             file_has_lines: bool = False
             file_has_useable_data: bool = False
+            file_has_vehicle_journeys: bool = False
 
             for operator in operators:
                 if "NationalOperatorCode" not in operator:
@@ -626,17 +593,17 @@ def write_to_database(
                                 logger
                             )
 
-                file_has_vehicle_journeys = True
-                file_has_usable_vehicle_data = data_has_vehicle_journeys(data)
                 for vehicle in vehicle_journeys:
                     if not valid_noc:
                         break
-                    if file_has_usable_vehicle_data:
-                        vehicle_journeys_and_run_insert_queries(
-                                cursor,
-                                vehicle,
-                                logger
-                            )
+
+                    file_has_vehicle_journeys = True
+
+                    collect_vehicle_journeys_and_run_insert_queries(
+                        cursor,
+                        vehicle,
+                        logger
+                    )
 
             if not file_has_nocs:
                 db_connection.rollback()
@@ -675,14 +642,6 @@ def write_to_database(
                 logger.info(f"No useable data found in TXC file: '{key}'")
                 put_metric_data_by_data_source(
                     cloudwatch, data_source, "NoUseableDataInFile", 1
-                )
-                return False
-
-            if not file_has_usable_vehicle_data:
-                db_connection.rollback()
-                logger.info(f"No useable vehicle journeys data found in TXC file: '{key}'")
-                put_metric_data_by_data_source(
-                    cloudwatch, data_source, "NoUseableVehicleJourneysDataInFile", 1
                 )
                 return False
 
