@@ -152,6 +152,9 @@ def process_journey_pattern_sections(
                                 "RunTime", None
                             ),
                             "to_sequence_number": link_to.get("@SequenceNumber"),
+                            "route_link_ref": raw_journey_pattern_timing_link.get(
+                                "RouteLinkRef"
+                            ),
                         }
                         journey_pattern_timing_links.append(journey_pattern_timing_link)
 
@@ -222,8 +225,35 @@ def iterate_through_journey_patterns_and_run_insert_queries(
         insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
 
 
-def insert_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, area_codes, service_id):
-    codes_dict = {f"k{k}":v for k,v in enumerate(area_codes)}
+def iterate_through_routes_and_run_insert_queries(
+    cursor, data: dict, operator_service_id: str, logger
+):
+    route_sections = make_list(data["TransXChange"]["RouteSections"]["RouteSection"])
+
+    routes = []
+    for route_section in route_sections:
+        route_links = make_list(route_section["RouteLink"])
+        for route_link in route_links:
+            locations = make_list(route_link["Track"]["Mapping"]["Location"])
+            for location in locations:
+                route = {
+                    "route_section_id": route_section["@id"],
+                    "route_link_id": route_link["@id"],
+                    "from_stop_ref": route_link["From"]["StopPointRef"],
+                    "to_stop_ref": route_link["To"]["StopPointRef"],
+                    "location_id": location["@id"],
+                    "longitude": location["Translation"]["Longitude"],
+                    "latitude": location["Translation"]["Latitude"],
+                }
+                routes.append(route)
+
+    insert_into_txc_routes_table(cursor, routes, operator_service_id, logger)
+
+
+def insert_admin_area_codes(
+    cursor: aurora_data_api.AuroraDataAPICursor, area_codes, service_id
+):
+    codes_dict = {f"k{k}": v for k, v in enumerate(area_codes)}
     query = "INSERT IGNORE INTO service_admin_area_codes_new (serviceId, adminAreaCode) VALUES %s"
     keys = ", ".join(list([f"(:service_id, :{v})" for v in codes_dict.keys()]))
     query = query % keys
@@ -279,11 +309,34 @@ def insert_into_txc_journey_pattern_link_table(cursor: aurora_data_api.AuroraDat
             "to_sequence_number": link["to_sequence_number"],
             "run_time": link["run_time"],
             "order": order,
+            "route_link_ref": link["route_link_ref"],
         }
         for order, link in enumerate(links)
     ]
     query = """INSERT INTO service_journey_pattern_links_new (journeyPatternId, fromAtcoCode, fromTimingStatus, fromSequenceNumber,
-        toAtcoCode, toTimingStatus, toSequenceNumber, runtime, orderInSequence) VALUES (:journey_pattern_id, :from_atco_code, :from_timing_status, :from_sequence_number, :to_atco_code, :to_timing_status, :to_sequence_number, :run_time, :order)"""
+        toAtcoCode, toTimingStatus, toSequenceNumber, runtime, orderInSequence, routeLinkRef) VALUES (:journey_pattern_id, :from_atco_code, :from_timing_status, :from_sequence_number, :to_atco_code, :to_timing_status, :to_sequence_number, :run_time, :order, :route_link_ref)"""
+    cursor.executemany(query, values)
+
+
+def insert_into_txc_routes_table(
+    cursor: aurora_data_api.AuroraDataAPICursor, routes, operator_service_id, logger
+):
+    values = [
+        {
+            "operator_service_id": operator_service_id,
+            "route_section_id": route["route_section_id"],
+            "route_link_id": route["route_link_id"],
+            "from_stop_ref": route["from_stop_ref"],
+            "to_stop_ref": route["to_stop_ref"],
+            "location_id": route["location_id"],
+            "longitude": route["longitude"],
+            "latitude": route["latitude"],
+        }
+        for route in routes
+    ]
+
+    query = """INSERT INTO routes_new (operatorServiceId, routeSectionId, routeLinkId, fromAtcoCode,
+        toAtcoCode, locationId, longitude, latitude) VALUES (:operator_service_id, :route_section_id, :route_link_id, :from_stop_ref, :to_stop_ref, :location_id, :longitude, :latitude)"""
     cursor.executemany(query, values)
 
 
@@ -534,11 +587,10 @@ def write_to_database(
                         )
                         if file_has_useable_data:
                             iterate_through_journey_patterns_and_run_insert_queries(
-                                cursor,
-                                data,
-                                operator_service_id,
-                                service,
-                                logger
+                                cursor, data, operator_service_id, service, logger
+                            )
+                            iterate_through_routes_and_run_insert_queries(
+                                cursor, data, operator_service_id, logger
                             )
 
             if not file_has_nocs:

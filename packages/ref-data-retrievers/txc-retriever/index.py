@@ -39,6 +39,8 @@ db_connection = aurora_data_api.connect(
 
 queries = [
     "SET FOREIGN_KEY_CHECKS=0",
+    "DROP TABLE IF EXISTS routes_new",
+    "CREATE TABLE routes_new LIKE routes",
     "DROP TABLE IF EXISTS service_journey_pattern_links_new",
     "CREATE TABLE service_journey_pattern_links_new LIKE service_journey_pattern_links",
     "DROP TABLE IF EXISTS service_journey_patterns_new",
@@ -47,7 +49,7 @@ queries = [
     "CREATE TABLE service_admin_area_codes_new LIKE service_admin_area_codes",
     "DROP TABLE IF EXISTS services_new",
     "CREATE TABLE services_new LIKE services",
-    "SET FOREIGN_KEY_CHECKS=1"
+    "SET FOREIGN_KEY_CHECKS=1",
 ]
 
 

@@ -164,6 +164,19 @@ export interface ServiceJourneyPatternLinksTable {
     orderInSequence: number;
     fromSequenceNumber: string | null;
     toSequenceNumber: string | null;
+    routeLinkRef: string | null;
+}
+
+export interface RoutesTable {
+    id: Generated<number>;
+    operatorServiceId: number;
+    routeSectionId: string;
+    routeLinkId: string | null;
+    fromAtcoCode: string | null;
+    toAtcoCode: string | null;
+    locationId: string | null;
+    longitude: string | null;
+    latitude: string | null;
 }
 
 export interface ServiceAdminAreaCodes {
@@ -217,6 +230,9 @@ export interface Database {
     service_journey_pattern_links: ServiceJourneyPatternLinksTable;
     service_journey_pattern_links_new?: ServiceJourneyPatternLinksTable;
     service_journey_pattern_links_old?: ServiceJourneyPatternLinksTable;
+    routes: RoutesTable;
+    routes_old: RoutesTable;
+    routes_new: RoutesTable;
     service_admin_area_codes: ServiceAdminAreaCodes;
     service_admin_area_codes_new?: ServiceAdminAreaCodes;
     service_admin_area_codes_old?: ServiceAdminAreaCodes;
@@ -234,7 +250,8 @@ export type Tables =
     | "service_journey_patterns"
     | "service_journey_pattern_links"
     | "service_admin_area_codes"
-    | "localities";
+    | "localities"
+    | "routes";
 export type TablesNew =
     | "stops_new"
     | "operator_lines_new"
@@ -244,7 +261,8 @@ export type TablesNew =
     | "service_journey_patterns_new"
     | "service_journey_pattern_links_new"
     | "service_admin_area_codes_new"
-    | "localities_new";
+    | "localities_new"
+    | "routes_new";
 export type TablesOld =
     | "stops_old"
     | "operator_lines_old"
@@ -254,7 +272,8 @@ export type TablesOld =
     | "service_journey_patterns_old"
     | "service_journey_pattern_links_old"
     | "service_admin_area_codes_old"
-    | "localities_old";
+    | "localities_old"
+    | "routes_old";
 
 export const getDbClient = () => {
     const { DATABASE_NAME: dbName, DATABASE_SECRET_ARN: secretArn, DATABASE_RESOURCE_ARN: resourceArn } = process.env;
