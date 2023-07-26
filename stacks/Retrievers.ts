@@ -32,7 +32,7 @@ export function RetrieversStack({ stack }: StackContext) {
             BUCKET_NAME: csvBucket.bucketName,
             CONTENT_TYPE: "text/csv",
         },
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:PutObject"],
@@ -67,7 +67,7 @@ export function RetrieversStack({ stack }: StackContext) {
             CONTENT_TYPE: "text/csv",
             TARGET_FILE: "Stops.csv",
         },
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:PutObject"],
@@ -102,7 +102,7 @@ export function RetrieversStack({ stack }: StackContext) {
             CONTENT_TYPE: "text/csv",
             TARGET_FILE: "Localities.csv",
         },
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:PutObject"],
@@ -146,7 +146,7 @@ export function RetrieversStack({ stack }: StackContext) {
             CLUSTER_ARN: cluster.clusterArn,
             FTP_CREDENTIALS_SECRET_ARN: ftpSecret.secretArn || "",
         },
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:PutObject"],
@@ -185,7 +185,7 @@ export function RetrieversStack({ stack }: StackContext) {
             TNDS_FUNCTION: tndsRetriever.functionName,
             STAGE: stack.stage,
         },
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:PutObject"],
@@ -233,7 +233,7 @@ export function RetrieversStack({ stack }: StackContext) {
         environment: {
             BUCKET_NAME: txcBucket.bucketName,
         },
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:PutObject"],

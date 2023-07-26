@@ -21,7 +21,7 @@ export function TableRenamerStack({ stack }: StackContext) {
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
             STAGE: stack.stage,
         },
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["ssm:PutParameter", "ssm:GetParameter"],
