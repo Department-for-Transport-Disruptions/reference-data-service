@@ -12,12 +12,17 @@ export async function up(db) {
         .addColumn("lineRef", "varchar(255)")
         .addColumn("journeyPatternRef", "varchar(255)")
         .execute();
-        
-    await db.schema.createIndex("idx_journeyPatternRef").on("vehicle_journeys").column("journeyPatternRef").execute();
 
-    await sql`ALTER TABLE service_journey_patterns ADD journeyPatternRef varchar(255);`.execute(
-        db,
-    )
+    await db.schema.alterTable("service_journey_patterns").addColumn("journeyPatternRef", "varchar(255)").execute();
+
+    await db.schema.createIndex("idx_journeyPatternRef").on("vehicle_journeys").column("journeyPatternRef").execute();
+    await db.schema
+        .createIndex("idx_journeyPatternRef")
+        .on("service_journey_patterns")
+        .column("journeyPatternRef")
+        .execute();
+    await db.schema.createIndex("idx_lineRef").on("vehicle_journeys").column("lineRef").execute();
+    await db.schema.createIndex("idx_lineId").on("services").column("lineId").execute();
 }
 
 /**
@@ -25,4 +30,8 @@ export async function up(db) {
  */
 export async function down(db) {
     await db.schema.dropTable("vehicle_journeys").execute();
+    await db.schema.alterTable("service_journey_patterns").dropColumn("journeyPatternRef", "varchar(255)").execute();
+
+    await db.schema.dropIndex("idx_lineRef").on("vehicle_journeys").execute();
+    await db.schema.dropIndex("idx_lineId").on("services").execute();
 }

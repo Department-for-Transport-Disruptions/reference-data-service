@@ -116,6 +116,7 @@ const tables = [
     "service_journey_pattern_links",
     "service_admin_area_codes",
     "localities",
+    "vehicle_journeys",
 ];
 
 export const deleteAndRenameTables = async (db: Kysely<Database>): Promise<void> => {
