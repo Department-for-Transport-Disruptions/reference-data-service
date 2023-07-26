@@ -225,11 +225,7 @@ def iterate_through_journey_patterns_and_run_insert_queries(
         insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
 
 
-def iterate_through_routes_and_run_insert_queries(
-    cursor, data: dict, operator_service_id: str, logger
-):
-    route_sections = make_list(data["TransXChange"]["RouteSections"]["RouteSection"])
-
+def collect_track_data(route_sections):
     routes = []
     for route_section in route_sections:
         route_links = make_list(route_section["RouteLink"])
@@ -246,8 +242,16 @@ def iterate_through_routes_and_run_insert_queries(
                     "latitude": location["Translation"]["Latitude"],
                 }
                 routes.append(route)
+                
+    return routes
 
-    insert_into_txc_routes_table(cursor, routes, operator_service_id, logger)
+    
+def iterate_through_routes_and_run_insert_queries(
+    cursor, data: dict, operator_service_id: str
+):
+    route_sections = make_list(data["TransXChange"]["RouteSections"]["RouteSection"])
+    routes = collect_track_data(route_sections)
+    insert_into_txc_routes_table(cursor, routes, operator_service_id)
 
 
 def insert_admin_area_codes(
@@ -319,7 +323,7 @@ def insert_into_txc_journey_pattern_link_table(cursor: aurora_data_api.AuroraDat
 
 
 def insert_into_txc_routes_table(
-    cursor: aurora_data_api.AuroraDataAPICursor, routes, operator_service_id, logger
+    cursor: aurora_data_api.AuroraDataAPICursor, routes, operator_service_id
 ):
     values = [
         {
@@ -590,7 +594,7 @@ def write_to_database(
                                 cursor, data, operator_service_id, service, logger
                             )
                             iterate_through_routes_and_run_insert_queries(
-                                cursor, data, operator_service_id, logger
+                                cursor, data, operator_service_id
                             )
 
             if not file_has_nocs:

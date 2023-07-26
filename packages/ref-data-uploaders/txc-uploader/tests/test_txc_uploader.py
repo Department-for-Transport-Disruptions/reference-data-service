@@ -1,16 +1,23 @@
 import os
+import logging
 from unittest.mock import patch, MagicMock
-
+from aurora_data_api import AuroraDataAPICursor
 import boto3
 
-from txc_uploader.txc_processor import (
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+from txc_processor import (
     download_from_s3_and_write_to_db,
     extract_data_for_txc_operator_service_table,
     collect_journey_pattern_section_refs_and_info,
     collect_journey_patterns,
     iterate_through_journey_patterns_and_run_insert_queries,
     check_file_has_usable_data,
-    create_unique_line_id
+    create_unique_line_id,
+    make_list,
+    collect_track_data,
+    iterate_through_routes_and_run_insert_queries,
 )
 
 from tests.helpers import test_xml_helpers
@@ -20,6 +27,7 @@ logger = MagicMock()
 mock_data_dict = test_xml_helpers.generate_mock_data_dict()
 mock_non_bus_dict = test_xml_helpers.generate_mock_ferry_txc_data_dict()
 mock_invalid_data_dict = test_xml_helpers.generate_mock_invalid_data_dict()
+mock_data_routes_dict = test_xml_helpers.generate_mock_txc_routes_data_dict()
 
 
 class TestLineIdGeneration:
@@ -42,11 +50,16 @@ class TestFileHasUsableData:
         data = mock_invalid_data_dict
         service = mock_invalid_data_dict["TransXChange"]["Services"]["Service"]
         assert check_file_has_usable_data(data, service) == False
+        
+    def test_routes_file_with_valid_data_is_usable(self):
+        data = mock_data_routes_dict
+        service = mock_data_routes_dict["TransXChange"]["Services"]["Service"]
+        assert check_file_has_usable_data(data, service) == True
 
 
 class TestDatabaseInsertQuerying:
-    @patch("txc_uploader.txc_processor.insert_into_txc_journey_pattern_table")
-    @patch("txc_uploader.txc_processor.insert_into_txc_journey_pattern_link_table")
+    @patch("txc_processor.insert_into_txc_journey_pattern_table")
+    @patch("txc_processor.insert_into_txc_journey_pattern_link_table")
     def test_insert_methods_are_called_correct_number_of_times(
         self, mock_jp_insert, mock_jpl_insert
     ):
@@ -56,11 +69,26 @@ class TestDatabaseInsertQuerying:
         mock_cursor = MagicMock()
         mock_op_service_id = 12
         iterate_through_journey_patterns_and_run_insert_queries(
-            mock_cursor, mock_data_dict, mock_op_service_id, service
+            mock_cursor, mock_data_dict, mock_op_service_id, service, logger
         )
 
         assert mock_jp_insert.call_count == len(mock_journey_patterns)
         assert mock_jpl_insert.call_count == len(mock_journey_patterns)
+                 
+    @patch("txc_processor.insert_into_txc_routes_table")
+    def test_routes_insert_methods_are_called_correct_number_of_times(
+        self,  mock_routes_insert
+    ):
+        route_sections = make_list(mock_data_routes_dict["TransXChange"]["RouteSections"]["RouteSection"])
+        routes = collect_track_data(route_sections)
+        mock_cursor = MagicMock(spec=AuroraDataAPICursor)
+        mock_op_service_id = 12
+        iterate_through_routes_and_run_insert_queries(
+            mock_cursor, mock_data_routes_dict, mock_op_service_id
+        )
+
+        assert len(routes) == 461
+        assert mock_routes_insert.call_count == 1
 
 
 class TestDataCollectionFunctionality:
@@ -128,7 +156,7 @@ class TestDataCollectionFunctionality:
 
 
 class TestMainFunctionality:
-    @patch("txc_uploader.txc_processor.write_to_database")
+    @patch("txc_processor.write_to_database")
     def test_integration_between_s3_download_and_database_write_functionality(
         self, db_patch, s3, cloudwatch
     ):
