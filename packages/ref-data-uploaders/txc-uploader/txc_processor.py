@@ -230,28 +230,35 @@ def collect_track_data(route_sections):
     for route_section in route_sections:
         route_links = make_list(route_section["RouteLink"])
         for route_link in route_links:
-            locations = make_list(route_link["Track"]["Mapping"]["Location"])
-            for location in locations:
-                route = {
-                    "route_section_id": route_section["@id"],
-                    "route_link_id": route_link["@id"],
-                    "from_stop_ref": route_link["From"]["StopPointRef"],
-                    "to_stop_ref": route_link["To"]["StopPointRef"],
-                    "location_id": location["@id"],
-                    "longitude": location["Translation"]["Longitude"],
-                    "latitude": location["Translation"]["Latitude"],
-                }
-                routes.append(route)
-                
+            trackData = route_link.get("Track", None)
+            if trackData is not None:
+                tracks = trackData if isinstance(trackData, list) else [trackData]
+                for track in tracks:
+                    locations = make_list(track["Mapping"]["Location"])
+                    for location in locations:
+                        longitude = location["Longitude"] if location.get("Translation", None) is None else location["Translation"]["Longitude"]            
+                        latitude = location["Longitude"] if location.get("Translation", None) is None else location["Translation"]["Longitude"]
+                        route = {
+                            "route_section_id": route_section.get("@id", None),
+                            "route_link_id": route_link.get("@id", None),
+                            "from_stop_ref": route_link["From"]["StopPointRef"],
+                            "to_stop_ref": route_link["To"]["StopPointRef"],
+                            "location_id": location.get("@id", None),
+                            "longitude": longitude,
+                            "latitude": latitude,
+                        }
+                        routes.append(route)
+                    
     return routes
 
     
 def iterate_through_routes_and_run_insert_queries(
     cursor, data: dict, operator_service_id: str
 ):
-    route_sections = make_list(data["TransXChange"]["RouteSections"]["RouteSection"])
-    routes = collect_track_data(route_sections)
-    insert_into_txc_routes_table(cursor, routes, operator_service_id)
+    route_sections = None if data["TransXChange"].get("RouteSections", None) is None else make_list(data["TransXChange"]["RouteSections"]["RouteSection"])
+    if route_sections is not None:
+        routes = collect_track_data(route_sections)
+        insert_into_txc_routes_table(cursor, routes, operator_service_id)
 
 
 def insert_admin_area_codes(
