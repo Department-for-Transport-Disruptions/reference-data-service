@@ -12,6 +12,16 @@ export function ApiStack({ stack }: StackContext) {
         throw new Error("ROOT_DOMAIN must be set");
     }
 
+    let prodDomain = "";
+
+    if (stack.stage === "prod") {
+        prodDomain = process.env.PROD_DOMAIN?.toString() ?? "";
+
+        if (!prodDomain) {
+            throw new Error("PROD_DOMAIN must be set in production");
+        }
+    }
+
     const stopsFunction = new Function(stack, "ref-data-service-get-stops-function", {
         bind: [cluster],
         functionName: `ref-data-service-get-stops-function-${stack.stage}`,
@@ -28,7 +38,7 @@ export function ApiStack({ stack }: StackContext) {
             IS_LOCAL: !["test", "preprod", "prod"].includes(stack.stage) ? "true" : "false",
         },
         runtime: "nodejs18.x",
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
     const operatorsFunction = new Function(stack, "ref-data-service-get-operators-function", {
@@ -44,7 +54,7 @@ export function ApiStack({ stack }: StackContext) {
             MAX_NOC_CODES: "50",
         },
         runtime: "nodejs18.x",
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
     const servicesForOperatorFunction = new Function(stack, "ref-data-service-get-services-for-operator-function", {
@@ -59,7 +69,7 @@ export function ApiStack({ stack }: StackContext) {
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
         },
         runtime: "nodejs18.x",
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
     const serviceByIdFunction = new Function(stack, "ref-data-service-get-service-by-id-function", {
@@ -74,7 +84,7 @@ export function ApiStack({ stack }: StackContext) {
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
         },
         runtime: "nodejs18.x",
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
     const servicesFunction = new Function(stack, "ref-data-service-get-services-function", {
@@ -90,7 +100,7 @@ export function ApiStack({ stack }: StackContext) {
             MAX_ATCO_CODES: "100",
         },
         runtime: "nodejs18.x",
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
     const serviceStopsFunction = new Function(stack, "ref-data-service-get-service-stops-function", {
@@ -105,7 +115,7 @@ export function ApiStack({ stack }: StackContext) {
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
         },
         runtime: "nodejs18.x",
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
     const serviceRoutesFunction = new Function(stack, "ref-data-service-get-service-routes-function", {
@@ -120,7 +130,7 @@ export function ApiStack({ stack }: StackContext) {
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
         },
         runtime: "nodejs18.x",
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
     const areaCodeFunction = new Function(stack, "ref-data-service-get-admin-area-codes-function", {
@@ -135,12 +145,14 @@ export function ApiStack({ stack }: StackContext) {
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
         },
         runtime: "nodejs18.x",
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
     const subDomain = ["test", "preprod", "prod"].includes(stack.stage) ? "api" : `api.${stack.stage}`;
 
-    const allowedOrigins = [`https://${stack.stage}.cdd.${rootDomain}`];
+    const allowedOrigins = [
+        stack.stage === "prod" ? `https://${prodDomain}` : `https://${stack.stage}.cdd.${rootDomain}`,
+    ];
 
     if (!["preprod", "prod"].includes(stack.stage)) {
         allowedOrigins.push("http://localhost:3000");
