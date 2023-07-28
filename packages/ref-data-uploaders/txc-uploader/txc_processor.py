@@ -532,6 +532,14 @@ def write_to_database(
                     continue
                 file_has_services = True
 
+                if not vehicle_journeys:
+                    logger.info(
+                        f"No vehicle journey data found for operator: '{noc}', in TXC file: '{key}'"
+                    )
+                    continue
+
+                file_has_vehicle_journeys = True
+            
                 for service in services:
                     if not valid_noc:
                         break
@@ -588,10 +596,7 @@ def write_to_database(
                     if not valid_noc:
                         break
 
-                    file_has_vehicle_journeys = True
-
                     vehicle_journeys_data.append(collect_vehicle_journey(vehicle))
-
                 insert_into_txc_vehicle_journey_table(
                     cursor, vehicle_journeys_data,
                 )
