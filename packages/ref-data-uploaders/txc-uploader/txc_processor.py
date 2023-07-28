@@ -58,7 +58,7 @@ def get_services_for_operator(data_dict, operator):
 
 
 def get_vehicle_journeys(data_dict):
-    if "VehicleJourneys" in data_dict["TransXChange"]:
+    if "VehicleJourneys" in data_dict["TransXChange"] and data_dict["TransXChange"]["VehicleJourneys"] is not None:
         vehicle_journeys = make_list(data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"])
         
         return vehicle_journeys
