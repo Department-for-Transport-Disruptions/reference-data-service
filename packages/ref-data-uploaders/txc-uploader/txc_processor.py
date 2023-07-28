@@ -246,16 +246,6 @@ def iterate_through_journey_patterns_and_run_insert_queries(
     if admin_area_codes:
         insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
 
-def collect_vehicle_journeys_and_run_insert_queries(
-    cursor, vehicle: dict, logger
-):
-    vehicle_journey = collect_vehicle_journey(vehicle)
-   
-    insert_into_txc_vehicle_journey_table(
-        cursor, vehicle_journey,
-    )
-
-
 def insert_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, area_codes, service_id):
     codes_dict = {f"k{k}":v for k,v in enumerate(area_codes)}
     query = "INSERT IGNORE INTO service_admin_area_codes_new (serviceId, adminAreaCode) VALUES %s"
@@ -302,20 +292,20 @@ def insert_into_txc_journey_pattern_table(
     return journey_pattern_id
 
 def insert_into_txc_vehicle_journey_table(
-    cursor: aurora_data_api.AuroraDataAPICursor, vehicle_journey_info
+    cursor: aurora_data_api.AuroraDataAPICursor, vehicle_journeys_info
 ):
-    query = "INSERT INTO vehicle_journeys_new (vehicleJourneyCode, serviceRef, lineRef, journeyPatternRef) VALUES (:vehicle_journey_code, :service_ref, :line_ref, :journey_pattern_ref)"
-    cursor.execute(
-        query,
-        {
+    values = [
+       {
             "vehicle_journey_code": vehicle_journey_info["vehicle_journey_code"],
             "service_ref": vehicle_journey_info["service_ref"],
             "line_ref": vehicle_journey_info["line_ref"],
             "journey_pattern_ref": vehicle_journey_info["journey_pattern_ref"],
-        },
-    )
-    vehicle_journey_id = cursor.lastrowid
-    return vehicle_journey_id
+        }
+        for vehicle_journey_info in vehicle_journeys_info
+    ]
+    
+    query = "INSERT INTO vehicle_journeys_new (vehicleJourneyCode, serviceRef, lineRef, journeyPatternRef) VALUES (:vehicle_journey_code, :service_ref, :line_ref, :journey_pattern_ref)"
+    cursor.executemany(query, values)
 
 def insert_into_txc_journey_pattern_link_table(cursor: aurora_data_api.AuroraDataAPICursor, links, journey_pattern_id):
     values = [
@@ -593,17 +583,19 @@ def write_to_database(
                                 logger
                             )
 
+                vehicle_journeys_data = []
                 for vehicle in vehicle_journeys:
                     if not valid_noc:
                         break
 
                     file_has_vehicle_journeys = True
 
-                    collect_vehicle_journeys_and_run_insert_queries(
-                        cursor,
-                        vehicle,
-                        logger
-                    )
+                    vehicle_journeys_data.append(collect_vehicle_journey(vehicle))
+
+                insert_into_txc_vehicle_journey_table(
+                    cursor, vehicle_journeys_data,
+                )
+                
 
             if not file_has_nocs:
                 db_connection.rollback()
