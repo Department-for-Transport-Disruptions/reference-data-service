@@ -18,6 +18,7 @@ from txc_processor import (
     make_list,
     collect_track_data,
     iterate_through_routes_and_run_insert_queries,
+    collect_vehicle_journey
 )
 
 from tests.helpers import test_xml_helpers
@@ -153,6 +154,13 @@ class TestDataCollectionFunctionality:
             collect_journey_patterns(mock_data_dict, service)
             == test_data.expected_list_of_journey_patterns
         )
+
+    def test_collect_vehicle_journey(self):
+        assert (
+            collect_vehicle_journey(mock_data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"][0])
+            == test_data.expected_vehicle_journey
+        )
+
 
 
 class TestMainFunctionality:

@@ -26,7 +26,7 @@ export function UploadersStack({ stack }: StackContext) {
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
             STAGE: stack.stage,
         },
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:GetObject"],
@@ -58,7 +58,7 @@ export function UploadersStack({ stack }: StackContext) {
             DATABASE_SECRET_ARN: cluster.secretArn,
             CLUSTER_ARN: cluster.clusterArn,
         },
-        logRetention: stack.stage === "production" ? "three_months" : "two_weeks",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:GetObject"],
