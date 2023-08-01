@@ -534,6 +534,7 @@ export const getServicesByStops = async (dbClient: Kysely<Database>, input: Serv
         )
         .selectAll("services")
         .select(["fromAtcoCode", "toAtcoCode"])
+        .distinct()
         .where((qb) => qb.where("fromAtcoCode", "in", input.stops).orWhere("toAtcoCode", "in", input.stops))
         .where("dataSource", "=", input.dataSource)
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
