@@ -355,6 +355,10 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .where("id", "=", input.serviceId)
         .execute();
 
+    if (!dataSourceResult) {
+        return [];
+    }
+
     const journeyPatternRefsResult = await dbClient
         .selectFrom("services")
         .innerJoin(
@@ -368,6 +372,10 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .where("services.id", "=", input.serviceId)
         .distinct()
         .execute();
+
+    if (!journeyPatternRefsResult?.length) {
+        return [];
+    }
 
     const journeyPatternRefs = journeyPatternRefsResult.map((ref) => ref.journeyPatternRef);
 
