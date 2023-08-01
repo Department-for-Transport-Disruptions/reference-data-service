@@ -1,13 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import {
-    DataSource,
-    getServiceStops,
-    isValidMode,
-    ServiceStop,
-    ServiceStops,
-    ServiceStopsQueryInput,
-    Stops,
-} from "./client";
+import { getServiceStops, isValidMode, ServiceStop, ServiceStops, ServiceStopsQueryInput, Stops } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 
@@ -57,14 +49,11 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
-    const dataSourceInput = pathParameters?.dataSource;
-
     return {
         serviceId: Number(serviceId),
         ...(pathParameters?.busStopType ? { busStopType: pathParameters.busStopType } : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
-        ...(dataSourceInput ? { dataSource: dataSourceInput as DataSource } : {}),
         ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
     };
 };
