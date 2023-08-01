@@ -343,21 +343,37 @@ export type ServiceStopsQueryInput = {
     modes?: VehicleMode[];
     busStopType?: string;
     stopTypes?: string[];
-    dataSource?: DataSource;
     adminAreaCodes?: string[];
 };
 
 export const getServiceStops = async (dbClient: Kysely<Database>, input: ServiceStopsQueryInput) => {
     logger.info("Starting getServiceStops...");
 
+    const [dataSourceResult] = await dbClient
+        .selectFrom("services")
+        .select("dataSource")
+        .where("id", "=", input.serviceId)
+        .execute();
+
+    const journeyPatternRefsResult = await dbClient
+        .selectFrom("services")
+        .innerJoin(
+            "vehicle_journeys",
+            dataSourceResult.dataSource === DataSource.bods
+                ? "vehicle_journeys.lineRef"
+                : "vehicle_journeys.serviceRef",
+            dataSourceResult.dataSource === DataSource.bods ? "services.lineId" : "services.serviceCode",
+        )
+        .select("vehicle_journeys.journeyPatternRef")
+        .where("services.id", "=", input.serviceId)
+        .distinct()
+        .execute();
+
+    const journeyPatternRefs = journeyPatternRefsResult.map((ref) => ref.journeyPatternRef);
+
     const stops = await dbClient
         .selectFrom("services")
-        .innerJoin("vehicle_journeys", "vehicle_journeys.lineRef", "services.lineId")
-        .innerJoin("service_journey_patterns", (join) =>
-            join
-                .onRef("service_journey_patterns.journeyPatternRef", "=", "vehicle_journeys.journeyPatternRef")
-                .onRef("service_journey_patterns.operatorServiceId", "=", "services.id"),
-        )
+        .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
         .innerJoin(
             "service_journey_pattern_links",
             "service_journey_pattern_links.journeyPatternId",
@@ -416,6 +432,7 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .distinct()
         .groupBy(["fromId", "toId"])
         .where("services.id", "=", input.serviceId)
+        .where("service_journey_patterns.journeyPatternRef", "in", journeyPatternRefs)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
@@ -430,7 +447,6 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
                 .where("toStop.busStopType", "=", input.busStopType ?? "---")
                 .where("fromStop.busStopType", "=", input.busStopType ?? "---"),
         )
-        .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
         .orderBy("service_journey_pattern_links.orderInSequence")
         .orderBy("service_journey_pattern_links.journeyPatternId")
         .execute();
@@ -512,7 +528,6 @@ export const getServicesByStops = async (dbClient: Kysely<Database>, input: Serv
         .select(["fromAtcoCode", "toAtcoCode"])
         .where((qb) => qb.where("fromAtcoCode", "in", input.stops).orWhere("toAtcoCode", "in", input.stops))
         .where("dataSource", "=", input.dataSource)
-        .groupBy(["fromAtcoCode", "toAtcoCode"])
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
         .orderBy("service_journey_patterns.direction")
         .execute();
