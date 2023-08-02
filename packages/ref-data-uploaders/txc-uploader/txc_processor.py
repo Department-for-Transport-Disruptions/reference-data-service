@@ -237,7 +237,7 @@ def collect_track_data(route_sections):
                     locations = make_list(track["Mapping"]["Location"])
                     for location in locations:
                         longitude = location["Longitude"] if location.get("Translation", None) is None else location["Translation"]["Longitude"]            
-                        latitude = location["Longitude"] if location.get("Translation", None) is None else location["Translation"]["Longitude"]
+                        latitude = location["Latitude"] if location.get("Translation", None) is None else location["Translation"]["Latitude"]
                         route = {
                             "route_section_id": route_section.get("@id", None),
                             "route_link_id": route_link.get("@id", None),
