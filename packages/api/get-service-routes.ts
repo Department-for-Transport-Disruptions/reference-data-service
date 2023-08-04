@@ -26,23 +26,23 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
 };
 
 const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
+    const sortedStops = flattenedStops
+        // filter stops by direction
+        .filter((stop) => stop.direction === direction)
+        // remove any duplicates on atcoCode and sequence number
+        .filter(
+            (stop, index, self) =>
+                self.findIndex(
+                    (other) => stop.atcoCode === other.atcoCode && stop.sequenceNumber === other.sequenceNumber,
+                ) === index,
+        )
+        // sort stops by sequence number
+        .sort((stop, other) => Number(stop.sequenceNumber) - Number(other.sequenceNumber));
+
     return (
-        flattenedStops
-            // filter stops by direction
-            .filter((stop) => stop.direction === direction)
-            // remove any duplicates on atcoCode and sequence number
-            .filter(
-                (stop, index, self) =>
-                    self.findIndex(
-                        (other) => stop.atcoCode === other.atcoCode && stop.sequenceNumber === other.sequenceNumber,
-                    ) === index,
-            )
-            // sort stops by sequence number
-            .sort((stop, other) => Number(stop.sequenceNumber) - Number(other.sequenceNumber))
+        sortedStops
             // remove duplicate adjacent stops
-            .filter((stop, i) => (i > 0 ? stop.atcoCode !== flattenedStops[i - 1].atcoCode : true))
-            // sort stops by journey pattern id
-            .sort((stop, other) => stop.journeyPatternId - other.journeyPatternId)
+            .filter((stop, i) => (i > 0 ? stop.atcoCode !== sortedStops[i - 1].atcoCode : true))
     );
 };
 
@@ -51,6 +51,7 @@ export const formatStopsRoutes = async (
     // eslint-disable-next-line @typescript-eslint/require-await
 ): Promise<{ outbound: ServiceStop[]; inbound: ServiceStop[] }> => {
     const flattenedStops = flattenStops(stops);
+
     const outbound = filterStops(flattenedStops, "outbound");
     const inbound = filterStops(flattenedStops, "inbound");
     return { outbound, inbound };

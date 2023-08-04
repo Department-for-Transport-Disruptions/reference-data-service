@@ -150,6 +150,7 @@ export interface ServiceJourneyPatternsTable {
     destinationDisplay: string | null;
     direction: string | null;
     routeRef: string | null;
+    journeyPatternRef: string | null;
     sectionRefs: string | null;
 }
 
@@ -182,6 +183,14 @@ export interface RoutesTable {
 export interface ServiceAdminAreaCodes {
     serviceId: number;
     adminAreaCode: string;
+}
+
+export interface VehicleJourneysTable {
+    id: number;
+    vehicleJourneyCode: string | null;
+    serviceRef: string | null;
+    lineRef: string | null;
+    journeyPatternRef: string | null;
 }
 
 export interface LocalitiesTable {
@@ -239,6 +248,9 @@ export interface Database {
     localities: LocalitiesTable;
     localities_new?: LocalitiesTable;
     localities_old?: LocalitiesTable;
+    vehicle_journeys: VehicleJourneysTable;
+    vehicle_journeys_new?: VehicleJourneysTable;
+    vehicle_journeys_old?: VehicleJourneysTable;
 }
 
 export type Tables =
@@ -251,7 +263,8 @@ export type Tables =
     | "service_journey_pattern_links"
     | "service_admin_area_codes"
     | "localities"
-    | "routes";
+    | "routes"
+    | "vehicle_journeys";
 export type TablesNew =
     | "stops_new"
     | "operator_lines_new"
@@ -262,7 +275,8 @@ export type TablesNew =
     | "service_journey_pattern_links_new"
     | "service_admin_area_codes_new"
     | "localities_new"
-    | "routes_new";
+    | "routes_new"
+    | "vehicle_journeys_new";
 export type TablesOld =
     | "stops_old"
     | "operator_lines_old"
@@ -273,7 +287,8 @@ export type TablesOld =
     | "service_journey_pattern_links_old"
     | "service_admin_area_codes_old"
     | "localities_old"
-    | "routes_old";
+    | "routes_old"
+    | "vehicle_journeys_old";
 
 export const getDbClient = () => {
     const { DATABASE_NAME: dbName, DATABASE_SECRET_ARN: secretArn, DATABASE_RESOURCE_ARN: resourceArn } = process.env;
