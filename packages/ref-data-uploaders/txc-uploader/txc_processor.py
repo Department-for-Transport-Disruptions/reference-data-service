@@ -227,27 +227,36 @@ def iterate_through_journey_patterns_and_run_insert_queries(
 
 def collect_track_data(route_sections):
     routes = []
-    for route_section in route_sections:
-        route_links = make_list(route_section["RouteLink"])
-        for route_link in route_links:
-            trackData = route_link.get("Track", None)
-            if trackData is not None:
-                tracks = trackData if isinstance(trackData, list) else [trackData]
-                for track in tracks:
-                    locations = make_list(track["Mapping"]["Location"])
-                    for location in locations:
-                        longitude = location["Longitude"] if location.get("Translation", None) is None else location["Translation"]["Longitude"]            
-                        latitude = location["Latitude"] if location.get("Translation", None) is None else location["Translation"]["Latitude"]
-                        route = {
-                            "route_section_id": route_section.get("@id", None),
-                            "route_link_id": route_link.get("@id", None),
-                            "from_stop_ref": route_link["From"]["StopPointRef"],
-                            "to_stop_ref": route_link["To"]["StopPointRef"],
-                            "location_id": location.get("@id", None),
-                            "longitude": longitude,
-                            "latitude": latitude,
-                        }
-                        routes.append(route)
+    if route_sections is not None:
+        for route_section in route_sections:
+            route_links = make_list(route_section["RouteLink"])
+            for route_link in route_links:
+                trackData = route_link.get("Track", None)
+                if trackData is not None:
+                    tracks = trackData if isinstance(trackData, list) else [trackData]
+                    for track in tracks:
+                        mapping = track["Mapping"]
+                        if mapping is not None:
+                            locations = make_list(mapping["Location"])
+                            if locations is not None:
+                                for location in locations:
+                                    translation = location.get("Translation", None)
+                                    if translation is None:
+                                        longitude = location["Longitude"]
+                                        latitude = location["Latitude"]
+                                    else:
+                                        longitude = translation["Longitude"]
+                                        latitude = translation["Latitude"]
+                                    route = {
+                                        "route_section_id": route_section.get("@id", None),
+                                        "route_link_id": route_link.get("@id", None),
+                                        "from_stop_ref": route_link["From"]["StopPointRef"],
+                                        "to_stop_ref": route_link["To"]["StopPointRef"],
+                                        "location_id": location.get("@id", None),
+                                        "longitude": longitude,
+                                        "latitude": latitude,
+                                    }
+                                    routes.append(route)
                     
     return routes
 
