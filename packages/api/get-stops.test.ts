@@ -194,7 +194,7 @@ describe("get-stops", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(() => getQueryInput(event)).toThrowError("Area of polygon must be below 100km2");
+            expect(() => getQueryInput(event)).toThrowError("Area of polygon must be below 36km2");
         });
     });
 });
