@@ -7,7 +7,7 @@ import { getPolygon } from "./utils";
 const MAX_ATCO_CODES = process.env.MAX_ATCO_CODES || "5";
 const MAX_NAPTAN_CODES = process.env.MAX_NAPTAN_CODES || "5";
 const MAX_ADMIN_AREA_CODES = process.env.MAX_ADMIN_AREA_CODES || "5";
-const MAX_POLYGON_AREA = process.env.MAX_POLYGON_AREA ? Number(process.env.MAX_POLYGON_AREA) : 100000000;
+const MAX_POLYGON_AREA_IN_KM2 = process.env.MAX_POLYGON_AREA_IN_KM2 ? Number(process.env.MAX_POLYGON_AREA_IN_KM2) : 36;
 
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     executeClient(event, getQueryInput, getStops);
@@ -62,7 +62,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
     let sqlPolygon;
 
     if (polygon) {
-        sqlPolygon = getPolygon(polygon, MAX_POLYGON_AREA);
+        sqlPolygon = getPolygon(polygon, MAX_POLYGON_AREA_IN_KM2);
     }
 
     const stopTypes = queryStringParameters?.stopTypes || "";

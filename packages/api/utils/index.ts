@@ -25,8 +25,8 @@ export const getPolygon = (polygon: string, maxArea: number): string => {
 
     const polygonArea = getAreaOfPolygon(parsedPolygon);
 
-    if (polygonArea > maxArea) {
-        throw new ClientError(`Area of polygon must be below ${maxArea / 1000000}km2`);
+    if (polygonArea / 1000000 > maxArea) {
+        throw new ClientError(`Area of polygon must be below ${maxArea}km2`);
     }
 
     return `POLYGON((${formatPolygon(parsedPolygon)}))`;
