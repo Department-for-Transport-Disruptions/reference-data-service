@@ -55,7 +55,6 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
-        ...(pathParameters?.dataSource ? { dataSource: pathParameters.dataSource } : {}),
     };
 };
 

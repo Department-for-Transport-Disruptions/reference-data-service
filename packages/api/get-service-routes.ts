@@ -43,7 +43,6 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         ...(pathParameters?.busStopType ? { busStopType: pathParameters.busStopType } : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
-        ...(pathParameters?.dataSource ? { dataSource: pathParameters.dataSource } : {}),
     };
 };
 
