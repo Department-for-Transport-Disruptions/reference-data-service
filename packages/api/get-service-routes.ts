@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { getServiceStops, ServiceStop, ServiceStops, ServiceStopsQueryInput } from "./client";
+import { getServiceStops, isValidMode, ServiceStop, ServiceStops, ServiceStopsQueryInput } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 import { flattenStops } from "./get-service-stops";
@@ -20,8 +20,30 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Provided service ID is not valid");
     }
 
+    const stopTypes = pathParameters.stopTypes || "";
+    const stopTypesArray = stopTypes
+        .split(",")
+        .filter((stop) => stop)
+        .map((stop) => stop.trim());
+
+    const modes = pathParameters.modes || "";
+    const modesArray = modes
+        .split(",")
+        .filter((mode) => mode)
+        .map((mode) => mode.trim());
+
+    const filteredModesArray = modesArray.filter(isValidMode);
+
+    if (filteredModesArray.length !== modesArray.length) {
+        throw new ClientError("Invalid mode provided");
+    }
+
     return {
         serviceId: Number(serviceId),
+        ...(pathParameters?.busStopType ? { busStopType: pathParameters.busStopType } : {}),
+        ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
+        ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
+        ...(pathParameters?.dataSource ? { dataSource: pathParameters.dataSource } : {}),
     };
 };
 
