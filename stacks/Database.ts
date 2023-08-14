@@ -24,8 +24,8 @@ export function DatabaseStack({ stack }: StackContext) {
         defaultDatabaseName: "ref_data",
         migrations: "services/migrations",
         scaling: autoscalingConfig[stack.stage] ?? {
-            minCapacity: "ACU_1",
-            maxCapacity: "ACU_2",
+            minCapacity: "ACU_2",
+            maxCapacity: "ACU_4",
             autoPause: 10,
         },
     });
