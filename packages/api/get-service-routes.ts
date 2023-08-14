@@ -45,7 +45,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid mode provided");
     }
 
-    const busStopTypes = pathParameters?.busStopType || "";
+    const busStopTypes = pathParameters?.busStopTypes || "";
     const busStopTypesArray = busStopTypes
         .split(",")
         .filter((stop) => stop)
@@ -60,7 +60,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
     return {
         serviceId: Number(serviceId),
         ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
-            ? { busStopType: filteredBusStopTypesArray }
+            ? { busStopTypes: filteredBusStopTypesArray }
             : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),

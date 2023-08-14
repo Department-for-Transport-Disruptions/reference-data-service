@@ -71,7 +71,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         .filter((stop) => stop)
         .map((stop) => stop.trim());
 
-    const busStopTypes = queryStringParameters?.busStopType || "";
+    const busStopTypes = queryStringParameters?.busStopTypes || "";
     const busStopTypesArray = busStopTypes
         .split(",")
         .filter((stop) => stop)
@@ -90,7 +90,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         ...(adminAreaCodes ? { adminAreaCodes: adminAreaCodeArray } : {}),
         ...(sqlPolygon ? { polygon: sqlPolygon } : {}),
         ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
-            ? { busStopType: filteredBusStopTypesArray }
+            ? { busStopTypes: filteredBusStopTypesArray }
             : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         page: page - 1,

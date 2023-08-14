@@ -120,7 +120,7 @@ export type StopsQueryInput = {
     adminAreaCodes?: string[];
     page?: number;
     polygon?: string;
-    busStopType?: BusStopType[];
+    busStopTypes?: BusStopType[];
     stopTypes?: string[];
 };
 
@@ -168,7 +168,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                 ),
         )
         .$if(!!input.stopTypes?.[0], (qb) => qb.where("stopType", "in", input.stopTypes ?? ["---"]))
-        .$if(!!input.busStopType?.[0], (qb) => qb.where("busStopType", "in", input.busStopType ?? ["---"]))
+        .$if(!!input.busStopTypes?.[0], (qb) => qb.where("busStopType", "in", input.busStopTypes ?? ["---"]))
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
         .execute();
@@ -349,7 +349,7 @@ export type Services = Awaited<ReturnType<typeof getServices>>;
 export type ServiceStopsQueryInput = {
     serviceId: number;
     modes?: VehicleMode[];
-    busStopType?: BusStopType[];
+    busStopTypes?: BusStopType[];
     stopTypes?: string[];
     adminAreaCodes?: string[];
 };
@@ -458,10 +458,10 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
                 .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
                 .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
         )
-        .$if(!!input.busStopType?.[0], (qb) =>
+        .$if(!!input.busStopTypes?.[0], (qb) =>
             qb
-                .where("toStop.busStopType", "in", input.busStopType ?? ["---"])
-                .where("fromStop.busStopType", "in", input.busStopType ?? ["---"]),
+                .where("toStop.busStopType", "in", input.busStopTypes ?? ["---"])
+                .where("fromStop.busStopType", "in", input.busStopTypes ?? ["---"]),
         )
         .orderBy("service_journey_pattern_links.orderInSequence")
         .orderBy("service_journey_pattern_links.journeyPatternId")

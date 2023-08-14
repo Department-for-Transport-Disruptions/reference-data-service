@@ -136,13 +136,13 @@ describe("get-stops", () => {
             const event = {
                 queryStringParameters: {
                     stopTypes: "BCT",
-                    busStopType: BusStopType.MKD,
+                    busStopTypes: BusStopType.MKD,
                 },
             } as unknown as APIGatewayEvent;
 
             expect(getQueryInput(event)).toEqual({
                 stopTypes: ["BCT"],
-                busStopType: [BusStopType.MKD],
+                busStopTypes: [BusStopType.MKD],
                 page: 0,
             });
         });
@@ -215,7 +215,7 @@ describe("get-stops", () => {
         it("throws a ClientError if invalid busStopType provided", () => {
             const event = {
                 queryStringParameters: {
-                    busStopType: "test",
+                    busStopTypes: "test",
                 },
             } as unknown as APIGatewayEvent;
 

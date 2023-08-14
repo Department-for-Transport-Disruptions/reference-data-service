@@ -29,7 +29,7 @@ describe("get-service-routes", () => {
                 pathParameters: {
                     serviceId: "234",
                     stopTypes: "BCT",
-                    busStopType: BusStopType.MKD,
+                    busStopTypes: BusStopType.MKD,
                     modes: VehicleMode.bus,
                 },
             } as unknown as APIGatewayEvent;
@@ -37,7 +37,7 @@ describe("get-service-routes", () => {
             expect(getQueryInput(event)).toEqual({
                 serviceId: 234,
                 stopTypes: ["BCT"],
-                busStopType: [BusStopType.MKD],
+                busStopTypes: [BusStopType.MKD],
                 modes: [VehicleMode.bus],
             });
         });
@@ -55,7 +55,7 @@ describe("get-service-routes", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
-                    busStopType: "invalid",
+                    busStopTypes: "invalid",
                 },
             } as unknown as APIGatewayEvent;
 
