@@ -14,8 +14,8 @@ export enum VehicleMode {
 }
 
 export enum BusStopType {
-    mkd = "mkd",
-    cus = "cus",
+    MKD = "MKD",
+    CUS = "CUS",
 }
 
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;

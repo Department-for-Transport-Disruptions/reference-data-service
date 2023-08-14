@@ -57,22 +57,22 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
-    const busStopType = pathParameters?.busStopType || "";
-    const busStopTypeArray = busStopType
+    const busStopTypes = pathParameters?.busStopType || "";
+    const busStopTypesArray = busStopTypes
         .split(",")
         .filter((stop) => stop)
         .map((busStopType) => busStopType.trim());
 
-    const filteredBusStopTypeArray = busStopTypeArray.filter(isValidBusStopType);
+    const filteredBusStopTypesArray = busStopTypesArray.filter(isValidBusStopType);
 
-    if (filteredBusStopTypeArray.length !== busStopTypeArray.length) {
+    if (filteredBusStopTypesArray.length !== busStopTypesArray.length) {
         throw new ClientError("Invalid bus stop type provided");
     }
 
     return {
         serviceId: Number(serviceId),
-        ...(filteredBusStopTypeArray && filteredBusStopTypeArray.length > 0
-            ? { busStopType: filteredBusStopTypeArray }
+        ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
+            ? { busStopType: filteredBusStopTypesArray }
             : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),

@@ -71,15 +71,15 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         .filter((stop) => stop)
         .map((stop) => stop.trim());
 
-    const busStopType = queryStringParameters?.busStopType || "";
-    const busStopTypeArray = busStopType
+    const busStopTypes = queryStringParameters?.busStopType || "";
+    const busStopTypesArray = busStopTypes
         .split(",")
         .filter((stop) => stop)
         .map((busStopType) => busStopType.trim());
 
-    const filteredBusStopTypeArray = busStopTypeArray.filter(isValidBusStopType);
+    const filteredBusStopTypesArray = busStopTypesArray.filter(isValidBusStopType);
 
-    if (filteredBusStopTypeArray.length !== busStopTypeArray.length) {
+    if (filteredBusStopTypesArray.length !== busStopTypesArray.length) {
         throw new ClientError("Invalid bus stop type provided");
     }
 
@@ -89,8 +89,8 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         ...(commonName ? { commonName } : {}),
         ...(adminAreaCodes ? { adminAreaCodes: adminAreaCodeArray } : {}),
         ...(sqlPolygon ? { polygon: sqlPolygon } : {}),
-        ...(filteredBusStopTypeArray && filteredBusStopTypeArray.length > 0
-            ? { busStopType: filteredBusStopTypeArray }
+        ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
+            ? { busStopType: filteredBusStopTypesArray }
             : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         page: page - 1,
