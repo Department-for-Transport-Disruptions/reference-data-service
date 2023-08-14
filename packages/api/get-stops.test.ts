@@ -136,13 +136,13 @@ describe("get-stops", () => {
             const event = {
                 queryStringParameters: {
                     stopTypes: "BCT",
-                    busStopType: BusStopType.mkd,
+                    busStopType: BusStopType.MKD,
                 },
             } as unknown as APIGatewayEvent;
 
             expect(getQueryInput(event)).toEqual({
                 stopTypes: ["BCT"],
-                busStopType: [BusStopType.mkd],
+                busStopType: [BusStopType.MKD],
                 page: 0,
             });
         });
