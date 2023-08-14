@@ -13,7 +13,15 @@ export enum VehicleMode {
     blank = "",
 }
 
+export enum BusStopType {
+    mkd = "mkd",
+    cus = "cus",
+}
+
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
+
+export const isValidBusStopType = (busStopType: string): busStopType is BusStopType =>
+    !!busStopType && busStopType in BusStopType;
 
 export const isDataSource = (input: string): input is DataSource => input in DataSource;
 
@@ -112,7 +120,7 @@ export type StopsQueryInput = {
     adminAreaCodes?: string[];
     page?: number;
     polygon?: string;
-    busStopType?: string;
+    busStopType?: BusStopType[];
     stopTypes?: string[];
 };
 
@@ -160,7 +168,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                 ),
         )
         .$if(!!input.stopTypes?.[0], (qb) => qb.where("stopType", "in", input.stopTypes ?? ["---"]))
-        .$if(!!input.busStopType, (qb) => qb.where("busStopType", "=", input.busStopType ?? "---"))
+        .$if(!!input.busStopType?.[0], (qb) => qb.where("busStopType", "in", input.busStopType ?? ["---"]))
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
         .execute();
@@ -341,7 +349,7 @@ export type Services = Awaited<ReturnType<typeof getServices>>;
 export type ServiceStopsQueryInput = {
     serviceId: number;
     modes?: VehicleMode[];
-    busStopType?: string;
+    busStopType?: BusStopType[];
     stopTypes?: string[];
     adminAreaCodes?: string[];
 };
@@ -450,10 +458,10 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
                 .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
                 .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
         )
-        .$if(!!input.busStopType, (qb) =>
+        .$if(!!input.busStopType?.[0], (qb) =>
             qb
-                .where("toStop.busStopType", "=", input.busStopType ?? "---")
-                .where("fromStop.busStopType", "=", input.busStopType ?? "---"),
+                .where("toStop.busStopType", "in", input.busStopType ?? ["---"])
+                .where("fromStop.busStopType", "in", input.busStopType ?? ["---"]),
         )
         .orderBy("service_journey_pattern_links.orderInSequence")
         .orderBy("service_journey_pattern_links.journeyPatternId")

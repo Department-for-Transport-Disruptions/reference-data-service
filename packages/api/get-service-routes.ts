@@ -1,5 +1,12 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { getServiceStops, isValidMode, ServiceStop, ServiceStops, ServiceStopsQueryInput } from "./client";
+import {
+    getServiceStops,
+    isValidBusStopType,
+    isValidMode,
+    ServiceStop,
+    ServiceStops,
+    ServiceStopsQueryInput,
+} from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 import { flattenStops } from "./get-service-stops";
@@ -38,9 +45,23 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid mode provided");
     }
 
+    const busStopType = pathParameters?.busStopType || "";
+    const busStopTypeArray = busStopType
+        .split(",")
+        .filter((stop) => stop)
+        .map((busStopType) => busStopType.trim());
+
+    const filteredBusStopTypeArray = busStopTypeArray.filter(isValidBusStopType);
+
+    if (filteredBusStopTypeArray.length !== busStopTypeArray.length) {
+        throw new ClientError("Invalid bus stop type provided");
+    }
+
     return {
         serviceId: Number(serviceId),
-        ...(pathParameters?.busStopType ? { busStopType: pathParameters.busStopType } : {}),
+        ...(filteredBusStopTypeArray && filteredBusStopTypeArray.length > 0
+            ? { busStopType: filteredBusStopTypeArray }
+            : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
     };

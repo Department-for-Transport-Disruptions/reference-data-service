@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { getStops, StopsQueryInput } from "./client";
+import { getStops, isValidBusStopType, StopsQueryInput } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 import { getPolygon } from "./utils";
@@ -71,13 +71,27 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         .filter((stop) => stop)
         .map((stop) => stop.trim());
 
+    const busStopType = queryStringParameters?.busStopType || "";
+    const busStopTypeArray = busStopType
+        .split(",")
+        .filter((stop) => stop)
+        .map((busStopType) => busStopType.trim());
+
+    const filteredBusStopTypeArray = busStopTypeArray.filter(isValidBusStopType);
+
+    if (filteredBusStopTypeArray.length !== busStopTypeArray.length) {
+        throw new ClientError("Invalid bus stop type provided");
+    }
+
     return {
         ...(atcoCodes ? { atcoCodes: atcoCodesArray } : {}),
         ...(naptanCodes ? { naptanCodes: naptanCodesArray } : {}),
         ...(commonName ? { commonName } : {}),
         ...(adminAreaCodes ? { adminAreaCodes: adminAreaCodeArray } : {}),
         ...(sqlPolygon ? { polygon: sqlPolygon } : {}),
-        ...(queryStringParameters?.busStopType ? { busStopType: queryStringParameters?.busStopType } : {}),
+        ...(filteredBusStopTypeArray && filteredBusStopTypeArray.length > 0
+            ? { busStopType: filteredBusStopTypeArray }
+            : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         page: page - 1,
     };

@@ -2,7 +2,7 @@ import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
 import { formatStops, getQueryInput } from "./get-service-stops";
 import { stopsDbData } from "./test/testdata";
-import { VehicleMode } from "./client";
+import { VehicleMode, BusStopType } from "./client";
 
 describe("get-service-stops", () => {
     describe("input generation", () => {
@@ -21,7 +21,7 @@ describe("get-service-stops", () => {
                 pathParameters: {
                     serviceId: "234",
                     stopTypes: "BCT",
-                    busStopType: "MKD",
+                    busStopType: BusStopType.mkd,
                     modes: VehicleMode.bus,
                 },
             } as unknown as APIGatewayEvent;
@@ -29,7 +29,7 @@ describe("get-service-stops", () => {
             expect(getQueryInput(event)).toEqual({
                 serviceId: 234,
                 stopTypes: ["BCT"],
-                busStopType: "MKD",
+                busStopType: [BusStopType.mkd],
                 modes: [VehicleMode.bus],
             });
         });
@@ -50,6 +50,16 @@ describe("get-service-stops", () => {
             } as unknown as APIGatewayEvent;
 
             expect(() => getQueryInput(event)).toThrowError("Provided service ID is not valid");
+        });
+        it("throws a ClientError if invalid busStopType provided", () => {
+            const event = {
+                pathParameters: {
+                    serviceId: "234",
+                    busStopType: "invalid",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(() => getQueryInput(event)).toThrowError("Invalid bus stop type provided");
         });
     });
 
