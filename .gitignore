@@ -9,6 +9,7 @@ cdk.context.json
 
 # misc
 .DS_Store
+.idea
 
 # local env files
 .env*.local
