@@ -7,3 +7,5 @@
 !requirements.test.txt
 !tests
 !tests/**/*
+
+__pycache__

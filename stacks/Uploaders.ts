@@ -49,7 +49,7 @@ export function UploadersStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-txc-uploader-${stack.stage}`,
         handler: "packages/ref-data-uploaders/txc-uploader/index.main",
-        runtime: "python3.9",
+        runtime: "python3.10",
         timeout: 600,
         memorySize: 1024,
         reservedConcurrentExecutions: 40,

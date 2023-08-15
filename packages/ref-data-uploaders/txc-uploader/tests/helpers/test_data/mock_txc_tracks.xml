@@ -4847,20 +4847,6 @@
       <PrivateCode>LASO003-1</PrivateCode>
       <Description>Oakwood Avenue - Arrival Stand</Description>
       <RouteSectionRef>RS14</RouteSectionRef>
-      <RouteSectionRef>RS15</RouteSectionRef>
-      <RouteSectionRef>RS16</RouteSectionRef>
-      <RouteSectionRef>RS17</RouteSectionRef>
-      <RouteSectionRef>RS18</RouteSectionRef>
-      <RouteSectionRef>RS19</RouteSectionRef>
-      <RouteSectionRef>RS20</RouteSectionRef>
-      <RouteSectionRef>RS21</RouteSectionRef>
-      <RouteSectionRef>RS22</RouteSectionRef>
-      <RouteSectionRef>RS23</RouteSectionRef>
-      <RouteSectionRef>RS24</RouteSectionRef>
-      <RouteSectionRef>RS25</RouteSectionRef>
-      <RouteSectionRef>RS26</RouteSectionRef>
-      <RouteSectionRef>RS27</RouteSectionRef>
-      <RouteSectionRef>RS28</RouteSectionRef>
     </Route>
     <Route id="RT4" CreationDateTime="2022-11-02T15:26:57" Modification="new" RevisionNumber="0">
       <PrivateCode>LASO003-3</PrivateCode>
