@@ -204,6 +204,14 @@ export interface LocalitiesTable {
     revisionNumber: string | null;
     modification: string | null;
 }
+
+export interface TracksTable {
+    id: Generated<number>;
+    operatorServiceId: number;
+    longitude: string;
+    latitude: string;
+}
+
 export interface Database {
     stops: StopsTable;
     stops_new?: StopsTable;
@@ -235,6 +243,9 @@ export interface Database {
     vehicle_journeys: VehicleJourneysTable;
     vehicle_journeys_new?: VehicleJourneysTable;
     vehicle_journeys_old?: VehicleJourneysTable;
+    tracks: TracksTable;
+    tracks_new?: TracksTable;
+    tracks_old?: TracksTable;
 }
 
 export type Tables =
@@ -247,7 +258,8 @@ export type Tables =
     | "service_journey_pattern_links"
     | "service_admin_area_codes"
     | "localities"
-    | "vehicle_journeys";
+    | "vehicle_journeys"
+    | "tracks";
 export type TablesNew =
     | "stops_new"
     | "operator_lines_new"
@@ -258,7 +270,8 @@ export type TablesNew =
     | "service_journey_pattern_links_new"
     | "service_admin_area_codes_new"
     | "localities_new"
-    | "vehicle_journeys_new";
+    | "vehicle_journeys_new"
+    | "tracks_new";
 export type TablesOld =
     | "stops_old"
     | "operator_lines_old"
@@ -269,7 +282,8 @@ export type TablesOld =
     | "service_journey_pattern_links_old"
     | "service_admin_area_codes_old"
     | "localities_old"
-    | "vehicle_journeys_old";
+    | "vehicle_journeys_old"
+    | "tracks_old";
 
 export const getDbClient = () => {
     const { DATABASE_NAME: dbName, DATABASE_SECRET_ARN: secretArn, DATABASE_RESOURCE_ARN: resourceArn } = process.env;

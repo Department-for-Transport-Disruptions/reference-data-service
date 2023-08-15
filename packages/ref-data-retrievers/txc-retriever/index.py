@@ -47,6 +47,8 @@ queries = [
     "CREATE TABLE service_admin_area_codes_new LIKE service_admin_area_codes",
     "DROP TABLE IF EXISTS vehicle_journeys_new",
     "CREATE TABLE vehicle_journeys_new LIKE vehicle_journeys",
+    "DROP TABLE IF EXISTS tracks_new",
+    "CREATE TABLE tracks_new LIKE tracks",
     "DROP TABLE IF EXISTS services_new",
     "CREATE TABLE services_new LIKE services",
     "SET FOREIGN_KEY_CHECKS=1"

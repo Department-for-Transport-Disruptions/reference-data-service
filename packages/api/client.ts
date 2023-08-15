@@ -1,6 +1,7 @@
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { Database } from "@reference-data-service/core/db";
+import { Track } from "./get-service-routes";
 
 export enum VehicleMode {
     bus = "bus",
@@ -340,13 +341,17 @@ export type Services = Awaited<ReturnType<typeof getServices>>;
 
 export type ServiceStopsQueryInput = {
     serviceId: number;
+    includeTracks?: boolean;
     modes?: VehicleMode[];
     busStopType?: string;
     stopTypes?: string[];
     adminAreaCodes?: string[];
 };
 
-export const getServiceStops = async (dbClient: Kysely<Database>, input: ServiceStopsQueryInput) => {
+export const getServiceStops = async (
+    dbClient: Kysely<Database>,
+    input: ServiceStopsQueryInput,
+): Promise<ServiceStops> => {
     logger.info("Starting getServiceStops...");
 
     const [dataSourceResult] = await dbClient
@@ -356,7 +361,10 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .execute();
 
     if (!dataSourceResult) {
-        return [];
+        return {
+            stops: [],
+            tracks: [],
+        };
     }
 
     const journeyPatternRefsResult = await dbClient
@@ -374,7 +382,10 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .execute();
 
     if (!journeyPatternRefsResult?.length) {
-        return [];
+        return {
+            stops: [],
+            tracks: [],
+        };
     }
 
     const journeyPatternRefs = journeyPatternRefsResult.map((ref) => ref.journeyPatternRef);
@@ -459,11 +470,23 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
         .orderBy("service_journey_pattern_links.journeyPatternId")
         .execute();
 
-    return stops;
+    let tracks: { longitude: string; latitude: string }[] = [];
+
+    if (input.includeTracks) {
+        tracks = await dbClient
+            .selectFrom("tracks")
+            .select(["longitude", "latitude"])
+            .where("operatorServiceId", "=", input.serviceId)
+            .execute();
+    }
+
+    return {
+        stops,
+        tracks,
+    };
 };
 
-// Unable to use Awaited due to error: Type instantiation is excessively deep and possibly infinite.
-export type ServiceStops = {
+export type Stop = {
     serviceId: number;
     dataSource: "bods" | "tnds";
     fromId: number;
@@ -505,7 +528,13 @@ export type ServiceStops = {
     journeyPatternId: number;
     orderInSequence: number;
     direction: string | null;
-}[];
+};
+
+// Unable to use Awaited due to error: Type instantiation is excessively deep and possibly infinite.
+export type ServiceStops = {
+    stops: Stop[];
+    tracks: Track[];
+};
 
 export type ServicesByStopsQueryInput = {
     dataSource: DataSource;

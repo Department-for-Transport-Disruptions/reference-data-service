@@ -1,9 +1,9 @@
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import ANY, patch, MagicMock
 
 import boto3
 
-from txc_uploader.txc_processor import (
+from txc_processor import (
     download_from_s3_and_write_to_db,
     extract_data_for_txc_operator_service_table,
     collect_journey_pattern_section_refs_and_info,
@@ -16,6 +16,8 @@ from txc_uploader.txc_processor import (
 
 from tests.helpers import test_xml_helpers
 from tests.helpers.test_data import test_data
+
+
 
 logger = MagicMock()
 mock_data_dict = test_xml_helpers.generate_mock_data_dict()
@@ -46,8 +48,8 @@ class TestFileHasUsableData:
 
 
 class TestDatabaseInsertQuerying:
-    @patch("txc_uploader.txc_processor.insert_into_txc_journey_pattern_table")
-    @patch("txc_uploader.txc_processor.insert_into_txc_journey_pattern_link_table")
+    @patch("txc_processor.insert_into_txc_journey_pattern_table")
+    @patch("txc_processor.insert_into_txc_journey_pattern_link_table")
     def test_insert_methods_are_called_correct_number_of_times(
         self, mock_jp_insert, mock_jpl_insert
     ):
@@ -57,7 +59,7 @@ class TestDatabaseInsertQuerying:
         mock_cursor = MagicMock()
         mock_op_service_id = 12
         iterate_through_journey_patterns_and_run_insert_queries(
-            mock_cursor, mock_data_dict, mock_op_service_id, service
+            mock_cursor, mock_data_dict, mock_op_service_id, service, logger, "JP4"
         )
 
         assert mock_jp_insert.call_count == len(mock_journey_patterns)
@@ -136,7 +138,7 @@ class TestDataCollectionFunctionality:
 
 
 class TestMainFunctionality:
-    @patch("txc_uploader.txc_processor.write_to_database")
+    @patch("txc_processor.write_to_database")
     def test_integration_between_s3_download_and_database_write_functionality(
         self, db_patch, s3, cloudwatch
     ):
@@ -147,12 +149,12 @@ class TestMainFunctionality:
         db_connection = MagicMock()
         conn = boto3.resource("s3", region_name="eu-west-2")
         # pylint: disable=no-member
-        conn.create_bucket(Bucket=mock_bucket)
+        conn.create_bucket(Bucket=mock_bucket, CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'})
         s3.put_object(Bucket=mock_bucket, Key=mock_key, Body=open(mock_file_dir, "rb"))
 
         download_from_s3_and_write_to_db(
             s3, cloudwatch, mock_bucket, mock_key, mock_file_dir, db_connection, logger
         )
         db_patch.assert_called_once_with(
-            mock_data_dict, "WM", "tnds", mock_key, db_connection, logger, cloudwatch
+            ANY, "WM", "tnds", mock_key, db_connection, logger, cloudwatch
         )

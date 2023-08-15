@@ -4,6 +4,11 @@ import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 import { flattenStops } from "./get-service-stops";
 
+export type Track = {
+    longitude: string;
+    latitude: string;
+};
+
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     executeClient(event, getQueryInput, getServiceStops, formatStopsRoutes);
 
@@ -40,6 +45,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
 
     return {
         serviceId: Number(serviceId),
+        includeTracks: true,
         ...(pathParameters?.busStopType ? { busStopType: pathParameters.busStopType } : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
@@ -68,12 +74,13 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
 };
 
 export const formatStopsRoutes = async (
-    stops: ServiceStops,
+    route: ServiceStops,
     // eslint-disable-next-line @typescript-eslint/require-await
-): Promise<{ outbound: ServiceStop[]; inbound: ServiceStop[] }> => {
-    const flattenedStops = flattenStops(stops);
+): Promise<{ outbound: ServiceStop[]; inbound: ServiceStop[]; tracks: Track[] }> => {
+    const flattenedStops = flattenStops(route.stops);
 
     const outbound = filterStops(flattenedStops, "outbound");
     const inbound = filterStops(flattenedStops, "inbound");
-    return { outbound, inbound };
+
+    return { outbound, inbound, tracks: route.tracks };
 };

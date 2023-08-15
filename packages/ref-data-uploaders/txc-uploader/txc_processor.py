@@ -1,3 +1,4 @@
+import itertools
 from typing import Optional
 
 import aurora_data_api
@@ -177,6 +178,7 @@ def process_journey_pattern_sections(
                                 "RunTime", None
                             ),
                             "to_sequence_number": link_to.get("@SequenceNumber"),
+                            "route_link_ref": raw_journey_pattern_timing_link.get("RouteLinkRef", None),
                         }
                         journey_pattern_timing_links.append(journey_pattern_timing_link)
 
@@ -213,10 +215,12 @@ def collect_journey_patterns(data: dict, service: dict):
 
 
 def iterate_through_journey_patterns_and_run_insert_queries( 
-    cursor, data: dict, operator_service_id: str, service: dict, logger
+    cursor, data: dict, operator_service_id: str, service: dict, logger, journey_pattern_to_use: str
 ):
     journey_patterns = collect_journey_patterns(data, service)
     admin_area_codes = set()
+    route_ref_for_tracks = None
+    link_refs_for_tracks = None
     for journey_pattern in journey_patterns:
         journey_pattern_info = journey_pattern["journey_pattern_info"]
         journey_pattern_section_refs: list = journey_pattern["journey_pattern_section_refs"]
@@ -242,9 +246,17 @@ def iterate_through_journey_patterns_and_run_insert_queries(
         insert_into_txc_journey_pattern_link_table(cursor, links, journey_pattern_id)
 
         admin_area_codes.update(get_admin_area_codes(cursor, stop_codes))
+        
+        if (journey_pattern_to_use is not None and journey_pattern_to_use == journey_pattern_info["journey_pattern_ref"]):
+            route_ref_for_tracks = journey_pattern_info["route_ref"]
+            link_refs_for_tracks = list(map(lambda link : link.get("route_link_ref", None), links))
     
     if admin_area_codes:
         insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
+        
+    return route_ref_for_tracks, link_refs_for_tracks
+        
+    
 
 def insert_admin_area_codes(cursor: aurora_data_api.AuroraDataAPICursor, area_codes, service_id):
     codes_dict = {f"k{k}":v for k,v in enumerate(area_codes)}
@@ -486,6 +498,76 @@ def check_file_has_usable_data(data: dict, service: dict) -> bool:
         and journey_pattern_sections_has_journey_pattern_section(data)
         and all_journey_pattern_sections_are_not_empty(data, service)
     )
+    
+    
+def insert_into_txc_tracks_table(
+    cursor: aurora_data_api.AuroraDataAPICursor, tracks, operator_service_id
+):
+    values = [
+        {
+            "operator_service_id": operator_service_id,
+            "longitude": track["longitude"],
+            "latitude": track["latitude"],
+        }
+        for track in tracks
+    ]
+
+    query = """INSERT INTO tracks_new (operatorServiceId, longitude, latitude) VALUES (:operator_service_id, :longitude, :latitude)"""
+    cursor.executemany(query, values)
+    
+    
+def collect_track_data(route_sections, route_section_ref, link_refs):
+    routes = []
+    route_section = next((item for item in route_sections if item["@id"] == route_section_ref), None)
+    
+    if route_section is not None:
+        route_links = route_section.get("RouteLink", None)
+        
+        if route_links is not None:
+            route_links_list = make_list(route_links)
+
+            for link_ref in link_refs:
+                route_link = next((item for item in route_links_list if item["@id"] == link_ref), None)
+                trackData = route_link.get("Track", None)
+
+                if trackData is not None:
+                    tracks = trackData if isinstance(trackData, list) else [trackData]
+                    for track in tracks:
+                        mapping = track["Mapping"]
+                        if mapping is not None:
+                            locations = make_list(mapping["Location"])
+                            if locations is not None:
+                                for location in locations:
+                                    translation = location.get("Translation", None)
+                                    if translation is None:
+                                        longitude = location["Longitude"]
+                                        latitude = location["Latitude"]
+                                    else:
+                                        longitude = translation["Longitude"]
+                                        latitude = translation["Latitude"]
+                                    route = {
+                                        "longitude": longitude,
+                                        "latitude": latitude,
+                                    }
+                                    routes.append(route)
+                            
+    clean_routes = [k for k,g in itertools.groupby(routes)]
+
+    return clean_routes
+    
+    
+def select_route_and_run_insert_query(
+    cursor, data: dict, operator_service_id: str, route_ref: str, link_refs: list
+):
+    routes = None if data["TransXChange"].get("Routes", None) is None else make_list(data["TransXChange"]["Routes"]["Route"])
+    route_sections = None if data["TransXChange"].get("RouteSections", None) is None else make_list(data["TransXChange"]["RouteSections"]["RouteSection"])
+    
+    if routes is not None:
+        route_section_ref = next((item for item in routes if item["@id"] == route_ref), None).get("RouteSectionRef", None)
+        
+        if route_section_ref is not None:
+            tracks = collect_track_data(route_sections, route_section_ref, link_refs)
+            insert_into_txc_tracks_table(cursor, tracks, operator_service_id)
 
 
 def write_to_database(
@@ -539,8 +621,28 @@ def write_to_database(
                     continue
 
                 file_has_vehicle_journeys = True
+                
+                vehicle_journeys_data = []
+                journey_pattern_count = {}
+                for vehicle in vehicle_journeys:
+                    if not valid_noc:
+                        break
+                    
+                    journey_pattern_ref = vehicle["JourneyPatternRef"] if "JourneyPatternRef" in vehicle else None
+                    
+                    if journey_pattern_ref not in journey_pattern_count:
+                        if journey_pattern_ref is not None: 
+                            journey_pattern_count[journey_pattern_ref] = 1
+                    else:
+                        journey_pattern_count[journey_pattern_ref] += 1
+
+                    vehicle_journeys_data.append(collect_vehicle_journey(vehicle))
+                    
+                journey_pattern_to_use = max(journey_pattern_count) if journey_pattern_count else None
             
                 for service in services:
+                    route_ref_for_tracks = None
+                    link_refs_for_tracks = None
                     if not valid_noc:
                         break
 
@@ -551,7 +653,9 @@ def write_to_database(
                         )
                         continue
                     file_has_lines = True
-
+                    
+                    operator_service_id = None
+                    
                     for line in lines:
                         operator_service_id = check_txc_line_exists(
                             cursor,
@@ -583,24 +687,24 @@ def write_to_database(
                             data, service
                         )
                         if file_has_useable_data:
-                            iterate_through_journey_patterns_and_run_insert_queries(
+                            route_ref_for_tracks, link_refs_for_tracks = iterate_through_journey_patterns_and_run_insert_queries(
                                 cursor,
                                 data,
                                 operator_service_id,
                                 service,
-                                logger
+                                logger,
+                                journey_pattern_to_use
                             )
+                            
+                    if route_ref_for_tracks and link_refs_for_tracks:
+                        select_route_and_run_insert_query(
+                            cursor, data, operator_service_id, route_ref_for_tracks, link_refs_for_tracks
+                        )
 
-                vehicle_journeys_data = []
-                for vehicle in vehicle_journeys:
-                    if not valid_noc:
-                        break
 
-                    vehicle_journeys_data.append(collect_vehicle_journey(vehicle))
                 insert_into_txc_vehicle_journey_table(
                     cursor, vehicle_journeys_data,
-                )
-                
+                )                
 
             if not file_has_nocs:
                 db_connection.rollback()

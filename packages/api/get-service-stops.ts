@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { getServiceStops, isValidMode, ServiceStop, ServiceStops, ServiceStopsQueryInput, Stops } from "./client";
+import { getServiceStops, isValidMode, ServiceStop, ServiceStops, ServiceStopsQueryInput, Stop, Stops } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 
@@ -58,7 +58,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
     };
 };
 
-export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
+export const flattenStops = (stops: Stop[]): ServiceStop[] => {
     return stops.flatMap((stop) => {
         const stopArray: ServiceStop[] = [];
         if (stop.fromStatus === "active") {
@@ -116,8 +116,8 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/require-await
-export const formatStops = async (stops: ServiceStops): Promise<Stops> => {
-    return flattenStops(stops).filter(
+export const formatStops = async (route: ServiceStops): Promise<Stops> => {
+    return flattenStops(route.stops).filter(
         (flattenedStop, index, self) => index === self.findIndex((stop) => stop.atcoCode === flattenedStop.atcoCode),
     );
 };

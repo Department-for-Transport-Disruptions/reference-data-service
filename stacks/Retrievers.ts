@@ -165,6 +165,7 @@ export function RetrieversStack({ stack }: StackContext) {
                 resources: ["*"],
             }),
         ],
+        enableLiveDev: false,
     });
 
     const bodsRetriever = new Function(stack, "ref-data-service-bods-retriever", {
@@ -203,6 +204,7 @@ export function RetrieversStack({ stack }: StackContext) {
                 resources: ["*"],
             }),
         ],
+        enableLiveDev: false,
     });
 
     const txcRetrieverSchedule: { [key: string]: Schedule } = {
@@ -246,6 +248,7 @@ export function RetrieversStack({ stack }: StackContext) {
                 resources: ["*"],
             }),
         ],
+        enableLiveDev: false,
     });
 
     txcZippedBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(unzipper));
