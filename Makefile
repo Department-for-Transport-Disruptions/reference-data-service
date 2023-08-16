@@ -14,6 +14,7 @@ install-deps:
 		python3 -m venv venv; \
 		. venv/bin/activate; \
 		pip install -r packages/ref-data-retrievers/txc-retriever/requirements.txt --target packages/ref-data-retrievers/txc-retriever/; \
+		pip install -r packages/ref-data-retrievers/txc-unzipper/requirements.txt --target packages/ref-data-retrievers/txc-unzipper/; \
 		pip install -r packages/ref-data-uploaders/txc-uploader/requirements.txt --target packages/ref-data-uploaders/txc-uploader/; \
 		rm -rf venv; \
 	)
@@ -41,7 +42,9 @@ test-bods-uploader: cleardown-txc-tables upload-bods-file
 test-tnds-uploader: cleardown-txc-tables upload-tnds-file
 
 upload-bods-file:
+	aws s3 rm s3://ref-data-service-txc-data-$(stage)/bods/test.xml
 	aws s3 sync ./test-data/bods s3://ref-data-service-txc-data-$(stage)/bods
 
 upload-tnds-file:
+	aws s3 rm s3://ref-data-service-txc-data-$(stage)/tnds/test.xml
 	aws s3 sync ./test-data/tnds s3://ref-data-service-txc-data-$(stage)/tnds

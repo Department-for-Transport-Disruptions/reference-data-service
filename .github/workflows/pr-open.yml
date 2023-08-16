@@ -14,8 +14,13 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.15.x'
+          node-version: '18.17.x'
           cache: 'npm'
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10.12
 
       - name: Install packages
         run: npm ci
@@ -25,3 +30,10 @@ jobs:
 
       - name: Test API
         run: npm run test:unit -w @reference-data-service/api
+
+      - name: Test reference data uploaders
+        run: |
+          cd packages/ref-data-uploaders/txc-uploader
+          pip install -r requirements.test.txt
+          echo "Running tests..."
+          python3 -m pytest tests/

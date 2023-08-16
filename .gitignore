@@ -14,3 +14,5 @@ cdk.context.json
 
 # local env files
 .env*.local
+
+__pycache__

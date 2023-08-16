@@ -4,7 +4,7 @@ STAGE=$(cat .sst/stage)
 DB_CLUSTER_ARN=$(aws rds describe-db-clusters | jq -r --arg stage $STAGE '.DBClusters[] | select(.TagList[] | select((.Key=="sst:stage") and (.Value==$stage))).DBClusterArn')
 SECRET_ARN=$(aws secretsmanager list-secrets | jq -r --arg stage $STAGE '.SecretList[] | select(.Tags[]? | select(.Key=="sst:stage" and .Value==$stage))' | jq -r '. | select(.Tags[]? | select(.Key=="sst:app" and .Value=="reference-data-service"))'.ARN)
 
-declare -a arr=("service_journey_pattern_links" "service_admin_area_codes" "vehicle_journeys" "service_journey_patterns" "services")
+declare -a arr=("service_journey_pattern_links" "service_admin_area_codes" "vehicle_journeys" "service_journey_patterns" "tracks" "services")
 
 echo "Clearing down TXC tables..."
 

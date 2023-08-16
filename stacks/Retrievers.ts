@@ -135,7 +135,7 @@ export function RetrieversStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-tnds-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/txc-retriever/index.main",
-        runtime: "python3.9",
+        runtime: "python3.10",
         timeout: 900,
         memorySize: 3008,
         environment: {
@@ -165,13 +165,14 @@ export function RetrieversStack({ stack }: StackContext) {
                 resources: ["*"],
             }),
         ],
+        enableLiveDev: false,
     });
 
     const bodsRetriever = new Function(stack, "ref-data-service-bods-retriever", {
         bind: [cluster],
         functionName: `ref-data-service-bods-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/txc-retriever/index.main",
-        runtime: "python3.9",
+        runtime: "python3.10",
         timeout: 900,
         memorySize: 3008,
         environment: {
@@ -203,6 +204,7 @@ export function RetrieversStack({ stack }: StackContext) {
                 resources: ["*"],
             }),
         ],
+        enableLiveDev: false,
     });
 
     const txcRetrieverSchedule: { [key: string]: Schedule } = {
@@ -224,7 +226,7 @@ export function RetrieversStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-txc-unzipper-${stack.stage}`,
         handler: "packages/ref-data-retrievers/txc-unzipper/index.main",
-        runtime: "python3.9",
+        runtime: "python3.10",
         timeout: 900,
         memorySize: 1024,
         retryAttempts: 0,
@@ -246,6 +248,7 @@ export function RetrieversStack({ stack }: StackContext) {
                 resources: ["*"],
             }),
         ],
+        enableLiveDev: false,
     });
 
     txcZippedBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(unzipper));
