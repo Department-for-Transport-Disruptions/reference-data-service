@@ -6,6 +6,7 @@ import {
     ServiceStop,
     ServiceStops,
     ServiceStopsQueryInput,
+    ServiceTracks,
 } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
@@ -64,6 +65,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
             : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
+        useTracks: true,
     };
 };
 
@@ -89,12 +91,16 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
 };
 
 export const formatStopsRoutes = async (
-    stops: ServiceStops,
+    stops: ServiceStops | ServiceTracks,
     // eslint-disable-next-line @typescript-eslint/require-await
-): Promise<{ outbound: ServiceStop[]; inbound: ServiceStop[] }> => {
-    const flattenedStops = flattenStops(stops);
+): Promise<{ outbound: ServiceStop[] | ServiceTracks; inbound: ServiceStop[] }> => {
+    if ((stops as ServiceStops)?.[0]?.dataSource) {
+        const flattenedStops = flattenStops(stops as ServiceStops);
 
-    const outbound = filterStops(flattenedStops, "outbound");
-    const inbound = filterStops(flattenedStops, "inbound");
-    return { outbound, inbound };
+        const outbound = filterStops(flattenedStops, "outbound");
+        const inbound = filterStops(flattenedStops, "inbound");
+        return { outbound, inbound };
+    } else {
+        return { outbound: stops as ServiceTracks, inbound: [] };
+    }
 };
