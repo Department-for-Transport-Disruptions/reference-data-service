@@ -352,10 +352,26 @@ export type ServiceStopsQueryInput = {
     busStopTypes?: BusStopType[];
     stopTypes?: string[];
     adminAreaCodes?: string[];
+    useTracks?: boolean;
 };
 
-export const getServiceStops = async (dbClient: Kysely<Database>, input: ServiceStopsQueryInput) => {
+export const getServiceStops = async (
+    dbClient: Kysely<Database>,
+    input: ServiceStopsQueryInput,
+): Promise<ServiceStops | ServiceTracks> => {
     logger.info("Starting getServiceStops...");
+
+    if (input.useTracks) {
+        const tracks = await dbClient
+            .selectFrom("tracks")
+            .select(["operatorServiceId as serviceId", "longitude", "latitude"])
+            .where("tracks.operatorServiceId", "=", input.serviceId)
+            .execute();
+
+        if (tracks && tracks.length > 0) {
+            return tracks;
+        }
+    }
 
     const [dataSourceResult] = await dbClient
         .selectFrom("services")
@@ -469,6 +485,12 @@ export const getServiceStops = async (dbClient: Kysely<Database>, input: Service
 
     return stops;
 };
+
+export type ServiceTracks = {
+    serviceId: number;
+    longitude: string;
+    latitude: string;
+}[];
 
 // Unable to use Awaited due to error: Type instantiation is excessively deep and possibly infinite.
 export type ServiceStops = {

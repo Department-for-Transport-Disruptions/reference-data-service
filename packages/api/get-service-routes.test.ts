@@ -2,7 +2,7 @@ import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
 import { formatStopsRoutes, getQueryInput } from "./get-service-routes";
 import { stopsDbData } from "./test/testdata";
-import { BusStopType, ServiceStop, VehicleMode } from "./client";
+import { BusStopType, ServiceStop, ServiceTracks, VehicleMode } from "./client";
 
 describe("get-service-routes", () => {
     describe("input generation", () => {
@@ -10,10 +10,11 @@ describe("get-service-routes", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
+                    useTracks: true,
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ serviceId: 234 });
+            expect(getQueryInput(event)).toEqual({ serviceId: 234, useTracks: true });
         });
 
         it("throws a ClientError if no serviceId provided", () => {
@@ -31,6 +32,7 @@ describe("get-service-routes", () => {
                     stopTypes: "BCT",
                     busStopTypes: BusStopType.MKD,
                     modes: VehicleMode.bus,
+                    useTracks: true,
                 },
             } as unknown as APIGatewayEvent;
 
@@ -39,6 +41,7 @@ describe("get-service-routes", () => {
                 stopTypes: ["BCT"],
                 busStopTypes: [BusStopType.MKD],
                 modes: [VehicleMode.bus],
+                useTracks: true,
             });
         });
 
@@ -46,6 +49,7 @@ describe("get-service-routes", () => {
             const event = {
                 pathParameters: {
                     serviceId: "abc",
+                    useTracks: true,
                 },
             } as unknown as APIGatewayEvent;
 
@@ -56,6 +60,7 @@ describe("get-service-routes", () => {
                 pathParameters: {
                     serviceId: "234",
                     busStopTypes: "invalid",
+                    useTracks: true,
                 },
             } as unknown as APIGatewayEvent;
 
@@ -65,9 +70,8 @@ describe("get-service-routes", () => {
 
     describe("format service", () => {
         it("correctly formats db response", async () => {
-            const formattedService: { outbound: ServiceStop[]; inbound: ServiceStop[] } = await formatStopsRoutes(
-                stopsDbData,
-            );
+            const formattedService: { outbound: ServiceStop[] | ServiceTracks; inbound: ServiceStop[] } =
+                await formatStopsRoutes(stopsDbData);
 
             expect(formattedService).toMatchSnapshot();
         });
