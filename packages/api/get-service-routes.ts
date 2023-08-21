@@ -90,17 +90,20 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
     );
 };
 
+const isServiceStops = (stops: ServiceStops | ServiceTracks): stops is ServiceStops =>
+    !!(stops as ServiceStops)[0]?.dataSource;
+
 export const formatStopsRoutes = async (
     stops: ServiceStops | ServiceTracks,
     // eslint-disable-next-line @typescript-eslint/require-await
 ): Promise<{ outbound: ServiceStop[] | ServiceTracks; inbound: ServiceStop[] }> => {
-    if ((stops as ServiceStops)?.[0]?.dataSource) {
-        const flattenedStops = flattenStops(stops as ServiceStops);
+    if (isServiceStops(stops)) {
+        const flattenedStops = flattenStops(stops);
 
         const outbound = filterStops(flattenedStops, "outbound");
         const inbound = filterStops(flattenedStops, "inbound");
         return { outbound, inbound };
     } else {
-        return { outbound: stops as ServiceTracks, inbound: [] };
+        return { outbound: stops, inbound: [] };
     }
 };

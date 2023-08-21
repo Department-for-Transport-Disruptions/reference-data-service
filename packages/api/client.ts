@@ -361,14 +361,16 @@ export const getServiceStops = async (
 ): Promise<ServiceStops | ServiceTracks> => {
     logger.info("Starting getServiceStops...");
 
-    const tracks = await dbClient
-        .selectFrom("tracks")
-        .select(["operatorServiceId as serviceId", "longitude", "latitude"])
-        .where("tracks.operatorServiceId", "=", input.serviceId)
-        .execute();
+    if (input.useTracks) {
+        const tracks = await dbClient
+            .selectFrom("tracks")
+            .select(["operatorServiceId as serviceId", "longitude", "latitude"])
+            .where("tracks.operatorServiceId", "=", input.serviceId)
+            .execute();
 
-    if (tracks && tracks.length > 0 && input.useTracks) {
-        return tracks;
+        if (tracks && tracks.length > 0) {
+            return tracks;
+        }
     }
 
     const [dataSourceResult] = await dbClient
