@@ -131,7 +131,7 @@ jobs:
           npm run sst -- deploy --stage preprod
 
   create_draft_release:
-    needs: ['deploy_to_test']
+    needs: ['deploy_to_preprod']
     name: Create draft release
     runs-on: ubuntu-22.04
     permissions:
