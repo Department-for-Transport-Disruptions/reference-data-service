@@ -28,6 +28,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test TypeScript compiles
+        run: npm run tsc:build
+
       - name: Test API
         run: npm run test:unit -w @reference-data-service/api
 

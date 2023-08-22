@@ -11,6 +11,7 @@ import {
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 import { flattenStops } from "./get-service-stops";
+import { isServiceStops } from "./utils";
 
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     executeClient(event, getQueryInput, getServiceStops, formatStopsRoutes);
@@ -89,9 +90,6 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
             .filter((stop, i) => (i > 0 ? stop.atcoCode !== sortedStops[i - 1].atcoCode : true))
     );
 };
-
-const isServiceStops = (stops: ServiceStops | ServiceTracks): stops is ServiceStops =>
-    !!(stops as ServiceStops)[0]?.dataSource;
 
 export const formatStopsRoutes = async (
     stops: ServiceStops | ServiceTracks,

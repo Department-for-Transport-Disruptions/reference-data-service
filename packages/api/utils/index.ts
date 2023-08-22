@@ -1,6 +1,7 @@
 import { getAreaOfPolygon } from "geolib";
 import { z } from "zod";
 import { ClientError } from "../error";
+import { ServiceStops, ServiceTracks } from "../client";
 
 export const notEmpty = <T>(value: T | null | undefined): value is T => value !== null && value !== undefined;
 
@@ -31,3 +32,6 @@ export const getPolygon = (polygon: string, maxArea: number): string => {
 
     return `POLYGON((${formatPolygon(parsedPolygon)}))`;
 };
+
+export const isServiceStops = (stops: ServiceStops | ServiceTracks): stops is ServiceStops =>
+    !!(stops as ServiceStops)[0]?.dataSource;

@@ -6,10 +6,12 @@ import {
     ServiceStop,
     ServiceStops,
     ServiceStopsQueryInput,
+    ServiceTracks,
     Stops,
 } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
+import { isServiceStops } from "./utils";
 
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     executeClient(event, getQueryInput, getServiceStops, formatStops);
@@ -138,7 +140,11 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/require-await
-export const formatStops = async (stops: ServiceStops): Promise<Stops> => {
+export const formatStops = async (stops: ServiceStops | ServiceTracks): Promise<Stops> => {
+    if (!isServiceStops(stops)) {
+        return [];
+    }
+
     return flattenStops(stops).filter(
         (flattenedStop, index, self) => index === self.findIndex((stop) => stop.atcoCode === flattenedStop.atcoCode),
     );
