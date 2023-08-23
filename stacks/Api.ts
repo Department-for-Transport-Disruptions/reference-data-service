@@ -148,6 +148,21 @@ export function ApiStack({ stack }: StackContext) {
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
+    const adminAreasFunction = new Function(stack, "ref-data-service-get-admin-areas-function", {
+        bind: [cluster],
+        functionName: `ref-data-service-get-admin-areas-function-${stack.stage}`,
+        handler: "packages/api/get-admin-areas.main",
+        timeout: 10,
+        memorySize: 512,
+        environment: {
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
+        },
+        runtime: "nodejs18.x",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+    });
+
     const subDomain = ["test", "preprod", "prod"].includes(stack.stage) ? "api" : `api.${stack.stage}`;
 
     const allowedOrigins = [
@@ -169,6 +184,7 @@ export function ApiStack({ stack }: StackContext) {
             "GET /services/{serviceId}/stops": serviceStopsFunction,
             "GET /services/{serviceId}/routes": serviceRoutesFunction,
             "GET /area-codes": areaCodeFunction,
+            "GET /admin-areas": adminAreasFunction,
         },
         customDomain: {
             domainName: `${subDomain}.${hostedZone.zoneName}`,

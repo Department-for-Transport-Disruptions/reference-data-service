@@ -31,10 +31,11 @@ jobs:
       - name: Test TypeScript compiles
         run: npm run tsc:build
 
-      - name: Test API
-        run: npm run test:unit -w @reference-data-service/api
+      - name: Tests Node.js
+        run: |
+          npm run test
 
-      - name: Test reference data uploaders
+      - name: Tests Python
         run: |
           cd packages/ref-data-uploaders/txc-uploader
           pip install -r requirements.test.txt

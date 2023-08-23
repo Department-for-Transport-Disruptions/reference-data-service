@@ -26,7 +26,7 @@ export const main = async () => {
             throw new Error("Missing env vars - DATA_URL, CONTENT_TYPE and BUCKET_NAME must be set");
         }
 
-        logger.info(`Starting CSV Retriever`);
+        logger.info(`Starting Data Retriever`);
 
         const response = await axios.get(dataUrl, {
             responseType: "arraybuffer",
@@ -78,7 +78,7 @@ export const main = async () => {
             return {
                 statusCode: 500,
                 body: JSON.stringify({
-                    error: "There was a problem with the csv retriever",
+                    error: "There was a problem with the data retriever",
                 }),
             };
         }
@@ -86,7 +86,7 @@ export const main = async () => {
         return {
             statusCode: 500,
             body: JSON.stringify({
-                error: "There was a problem with the csv retriever",
+                error: "There was a problem with the data retriever",
             }),
         };
     }

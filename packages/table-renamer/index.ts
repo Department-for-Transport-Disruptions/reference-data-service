@@ -40,6 +40,7 @@ export const main = async () => {
             await checkReferenceDataImportHasCompleted("stops", dbClient);
             await checkReferenceDataImportHasCompleted("services", dbClient);
             await checkReferenceDataImportHasCompleted("localities", dbClient);
+            await checkReferenceDataImportHasCompleted("nptg_admin_areas", dbClient);
 
             await deleteAndRenameTables(dbClient);
         } else {
@@ -118,6 +119,7 @@ const tables = [
     "localities",
     "vehicle_journeys",
     "tracks",
+    "nptg_admin_areas",
 ];
 
 export const deleteAndRenameTables = async (db: Kysely<Database>): Promise<void> => {

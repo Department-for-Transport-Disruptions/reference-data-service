@@ -1,6 +1,7 @@
 import { RDSData } from "@aws-sdk/client-rds-data";
 import { Generated, Kysely } from "kysely";
 import { DataApiDialect } from "kysely-data-api";
+import * as logger from "lambda-log";
 
 export interface StopsTable {
     id: number;
@@ -212,6 +213,14 @@ export interface TracksTable {
     latitude: string;
 }
 
+export interface NptgAdminAreasTable {
+    id: Generated<number>;
+    administrativeAreaCode: string;
+    atcoAreaCode: string | null;
+    name: string | null;
+    shortName: string | null;
+}
+
 export interface Database {
     stops: StopsTable;
     stops_new?: StopsTable;
@@ -246,6 +255,9 @@ export interface Database {
     tracks: TracksTable;
     tracks_new?: TracksTable;
     tracks_old?: TracksTable;
+    nptg_admin_areas: NptgAdminAreasTable;
+    nptg_admin_areas_new?: NptgAdminAreasTable;
+    nptg_admin_areas_old?: NptgAdminAreasTable;
 }
 
 export type Tables =
@@ -259,7 +271,8 @@ export type Tables =
     | "service_admin_area_codes"
     | "localities"
     | "vehicle_journeys"
-    | "tracks";
+    | "tracks"
+    | "nptg_admin_areas";
 export type TablesNew =
     | "stops_new"
     | "operator_lines_new"
@@ -271,7 +284,8 @@ export type TablesNew =
     | "service_admin_area_codes_new"
     | "localities_new"
     | "vehicle_journeys_new"
-    | "tracks_new";
+    | "tracks_new"
+    | "nptg_admin_areas_new";
 export type TablesOld =
     | "stops_old"
     | "operator_lines_old"
@@ -283,7 +297,8 @@ export type TablesOld =
     | "service_admin_area_codes_old"
     | "localities_old"
     | "vehicle_journeys_old"
-    | "tracks_old";
+    | "tracks_old"
+    | "nptg_admin_areas_old";
 
 export const getDbClient = () => {
     const { DATABASE_NAME: dbName, DATABASE_SECRET_ARN: secretArn, DATABASE_RESOURCE_ARN: resourceArn } = process.env;
@@ -305,4 +320,34 @@ export const getDbClient = () => {
             },
         }),
     });
+};
+
+export const waitForDb = async (dbClient: Kysely<Database>) => {
+    const delay = 5;
+    const maxAttempts = 20;
+
+    let attempts = 0;
+
+    logger.info("Checking if database is available");
+
+    while (attempts < maxAttempts) {
+        attempts++;
+
+        try {
+            await dbClient.selectFrom("operators").select("id").executeTakeFirst();
+            logger.info(`Database available`);
+            return;
+        } catch (e) {
+            if (
+                e instanceof Error &&
+                e.name === "BadRequestException" &&
+                e.message.includes("Communications link failure")
+            ) {
+                logger.info(`Database stopped, waiting for ${delay} seconds before retrying`);
+                await new Promise((r) => setTimeout(r, delay * 1000));
+            } else {
+                throw e;
+            }
+        }
+    }
 };

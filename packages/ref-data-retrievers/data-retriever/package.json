@@ -1,5 +1,5 @@
 {
-    "name": "@reference-data-service/csv-retriever",
+    "name": "@reference-data-service/data-retriever",
     "version": "0.1.0",
     "scripts": {
         "test": "sst bind vitest",

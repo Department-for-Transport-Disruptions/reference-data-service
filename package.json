@@ -15,8 +15,7 @@
         "typecheck": "tsc --noEmit",
         "lint": "eslint .",
         "prepare": "husky install",
-        "test:api": "npm -w @reference-data-service/api run test:unit",
-        "test": "npm run test:api -- run",
+        "test": "vitest run",
         "tsc:build": "tsc --noemit"
     },
     "devDependencies": {
