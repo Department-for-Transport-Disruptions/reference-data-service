@@ -16,7 +16,7 @@ let nptgString = "";
 
 describe("nptg-uploader", () => {
     beforeAll(async () => {
-        nptgString = await fs.readFile(__dirname + "/test-data/nptg.xml", "utf-8");
+        nptgString = await fs.readFile(__dirname + "/../../../test-data/nptg.xml", "utf-8");
     });
 
     beforeEach(() => {
@@ -56,8 +56,6 @@ describe("nptg-uploader", () => {
     });
 
     it("uploads correct admin areas to the database", async () => {
-        const nptgString = await fs.readFile(__dirname + "/test-data/nptg.xml", "utf-8");
-
         await nptgUploader.parseNptgAndUpload(nptgString, mockDbClient as unknown as Kysely<db.Database>);
 
         expect(insertMock).toBeCalledTimes(2);

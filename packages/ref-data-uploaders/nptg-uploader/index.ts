@@ -2,7 +2,7 @@ import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { SSMClient, PutParameterCommand } from "@aws-sdk/client-ssm";
 import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
 import { S3Event } from "aws-lambda";
-import { Promise } from "bluebird";
+import { Promise as BluebirdPromise } from "bluebird";
 import { randomUUID } from "crypto";
 import * as logger from "lambda-log";
 import { parseStringPromise } from "xml2js";
@@ -61,7 +61,7 @@ const uploadLocalities = async (localities: Nptg["localities"], dbClient: Kysely
 
     logger.info(`Uploading ${numLocalitiesRows} rows to the database in ${localitiesBatches.length} batches`);
 
-    await Promise.map(localitiesBatches, (batch) => writeToLocalitiesTable(batch, dbClient), {
+    await BluebirdPromise.map(localitiesBatches, (batch) => writeToLocalitiesTable(batch, dbClient), {
         concurrency: 10,
     });
 };
@@ -75,8 +75,7 @@ export const parseNptgAndUpload = async (nptgString: string, dbClient: Kysely<Da
 
     await setupTables(dbClient);
 
-    await uploadAdminAreas(adminAreas, dbClient);
-    await uploadLocalities(localities, dbClient);
+    await Promise.all([uploadAdminAreas(adminAreas, dbClient), uploadLocalities(localities, dbClient)]);
 };
 
 export const main = async (event: S3Event) => {

@@ -21,7 +21,9 @@ install-deps:
 
 cleardown-txc-tables:
 	./scripts/cleardown_txc.sh
-	
+
+cleardown-nptg-tables:
+	./scripts/cleardown_nptg.sh
 
 trigger-naptan-retriever:
 	aws lambda invoke --function-name ref-data-service-naptan-retriever-$(stage) --invocation-type Event /tmp/outfile.txt > /dev/null
@@ -29,8 +31,8 @@ trigger-naptan-retriever:
 trigger-noc-retriever:
 	aws lambda invoke --function-name ref-data-service-noc-retriever-$(stage) --invocation-type Event /tmp/outfile.txt > /dev/null
 
-trigger-localities-retriever:
-	aws lambda invoke --function-name ref-data-service-localities-retriever-$(stage) --invocation-type Event /tmp/outfile.txt > /dev/null
+trigger-nptg-retriever:
+	aws lambda invoke --function-name ref-data-service-nptg-retriever-$(stage) --invocation-type Event /tmp/outfile.txt > /dev/null
 
 trigger-bods-retriever:
 	aws lambda invoke --function-name ref-data-service-bods-retriever-$(stage) --invocation-type Event /tmp/outfile.txt > /dev/null
@@ -41,6 +43,8 @@ test-bods-uploader: cleardown-txc-tables upload-bods-file
 
 test-tnds-uploader: cleardown-txc-tables upload-tnds-file
 
+test-nptg-uploader: cleardown-nptg-tables upload-nptg-file
+
 upload-bods-file:
 	aws s3 rm s3://ref-data-service-txc-data-$(stage)/bods/test.xml
 	aws s3 sync ./test-data/bods s3://ref-data-service-txc-data-$(stage)/bods
@@ -48,3 +52,7 @@ upload-bods-file:
 upload-tnds-file:
 	aws s3 rm s3://ref-data-service-txc-data-$(stage)/tnds/test.xml
 	aws s3 sync ./test-data/tnds s3://ref-data-service-txc-data-$(stage)/tnds
+
+upload-nptg-file:
+	aws s3 rm s3://ref-data-service-nptg-data-$(stage)/nptg.xml
+	aws s3 cp ./test-data/nptg.xml s3://ref-data-service-nptg-data-$(stage)
