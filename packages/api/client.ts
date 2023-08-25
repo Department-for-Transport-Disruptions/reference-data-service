@@ -229,6 +229,7 @@ export type ServicesForOperatorQueryInput = {
     nocCode: string;
     dataSource: DataSource;
     modes?: VehicleMode[];
+    lineNames?: string[];
 };
 
 export const getServicesForOperator = async (dbClient: Kysely<Database>, input: ServicesForOperatorQueryInput) => {
@@ -241,6 +242,9 @@ export const getServicesForOperator = async (dbClient: Kysely<Database>, input: 
         .where("dataSource", "=", input.dataSource)
         .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("mode", "in", input.modes ?? []))
         .where((qb) => qb.where("services.endDate", "is", null).orWhere("services.endDate", ">=", sql`CURDATE()`))
+        .$if(!!input.lineNames && input.lineNames.length > 0, (qb) =>
+            qb.where("services.lineName", "in", input.lineNames ?? []),
+        )
         .orderBy("lineName", "asc")
         .orderBy("startDate", "asc")
         .execute();

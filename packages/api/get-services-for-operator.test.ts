@@ -52,6 +52,18 @@ describe("get-services-for-operator", () => {
 
             expect(getQueryInput(event)).toEqual({ nocCode: "TEST", dataSource: "tnds" });
         });
+        it("handles lineNames", () => {
+            const event = {
+                pathParameters: {
+                    nocCode: "TEST",
+                },
+                queryStringParameters: {
+                    lineNames: "test",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ nocCode: "TEST", dataSource: "bods", lineNames: ["test"] });
+        });
 
         it("throws a ClientError if no nocCode provided", () => {
             const event = {
