@@ -85,8 +85,8 @@ export function UploadersStack({ stack }: StackContext) {
         functionName: `ref-data-service-nptg-uploader-${stack.stage}`,
         handler: "packages/ref-data-uploaders/nptg-uploader/index.main",
         runtime: "nodejs18.x",
-        timeout: 300,
-        memorySize: 1024,
+        timeout: 450,
+        memorySize: 2048,
         environment: {
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
