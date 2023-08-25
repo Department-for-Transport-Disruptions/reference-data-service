@@ -35,9 +35,16 @@ export const getQueryInput = (event: APIGatewayEvent): ServicesForOperatorQueryI
         throw new ClientError("Provided dataSource must be tnds or bods");
     }
 
+    const lineNames = queryStringParameters?.lineNames ?? "";
+    const lineNamesArray = lineNames
+        .split(",")
+        .filter((lineName) => lineName)
+        .map((lineName) => lineName.trim());
+
     return {
         nocCode,
         dataSource: dataSourceInput,
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
+        ...(lineNamesArray && lineNamesArray.length > 0 ? { lineNames: lineNamesArray } : {}),
     };
 };
