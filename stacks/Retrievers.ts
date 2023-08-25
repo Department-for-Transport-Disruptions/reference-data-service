@@ -9,7 +9,7 @@ import { S3Stack } from "./S3";
 import { StringParameter } from "aws-cdk-lib/aws-ssm";
 
 export function RetrieversStack({ stack }: StackContext) {
-    const { csvBucket, txcBucket, txcZippedBucket } = use(S3Stack);
+    const { csvBucket, txcBucket, txcZippedBucket, nptgBucket } = use(S3Stack);
     const { cluster } = use(DatabaseStack);
 
     const enableSchedule = stack.stage === "prod" || stack.stage === "preprod" || stack.stage === "test";
@@ -22,7 +22,7 @@ export function RetrieversStack({ stack }: StackContext) {
 
     const nocRetriever = new Function(stack, `ref-data-service-noc-retriever`, {
         functionName: `ref-data-service-noc-retriever-${stack.stage}`,
-        handler: "packages/ref-data-retrievers/csv-retriever/index.main",
+        handler: "packages/ref-data-retrievers/data-retriever/index.main",
         runtime: "nodejs18.x",
         timeout: 60,
         memorySize: 256,
@@ -57,7 +57,7 @@ export function RetrieversStack({ stack }: StackContext) {
 
     const naptanRetriever = new Function(stack, `ref-data-service-naptan-retriever`, {
         functionName: `ref-data-service-naptan-retriever-${stack.stage}`,
-        handler: "packages/ref-data-retrievers/csv-retriever/index.main",
+        handler: "packages/ref-data-retrievers/data-retriever/index.main",
         runtime: "nodejs18.x",
         timeout: 60,
         memorySize: 512,
@@ -90,23 +90,23 @@ export function RetrieversStack({ stack }: StackContext) {
         },
     });
 
-    const nptgLocalitiesRetriever = new Function(stack, `ref-data-service-localities-retriever`, {
-        functionName: `ref-data-service-localities-retriever-${stack.stage}`,
-        handler: "packages/ref-data-retrievers/csv-retriever/index.main",
+    const nptgRetriever = new Function(stack, `ref-data-service-nptg-retriever`, {
+        functionName: `ref-data-service-nptg-retriever-${stack.stage}`,
+        handler: "packages/ref-data-retrievers/data-retriever/index.main",
         runtime: "nodejs18.x",
         timeout: 60,
         memorySize: 512,
         environment: {
-            DATA_URL: "https://naptan.api.dft.gov.uk/v1/nptg/localities",
-            BUCKET_NAME: csvBucket.bucketName,
-            CONTENT_TYPE: "text/csv",
-            TARGET_FILE: "Localities.csv",
+            DATA_URL: "https://naptan.api.dft.gov.uk/v1/nptg",
+            BUCKET_NAME: nptgBucket.bucketName,
+            CONTENT_TYPE: "application/xml",
+            TARGET_FILE: "nptg.xml",
         },
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:PutObject"],
-                resources: [`${csvBucket.bucketArn}/*`],
+                resources: [`${nptgBucket.bucketArn}/*`],
             }),
             new PolicyStatement({
                 actions: ["cloudwatch:PutMetricData"],
@@ -115,8 +115,8 @@ export function RetrieversStack({ stack }: StackContext) {
         ],
     });
 
-    new Cron(stack, "ref-data-service-localities-retriever-cron", {
-        job: nptgLocalitiesRetriever,
+    new Cron(stack, "ref-data-service-nptg-retriever-cron", {
+        job: nptgRetriever,
         enabled: enableSchedule,
         cdk: {
             rule: {

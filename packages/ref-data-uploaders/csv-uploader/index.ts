@@ -1,5 +1,5 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { getDbClient, Tables, TablesNew } from "@reference-data-service/core/db";
+import { getDbClient, Tables, TablesNew, waitForDb } from "@reference-data-service/core/db";
 import { S3Event } from "aws-lambda";
 import { Promise } from "bluebird";
 import { randomUUID } from "crypto";
@@ -13,36 +13,6 @@ const dbClient = getDbClient();
 const s3Client = new S3Client({ region: "eu-west-2" });
 const ssm = new SSMClient({ region: "eu-west-2" });
 
-const wait_for_db = async () => {
-    const delay = 5;
-    const maxAttempts = 20;
-
-    let attempts = 0;
-
-    logger.info("Checking if database is available");
-
-    while (attempts < maxAttempts) {
-        attempts++;
-
-        try {
-            await dbClient.selectFrom("operators").select("id").executeTakeFirst();
-            logger.info(`Database available`);
-            return;
-        } catch (e) {
-            if (
-                e instanceof Error &&
-                e.name === "BadRequestException" &&
-                e.message.includes("Communications link failure")
-            ) {
-                logger.info(`Database stopped, waiting for ${delay} seconds before retrying`);
-                await new Promise((r) => setTimeout(r, delay * 1000));
-            } else {
-                throw e;
-            }
-        }
-    }
-};
-
 export const main = async (event: S3Event) => {
     logger.options.dev = process.env.NODE_ENV !== "production";
     logger.options.debug = process.env.ENABLE_DEBUG_LOGS === "true" || process.env.NODE_ENV !== "production";
@@ -54,7 +24,7 @@ export const main = async (event: S3Event) => {
     const { STAGE: stage } = process.env;
 
     try {
-        await wait_for_db();
+        await waitForDb(dbClient);
         const key = event.Records[0].s3.object.key;
 
         logger.info(`Starting CSV Uploader for ${key}`);
@@ -150,11 +120,6 @@ export const main = async (event: S3Event) => {
             case "PublicName.csv":
                 table = "operator_public_data";
                 sqlString = sql`CREATE TABLE operator_public_data_new LIKE operator_public_data`;
-                break;
-
-            case "Localities.csv":
-                table = "localities";
-                sqlString = sql`CREATE TABLE localities_new LIKE localities`;
                 break;
 
             default:

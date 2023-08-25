@@ -7,11 +7,12 @@ import { DatabaseStack } from "./Database";
 import { S3Stack } from "./S3";
 
 export function UploadersStack({ stack }: StackContext) {
-    const { csvBucket, txcBucket } = use(S3Stack);
+    const { csvBucket, txcBucket, nptgBucket } = use(S3Stack);
     const { cluster } = use(DatabaseStack);
 
     const csvBucketCdk = Bucket.fromBucketName(stack, "ref-data-service-csv-bucket", csvBucket.bucketName);
     const txcBucketCdk = Bucket.fromBucketName(stack, "ref-data-service-txc-bucket", txcBucket.bucketName);
+    const nptgBucketCdk = Bucket.fromBucketName(stack, "ref-data-service-nptg-bucket", nptgBucket.bucketName);
 
     const csvUploader = new Function(stack, `ref-data-service-csv-uploader`, {
         bind: [cluster],
@@ -78,4 +79,36 @@ export function UploadersStack({ stack }: StackContext) {
     });
 
     txcBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(txcUploader));
+
+    const nptgUploader = new Function(stack, "ref-data-service-nptg-uploader", {
+        bind: [cluster],
+        functionName: `ref-data-service-nptg-uploader-${stack.stage}`,
+        handler: "packages/ref-data-uploaders/nptg-uploader/index.main",
+        runtime: "nodejs18.x",
+        timeout: 300,
+        memorySize: 1024,
+        environment: {
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
+            STAGE: stack.stage,
+        },
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+        permissions: [
+            new PolicyStatement({
+                actions: ["s3:GetObject"],
+                resources: [`${nptgBucket.bucketArn}/*`],
+            }),
+            new PolicyStatement({
+                actions: ["cloudwatch:PutMetricData"],
+                resources: ["*"],
+            }),
+            new PolicyStatement({
+                actions: ["ssm:PutParameter"],
+                resources: ["*"],
+            }),
+        ],
+    });
+
+    nptgBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(nptgUploader));
 }

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+STAGE=$(cat .sst/stage)
+DB_CLUSTER_ARN=$(aws rds describe-db-clusters | jq -r --arg stage $STAGE '.DBClusters[] | select(.TagList[] | select((.Key=="sst:stage") and (.Value==$stage))).DBClusterArn')
+SECRET_ARN=$(aws secretsmanager list-secrets | jq -r --arg stage $STAGE '.SecretList[] | select(.Tags[]? | select(.Key=="sst:stage" and .Value==$stage))' | jq -r '. | select(.Tags[]? | select(.Key=="sst:app" and .Value=="reference-data-service"))'.ARN)
+
+declare -a arr=("localities" "nptg_admin_areas")
+
+echo "Clearing down NPTG tables..."
+
+for i in "${arr[@]}"
+do
+    aws rds-data execute-statement --secret-arn $SECRET_ARN --resource-arn $DB_CLUSTER_ARN --sql "DROP TABLE IF EXISTS ref_data.${i}_new" > /dev/null
+    aws rds-data execute-statement --secret-arn $SECRET_ARN --resource-arn $DB_CLUSTER_ARN --sql "CREATE TABLE ref_data.${i}_new LIKE ref_data.${i}" > /dev/null
+done
+
+
+

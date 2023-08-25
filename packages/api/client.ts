@@ -585,3 +585,17 @@ export const getAdminAreaCodes = async (dbClient: Kysely<Database>) => {
 };
 
 export type AdminAreaCodes = Awaited<ReturnType<typeof getAdminAreaCodes>>;
+
+export const getAdminAreas = async (dbClient: Kysely<Database>) => {
+    logger.info("Starting getAdminAreas...");
+
+    const areaCodes = await dbClient
+        .selectFrom("nptg_admin_areas")
+        .select(["administrativeAreaCode", "name", "shortName"])
+        .distinct()
+        .execute();
+
+    return areaCodes;
+};
+
+export type AdminAreas = Awaited<ReturnType<typeof getAdminAreas>>;
