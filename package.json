@@ -15,8 +15,7 @@
         "typecheck": "tsc --noEmit",
         "lint": "eslint .",
         "prepare": "husky install",
-        "test:api": "vitest --dir packages/api --config packages/api/vitest.config.ts run --threads false --no-threads",
-        "test": "npm run test:api",
+        "test": "vitest --threads false --no-threads --config vitest.config.ts run",
         "tsc:build": "tsc --noemit"
     },
     "devDependencies": {
@@ -43,10 +42,10 @@
         "packages/**/*"
     ],
     "dependencies": {
-        "@aws-sdk/client-rds-data": "^3.418.0",
-        "@aws-sdk/client-s3": "^3.418.0",
-        "@aws-sdk/client-sns": "^3.418.0",
-        "@aws-sdk/types": "^3.418.0",
+        "@aws-sdk/client-rds-data": "^3.388.0",
+        "@aws-sdk/client-s3": "^3.388.0",
+        "@aws-sdk/client-sns": "^3.388.0",
+        "@aws-sdk/types": "^3.388.0",
         "@smithy/types": "^2.3.4",
         "kysely": "^0.23.4",
         "kysely-data-api": "^0.2.0",
