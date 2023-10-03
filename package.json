@@ -15,7 +15,7 @@
         "typecheck": "tsc --noEmit",
         "lint": "eslint .",
         "prepare": "husky install",
-        "test": "vitest run",
+        "test": "vitest --config ./vitest.config.ts run",
         "tsc:build": "tsc --noemit"
     },
     "devDependencies": {
