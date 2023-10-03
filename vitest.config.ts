@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
     test: {
         include: ["**/*.{test,spec}.{js,ts,tsx}"],
-        poolOptions: {},
+        threads: false,
         restoreMocks: true,
     },
 });
