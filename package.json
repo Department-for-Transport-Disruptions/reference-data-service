@@ -25,6 +25,7 @@
         "@typescript-eslint/parser": "^5.52.0",
         "aws-cdk": "2.91.0",
         "aws-cdk-lib": "2.91.0",
+        "aws-sdk-client-mock": "^3.0.0",
         "constructs": "10.2.69",
         "eslint": "^8.34.0",
         "eslint-config-prettier": "^8.6.0",
@@ -41,9 +42,14 @@
         "packages/**/*"
     ],
     "dependencies": {
-        "@aws-sdk/client-rds-data": "^3.282.0",
+        "@aws-sdk/client-rds-data": "^3.418.0",
+        "@aws-sdk/client-s3": "^3.418.0",
+        "@aws-sdk/client-sns": "^3.418.0",
+        "@aws-sdk/types": "^3.418.0",
+        "@smithy/types": "^2.3.4",
         "kysely": "^0.23.4",
-        "kysely-data-api": "^0.2.0"
+        "kysely-data-api": "^0.2.0",
+        "mockdate": "^3.0.5"
     },
     "overrides": {
         "jszip": "3.8.0",
