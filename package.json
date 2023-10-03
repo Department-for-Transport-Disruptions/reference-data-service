@@ -15,7 +15,8 @@
         "typecheck": "tsc --noEmit",
         "lint": "eslint .",
         "prepare": "husky install",
-        "test": "vitest --threads false --no-threads --config ./vitest.config.ts run",
+        "test:api": "vitest --dir packages/api --config packages/api/vitest.config.ts run --threads false --no-threads",
+        "test": "npm run test:api",
         "tsc:build": "tsc --noemit"
     },
     "devDependencies": {
