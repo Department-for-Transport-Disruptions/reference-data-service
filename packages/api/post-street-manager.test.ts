@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockClient } from "aws-sdk-client-mock";
 import * as snsMessageValidator from "./utils/snsMessageValidator";
 import { main } from "./post-street-manager";
@@ -37,10 +37,11 @@ describe("post-street-manager", () => {
 
     beforeEach(() => {
         isValidSignatureSpy.mockResolvedValue(true);
+        s3Mock.reset();
     });
 
-    afterEach(() => {
-        s3Mock.reset();
+    afterAll(() => {
+        Mockdate.reset();
     });
 
     it("should copy the validated SNS message body to S3 if request is of type Notification", async () => {
