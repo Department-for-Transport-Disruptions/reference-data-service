@@ -1,4 +1,4 @@
-import { APIGatewayEvent, SNSEvent } from "aws-lambda";
+import { APIGatewayEvent } from "aws-lambda";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import * as logger from "lambda-log";
 import { snsMessageSchema } from "./utils/snsMesssageTypes.zod";

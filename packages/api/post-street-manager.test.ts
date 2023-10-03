@@ -2,7 +2,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import { mockClient } from "aws-sdk-client-mock";
 import * as snsMessageValidator from "./utils/snsMessageValidator";
 import { main } from "./post-street-manager";
-import { APIGatewayEvent, APIGatewayProxyEvent } from "aws-lambda";
+import { APIGatewayEvent } from "aws-lambda";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import Mockdate from "mockdate";
 
@@ -65,7 +65,7 @@ describe("post-street-manager", () => {
                 "{\n" +
                 '  "Type" : "SubscriptionConfirmation",\n' +
                 '  "MessageId" : "1234",\n' +
-                '  "TopicArn" : "arn:aws:sns:eu-west-2:899289342948:test-street-manager-topic",\n' +
+                '  "TopicArn" : "arn:aws:sns:eu-west-2:287813576808:prod-activity-topic",\n' +
                 '  "Message" : "You have chosen to subscribe to the topic. To confirm the subscription, visit the SubscribeURL included in this message.",\n' +
                 '  "Timestamp" : "2023-10-02T14:22:45.889Z",\n' +
                 '  "SignatureVersion" : "1",\n' +
