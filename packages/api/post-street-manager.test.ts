@@ -40,7 +40,6 @@ describe("post-street-manager", () => {
     });
 
     afterEach(() => {
-        vi.restoreAllMocks();
         s3Mock.reset();
     });
 
