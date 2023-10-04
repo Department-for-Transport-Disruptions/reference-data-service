@@ -15,7 +15,9 @@
         "typecheck": "tsc --noEmit",
         "lint": "eslint .",
         "prepare": "husky install",
-        "test": "vitest --threads false --no-threads --config vitest.config.ts run",
+        "test:uploaders": "npm -w @reference-data-service/ref-data-uploaders run test",
+        "test:api": "npm -w @reference-data-service/api run test",
+        "test": "npm run test:uploaders -- run & npm run test:api -- run",
         "tsc:build": "tsc --noemit"
     },
     "devDependencies": {

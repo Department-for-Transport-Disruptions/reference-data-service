@@ -1,7 +1,7 @@
 import { promises as fs } from "fs";
 import { describe, expect, it, vi, beforeAll, afterEach, beforeEach } from "vitest";
 import * as nptgUploader from "./index";
-import * as db from "../../core/db";
+import * as db from "@reference-data-service/core/db";
 import { Kysely } from "kysely";
 
 let dropTableMock = vi.fn();
