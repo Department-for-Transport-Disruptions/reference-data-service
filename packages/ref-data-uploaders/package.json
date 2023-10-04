@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "scripts": {
         "test:unit": "vitest",
-        "test": "sst bind vitest",
+        "test": "vitest",
         "typecheck": "tsc -noEmit"
     },
     "devDependencies": {
@@ -11,7 +11,7 @@
         "@types/node": "^18.13.0",
         "@types/papaparse": "^5.3.7",
         "@types/xml2js": "^0.4.11",
-        "vitest": "^0.28.5"
+        "vitest": "^0.29.1"
     },
     "dependencies": {
         "@aws-sdk/client-ssm": "^3.362.0",
