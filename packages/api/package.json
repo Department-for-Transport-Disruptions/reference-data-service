@@ -11,6 +11,6 @@
     "dependencies": {
         "@reference-data-service/core": "file:../core",
         "geolib": "^3.3.3",
-        "zod": "^3.21.4"
+        "zod": "^3.22.3"
     }
 }
