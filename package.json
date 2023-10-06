@@ -36,6 +36,7 @@
         "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-vitest": "^0.0.48",
         "husky": "^8.0.0",
+        "mockdate": "^3.0.5",
         "prettier": "^2.8.4",
         "sst": "2.24.12",
         "typescript": "^4.9.5",
@@ -51,8 +52,7 @@
         "@aws-sdk/types": "^3.418.0",
         "@smithy/types": "^2.3.4",
         "kysely": "^0.23.4",
-        "kysely-data-api": "^0.2.0",
-        "mockdate": "^3.0.5"
+        "kysely-data-api": "^0.2.0"
     },
     "overrides": {
         "jszip": "3.8.0",

@@ -78,11 +78,11 @@ function buildSubscriptionStringToSign(body: SnsMessage) {
     stringToSign += "MessageId\n";
     stringToSign += body.MessageId + "\n";
     stringToSign += "SubscribeURL\n";
-    stringToSign += body.SubscribeURL ?? "" + "\n";
+    stringToSign += (body.SubscribeURL ?? "") + "\n";
     stringToSign += "Timestamp\n";
     stringToSign += body.Timestamp + "\n";
     stringToSign += "Token\n";
-    stringToSign += body.Token ?? "" + "\n";
+    stringToSign += (body.Token ?? "") + "\n";
     stringToSign += "TopicArn\n";
     stringToSign += body.TopicArn + "\n";
     stringToSign += "Type\n";

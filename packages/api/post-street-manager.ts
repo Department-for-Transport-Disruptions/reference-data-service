@@ -4,14 +4,14 @@ import * as logger from "lambda-log";
 import { snsMessageSchema } from "./utils/snsMesssageTypes.zod";
 import { confirmSubscription, isValidSignature } from "./utils/snsMessageValidator";
 
-const allowedTopicArns = {
-    activity: "arn:aws:sns:eu-west-2:287813576808:prod-activity-topic",
-    permit: "arn:aws:sns:eu-west-2:287813576808:prod-permit-topic",
-    sectionFiftyEight: "arn:aws:sns:eu-west-2:287813576808:prod-section-58-topic",
-};
+const allowedTopicArns = [
+    "arn:aws:sns:eu-west-2:287813576808:prod-activity-topic",
+    "arn:aws:sns:eu-west-2:287813576808:prod-permit-topic",
+    "arn:aws:sns:eu-west-2:287813576808:prod-section-58-topic",
+    "arn:aws:sns:eu-west-2:899289342948:test-street-manager-topic",
+];
 
-export const getS3Client = (): S3Client => new S3Client({ region: "eu-west-2" });
-const s3Client = getS3Client();
+const s3Client = new S3Client({ region: "eu-west-2" });
 
 export const uploadToS3 = async (
     s3Client: S3Client,
@@ -54,11 +54,7 @@ export const main = async (event: APIGatewayEvent) => {
         return;
     }
 
-    if (
-        snsMessage.TopicArn !== allowedTopicArns.permit &&
-        snsMessage.TopicArn !== allowedTopicArns.activity &&
-        snsMessage.TopicArn !== allowedTopicArns.sectionFiftyEight
-    ) {
+    if (!allowedTopicArns.includes(snsMessage.TopicArn)) {
         logger.error("Invalid topic ARN provided in SNS Message");
         return;
     }
@@ -66,9 +62,7 @@ export const main = async (event: APIGatewayEvent) => {
     if (snsMessage.Type === "SubscriptionConfirmation") {
         const subscribeUrl = snsMessage.SubscribeURL ?? "";
         await confirmSubscription(subscribeUrl);
-    }
-
-    if (snsMessage.Type === "Notification") {
+    } else if (snsMessage.Type === "Notification") {
         const currentTime = new Date();
 
         const { STREET_MANAGER_BUCKET_NAME: streetManagerBucketName } = process.env;
