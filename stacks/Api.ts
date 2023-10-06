@@ -1,10 +1,12 @@
 import { Api, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
 import { DnsStack } from "./Dns";
+import { S3Stack } from "./S3";
 
 export function ApiStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
     const { hostedZone } = use(DnsStack);
+    const { streetManagerBucket } = use(S3Stack);
 
     const { ROOT_DOMAIN: rootDomain } = process.env;
 
@@ -163,6 +165,19 @@ export function ApiStack({ stack }: StackContext) {
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
+    const postStreetManagerFunction = new Function(stack, "ref-data-service-post-street-manager-function", {
+        bind: [streetManagerBucket],
+        functionName: `ref-data-service-post-street-manager-function-${stack.stage}`,
+        handler: "packages/api/post-street-manager.main",
+        timeout: 10,
+        memorySize: 512,
+        environment: {
+            STREET_MANAGER_BUCKET_NAME: streetManagerBucket.bucketName,
+        },
+        runtime: "nodejs18.x",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+    });
+
     const subDomain = ["test", "preprod", "prod"].includes(stack.stage) ? "api" : `api.${stack.stage}`;
 
     const allowedOrigins = [
@@ -185,6 +200,7 @@ export function ApiStack({ stack }: StackContext) {
             "GET /services/{serviceId}/routes": serviceRoutesFunction,
             "GET /area-codes": areaCodeFunction,
             "GET /admin-areas": adminAreasFunction,
+            "POST /street-manager": postStreetManagerFunction,
         },
         customDomain: {
             domainName: `${subDomain}.${hostedZone.zoneName}`,
