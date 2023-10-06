@@ -8,7 +8,6 @@ const allowedTopicArns = [
     "arn:aws:sns:eu-west-2:287813576808:prod-activity-topic",
     "arn:aws:sns:eu-west-2:287813576808:prod-permit-topic",
     "arn:aws:sns:eu-west-2:287813576808:prod-section-58-topic",
-    "arn:aws:sns:eu-west-2:899289342948:test-street-manager-topic",
 ];
 
 const s3Client = new S3Client({ region: "eu-west-2" });
