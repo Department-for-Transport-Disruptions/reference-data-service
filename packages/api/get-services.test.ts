@@ -67,6 +67,16 @@ describe("get-services", () => {
             expect(getQueryInput(event)).toEqual({ adminAreaCodes: ["009", "001"], dataSource: "bods", page: 0 });
         });
 
+        it("handles nocCodes", () => {
+            const event = {
+                queryStringParameters: {
+                    nocCodes: "TEST1,TEST2",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ nocCodes: ["TEST1", "TEST2"], dataSource: "bods", page: 0 });
+        });
+
         it("throws a ClientError if invalid dataSource provided", () => {
             const event = {
                 queryStringParameters: {
@@ -154,6 +164,22 @@ describe("get-services", () => {
 
             expect(getServicesByStopsQueryInput(event)).toEqual({
                 adminAreaCodes: ["009", "001"],
+                dataSource: "bods",
+                page: 0,
+                includeRoutes: false,
+                stops: [],
+            });
+        });
+
+        it("handles nocCodes", () => {
+            const event = {
+                queryStringParameters: {
+                    nocCodes: "TEST1,TEST2",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getServicesByStopsQueryInput(event)).toEqual({
+                nocCodes: ["TEST1", "TEST2"],
                 dataSource: "bods",
                 page: 0,
                 includeRoutes: false,
