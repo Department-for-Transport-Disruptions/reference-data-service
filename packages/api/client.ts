@@ -324,6 +324,7 @@ export type ServicesQueryInput = {
     page: number;
     adminAreaCodes?: string[];
     modes?: VehicleMode[];
+    nocCodes?: string[];
 };
 
 export const getServices = async (dbClient: Kysely<Database>, input: ServicesQueryInput) => {
@@ -336,6 +337,7 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
         .selectAll(["services"])
         .where("services.dataSource", "=", input.dataSource)
         .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
+        .$if(!!input.nocCodes?.[0], (qb) => qb.where("services.nocCode", "in", input.nocCodes ?? ["---"]))
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
             qb
                 .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
@@ -548,6 +550,7 @@ export type ServicesByStopsQueryInput = {
     modes?: VehicleMode[];
     includeRoutes: boolean;
     adminAreaCodes?: string[];
+    nocCodes?: string[];
 };
 
 export const getServicesByStops = async (dbClient: Kysely<Database>, input: ServicesByStopsQueryInput) => {
@@ -566,6 +569,7 @@ export const getServicesByStops = async (dbClient: Kysely<Database>, input: Serv
                 .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
                 .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
         )
+        .$if(!!input.nocCodes?.[0], (qb) => qb.where("services.nocCode", "in", input.nocCodes ?? ["---"]))
         .selectAll("services")
         .select(["fromAtcoCode", "toAtcoCode"])
         .distinct()

@@ -22,6 +22,7 @@ import { Optional, notEmpty } from "./utils";
 
 const MAX_ADMIN_AREA_CODES = process.env.MAX_ADMIN_AREA_CODES || "5";
 const MAX_ATCO_CODES = process.env.MAX_ATCO_CODES || "5";
+const MAX_NOC_CODES = process.env.MAX_NOC_CODES || "5";
 
 export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResultV2> =>
     event.queryStringParameters?.atcoCodes
@@ -63,6 +64,16 @@ export const getQueryInput = (event: APIGatewayEvent): ServicesQueryInput => {
         throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
+    const nocCodes = queryStringParameters?.nocCodes ?? "";
+    const nocCodesArray = nocCodes
+        .split(",")
+        .filter((nocCode) => nocCode)
+        .map((nocCode) => nocCode);
+
+    if (nocCodesArray.length > Number(MAX_NOC_CODES)) {
+        throw new ClientError(`Only up to ${MAX_NOC_CODES} NOC codes can be provided`);
+    }
+
     const page = Number(queryStringParameters?.page ?? "1");
 
     if (isNaN(page)) {
@@ -74,6 +85,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServicesQueryInput => {
         page: page - 1,
         ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
+        ...(nocCodesArray && nocCodesArray.length > 0 ? { nocCodes: nocCodesArray } : {}),
     };
 };
 
@@ -103,6 +115,16 @@ export const getServicesByStopsQueryInput = (event: APIGatewayEvent): ServicesBy
         throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
+    const nocCodes = queryStringParameters?.nocCodes ?? "";
+    const nocCodesArray = nocCodes
+        .split(",")
+        .filter((nocCode) => nocCode)
+        .map((nocCode) => nocCode);
+
+    if (nocCodesArray.length > Number(MAX_NOC_CODES)) {
+        throw new ClientError(`Only up to ${MAX_NOC_CODES} NOC codes can be provided`);
+    }
+
     const includeRoutes = queryStringParameters?.includeRoutes === "true";
 
     return {
@@ -110,6 +132,7 @@ export const getServicesByStopsQueryInput = (event: APIGatewayEvent): ServicesBy
         includeRoutes,
         stops: atcoCodesArray,
         ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
+        ...(nocCodesArray && nocCodesArray.length > 0 ? { nocCodes: nocCodesArray } : {}),
     };
 };
 
