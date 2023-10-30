@@ -359,7 +359,6 @@ export type ServiceStopsQueryInput = {
     stopTypes?: string[];
     adminAreaCodes?: string[];
     useTracks?: boolean;
-    nocCodes?: string[];
 };
 
 export const getServiceStops = async (
@@ -476,7 +475,6 @@ export const getServiceStops = async (
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
         .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
-        .$if(!!input.nocCodes?.[0], (qb) => qb.where("services.nocCode", "in", input.nocCodes ?? ["---"]))
         .$if(!!input.stopTypes?.[0], (qb) =>
             qb
                 .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
@@ -552,6 +550,7 @@ export type ServicesByStopsQueryInput = {
     modes?: VehicleMode[];
     includeRoutes: boolean;
     adminAreaCodes?: string[];
+    nocCodes?: string[];
 };
 
 export const getServicesByStops = async (dbClient: Kysely<Database>, input: ServicesByStopsQueryInput) => {
@@ -570,6 +569,7 @@ export const getServicesByStops = async (dbClient: Kysely<Database>, input: Serv
                 .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
                 .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
         )
+        .$if(!!input.nocCodes?.[0], (qb) => qb.where("services.nocCode", "in", input.nocCodes ?? ["---"]))
         .selectAll("services")
         .select(["fromAtcoCode", "toAtcoCode"])
         .distinct()
