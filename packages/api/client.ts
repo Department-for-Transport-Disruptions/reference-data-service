@@ -350,7 +350,7 @@ export type ServicesQueryInput = {
 export const getServices = async (dbClient: Kysely<Database>, input: ServicesQueryInput) => {
     logger.info("Starting getServices...");
 
-    const SERVICES_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
+    const SERVICES_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 200 : 2000;
 
     const services = await dbClient
         .selectFrom("services")
@@ -362,6 +362,12 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
             qb
                 .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
                 .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
+        )
+        .where((qb) =>
+            qb.or([
+                qb("services.endDate", "is", null),
+                qb(sql`STR_TO_DATE(services.endDate, '%Y-%m-%d')`, ">=", sql`CURDATE()`),
+            ]),
         )
         .offset((input.page || 0) * SERVICES_PAGE_SIZE)
         .limit(SERVICES_PAGE_SIZE)
