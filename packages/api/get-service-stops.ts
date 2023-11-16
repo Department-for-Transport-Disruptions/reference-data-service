@@ -1,6 +1,8 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
+    DataSource,
     getServiceStops,
+    isDataSource,
     isValidBusStopType,
     isValidMode,
     ServiceStop,
@@ -19,7 +21,7 @@ export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResul
 const MAX_ADMIN_AREA_CODES = process.env.MAX_ADMIN_AREA_CODES || "5";
 
 export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput => {
-    const { pathParameters } = event;
+    const { pathParameters, queryStringParameters } = event;
 
     const serviceId = pathParameters?.serviceId;
 
@@ -27,8 +29,10 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Service ID must be provided");
     }
 
-    if (isNaN(Number(serviceId))) {
-        throw new ClientError("Provided service ID is not valid");
+    const dataSourceInput = queryStringParameters?.dataSource ?? DataSource.bods;
+
+    if (!isDataSource(dataSourceInput)) {
+        throw new ClientError("Provided dataSource must be tnds or bods");
     }
 
     const stopTypes = pathParameters.stopTypes || "";
@@ -72,7 +76,8 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
     }
 
     return {
-        serviceId: Number(serviceId),
+        serviceId,
+        dataSource: dataSourceInput,
         ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
             ? { busStopTypes: filteredBusStopTypesArray }
             : {}),

@@ -353,7 +353,8 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
 export type Services = Awaited<ReturnType<typeof getServices>>;
 
 export type ServiceStopsQueryInput = {
-    serviceId: number;
+    serviceId: string;
+    dataSource: DataSource;
     modes?: VehicleMode[];
     busStopTypes?: BusStopType[];
     stopTypes?: string[];
@@ -367,11 +368,29 @@ export const getServiceStops = async (
 ): Promise<ServiceStops | ServiceTracks> => {
     logger.info("Starting getServiceStops...");
 
+    const keyToUse = input.dataSource === "bods" ? "services.lineId" : "services.serviceCode";
+
+    const service = await dbClient
+        .selectFrom("services")
+        .select(["id"])
+        .where(keyToUse, "=", input.serviceId)
+        .where("dataSource", "=", input.dataSource)
+        .where((qb) =>
+            qb
+                .where(sql`CURDATE() BETWEEN services.startDate AND services.endDate`)
+                .orWhere("services.endDate", "is", null),
+        )
+        .executeTakeFirst();
+
+    if (!service) {
+        return [];
+    }
+
     if (input.useTracks) {
         const tracks = await dbClient
             .selectFrom("tracks")
             .select(["operatorServiceId as serviceId", "longitude", "latitude"])
-            .where("tracks.operatorServiceId", "=", input.serviceId)
+            .where("operatorServiceId", "=", service.id)
             .execute();
 
         if (tracks && tracks.length > 0) {
@@ -379,27 +398,11 @@ export const getServiceStops = async (
         }
     }
 
-    const [dataSourceResult] = await dbClient
-        .selectFrom("services")
-        .select("dataSource")
-        .where("id", "=", input.serviceId)
-        .execute();
-
-    if (!dataSourceResult) {
-        return [];
-    }
-
     const journeyPatternRefsResult = await dbClient
         .selectFrom("services")
-        .innerJoin(
-            "vehicle_journeys",
-            dataSourceResult.dataSource === DataSource.bods
-                ? "vehicle_journeys.lineRef"
-                : "vehicle_journeys.serviceRef",
-            dataSourceResult.dataSource === DataSource.bods ? "services.lineId" : "services.serviceCode",
-        )
+        .innerJoin("vehicle_journeys", "vehicle_journeys.operatorServiceId", "services.id")
         .select("vehicle_journeys.journeyPatternRef")
-        .where("services.id", "=", input.serviceId)
+        .where("services.id", "=", service.id)
         .distinct()
         .execute();
 
@@ -469,7 +472,8 @@ export const getServiceStops = async (
         ])
         .distinct()
         .groupBy(["fromId", "toId"])
-        .where("services.id", "=", input.serviceId)
+        .where("services.id", "=", service.id)
+        .where("dataSource", "=", input.dataSource)
         .where("service_journey_patterns.journeyPatternRef", "in", journeyPatternRefs)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
