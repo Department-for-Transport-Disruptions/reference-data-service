@@ -45,7 +45,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         throw new ClientError(`Only up to ${MAX_NAPTAN_CODES} NaPTAN codes can be provided`);
     }
 
-    const commonName = queryStringParameters?.search ?? "";
+    const searchInput = queryStringParameters?.search ?? "";
 
     const page = Number(queryStringParameters?.page ?? "1");
 
@@ -86,7 +86,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
     return {
         ...(atcoCodes ? { atcoCodes: atcoCodesArray } : {}),
         ...(naptanCodes ? { naptanCodes: naptanCodesArray } : {}),
-        ...(commonName ? { commonName } : {}),
+        ...(searchInput ? { searchInput } : {}),
         ...(adminAreaCodes ? { adminAreaCodes: adminAreaCodeArray } : {}),
         ...(sqlPolygon ? { polygon: sqlPolygon } : {}),
         ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
