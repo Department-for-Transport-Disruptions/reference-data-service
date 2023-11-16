@@ -53,7 +53,7 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
                 "services.destination",
                 "services.mode",
             ])
-            .where((qb) => qb.where("services.endDate", "is", null).orWhere("services.endDate", ">=", sql`CURDATE()`))
+            .where((qb) => qb.or([qb("services.endDate", "is", null), qb("services.endDate", ">=", sql`CURDATE()`)]))
             .where("nocCode", "=", input.nocCode)
             .execute();
 
@@ -116,12 +116,12 @@ export type Operators = Awaited<ReturnType<typeof getOperators>>;
 export type StopsQueryInput = {
     atcoCodes?: string[];
     naptanCodes?: string[];
-    commonName?: string;
     adminAreaCodes?: string[];
     page?: number;
     polygon?: string;
     busStopTypes?: BusStopType[];
     stopTypes?: string[];
+    searchInput?: string;
 };
 
 export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInput) => {
@@ -155,9 +155,6 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
         .where("status", "=", "active")
         .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
         .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
-        .$if(!!input.commonName, (qb) =>
-            qb.where("stops.commonName", "like", input.commonName ? `%${input.commonName}%` : "---"),
-        )
         .$if(!!input.adminAreaCodes?.[0], (qb) =>
             qb
                 .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"])
@@ -169,6 +166,14 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
         )
         .$if(!!input.stopTypes?.[0], (qb) => qb.where("stopType", "in", input.stopTypes ?? ["---"]))
         .$if(!!input.busStopTypes?.[0], (qb) => qb.where("busStopType", "in", input.busStopTypes ?? ["---"]))
+        .$if(!!input.searchInput, (qb) =>
+            qb.where((eb) =>
+                eb.or([
+                    eb("stops.commonName", "like", input.searchInput ? `%${input.searchInput}%` : "---"),
+                    eb("stops.atcoCode", "like", input.searchInput ? `%${input.searchInput}%` : "---"),
+                ]),
+            ),
+        )
         .offset((input.page || 0) * STOPS_PAGE_SIZE)
         .limit(STOPS_PAGE_SIZE)
         .execute();
@@ -241,7 +246,7 @@ export const getServicesForOperator = async (dbClient: Kysely<Database>, input: 
         .where("nocCode", "=", input.nocCode)
         .where("dataSource", "=", input.dataSource)
         .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("mode", "in", input.modes ?? []))
-        .where((qb) => qb.where("services.endDate", "is", null).orWhere("services.endDate", ">=", sql`CURDATE()`))
+        .where((qb) => qb.or([qb("services.endDate", "is", null), qb("services.endDate", ">=", sql`CURDATE()`)]))
         .$if(!!input.lineNames && input.lineNames.length > 0, (qb) =>
             qb.where("services.lineName", "in", input.lineNames ?? []),
         )
@@ -306,7 +311,7 @@ export const getServiceById = async (dbClient: Kysely<Database>, input: ServiceB
         .where("services.id", "=", input.serviceId)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
-        .where((qb) => qb.where("services.endDate", "is", null).orWhere("services.endDate", ">=", sql`CURDATE()`))
+        .where((qb) => qb.or([qb("services.endDate", "is", null), qb("services.endDate", ">=", sql`CURDATE()`)]))
         .orderBy("services.startDate", "asc")
         .execute();
 
@@ -477,7 +482,7 @@ export const getServiceStops = async (
         .where("service_journey_patterns.journeyPatternRef", "in", journeyPatternRefs)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
-        .where((qb) => qb.where("fromStop.status", "=", "active").orWhere("toStop.status", "=", "active"))
+        .where((qb) => qb.or([qb("fromStop.status", "=", "active"), qb("toStop.status", "=", "active")]))
         .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
         .$if(!!input.stopTypes?.[0], (qb) =>
             qb
@@ -577,7 +582,7 @@ export const getServicesByStops = async (dbClient: Kysely<Database>, input: Serv
         .selectAll("services")
         .select(["fromAtcoCode", "toAtcoCode"])
         .distinct()
-        .where((qb) => qb.where("fromAtcoCode", "in", input.stops).orWhere("toAtcoCode", "in", input.stops))
+        .where((qb) => qb.or([qb("fromAtcoCode", "in", input.stops), qb("toAtcoCode", "in", input.stops)]))
         .where("dataSource", "=", input.dataSource)
         .orderBy("service_journey_pattern_links.fromSequenceNumber")
         .orderBy("service_journey_patterns.direction")
