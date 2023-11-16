@@ -105,34 +105,12 @@ export const getServicesByStopsQueryInput = (event: APIGatewayEvent): ServicesBy
         throw new ClientError(`Only up to ${MAX_ATCO_CODES} ATCO codes can be provided`);
     }
 
-    const adminAreaCodes = queryStringParameters?.adminAreaCodes ?? "";
-    const adminAreaCodeArray = adminAreaCodes
-        .split(",")
-        .filter((adminAreaCode) => adminAreaCode)
-        .map((adminAreaCode) => adminAreaCode.trim());
-
-    if (adminAreaCodeArray.length > Number(MAX_ADMIN_AREA_CODES)) {
-        throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
-    }
-
-    const nocCodes = queryStringParameters?.nocCodes ?? "";
-    const nocCodesArray = nocCodes
-        .split(",")
-        .filter((nocCode) => nocCode)
-        .map((nocCode) => nocCode);
-
-    if (nocCodesArray.length > Number(MAX_NOC_CODES)) {
-        throw new ClientError(`Only up to ${MAX_NOC_CODES} NOC codes can be provided`);
-    }
-
     const includeRoutes = queryStringParameters?.includeRoutes === "true";
 
     return {
         ...inputs,
         includeRoutes,
         stops: atcoCodesArray,
-        ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
-        ...(nocCodesArray && nocCodesArray.length > 0 ? { nocCodes: nocCodesArray } : {}),
     };
 };
 
@@ -181,7 +159,8 @@ export const formatServicesWithStops = async (
         const serviceRoutePromises = groupedServices.map(
             (service) =>
                 getServiceStops(dbClient, {
-                    serviceId: service.id,
+                    serviceRef: input.dataSource === "bods" ? service.lineId || "" : service.serviceCode || "",
+                    dataSource: input.dataSource,
                 }) as Promise<ServiceStops>,
         );
 

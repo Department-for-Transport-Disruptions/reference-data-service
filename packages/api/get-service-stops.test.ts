@@ -13,7 +13,20 @@ describe("get-service-stops", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ serviceId: 234 });
+            expect(getQueryInput(event)).toEqual({ serviceRef: 234 });
+        });
+
+        it("handles serviceCode or lineId with datasource", () => {
+            const event = {
+                pathParameters: {
+                    serviceId: "abc",
+                },
+                queryStringParameters: {
+                    dataSource: "bods",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ dataSource: "bods", serviceRef: "abc" });
         });
 
         it("handles serviceId, stopTypes, busStopType and modes", () => {
@@ -27,7 +40,7 @@ describe("get-service-stops", () => {
             } as unknown as APIGatewayEvent;
 
             expect(getQueryInput(event)).toEqual({
-                serviceId: 234,
+                serviceRef: 234,
                 stopTypes: ["BCT"],
                 busStopTypes: [BusStopType.MKD],
                 modes: [VehicleMode.bus],
@@ -39,18 +52,19 @@ describe("get-service-stops", () => {
                 pathParameters: {},
             } as unknown as APIGatewayEvent;
 
-            expect(() => getQueryInput(event)).toThrowError("Service ID must be provided");
+            expect(() => getQueryInput(event)).toThrowError("Service Ref must be provided");
         });
 
-        it("throws a ClientError if invalid serviceId provided", () => {
+        it("throws a ClientError if serviceCode or lineId provided without dataSource", () => {
             const event = {
                 pathParameters: {
                     serviceId: "abc",
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(() => getQueryInput(event)).toThrowError("Provided service ID is not valid");
+            expect(() => getQueryInput(event)).toThrowError("ServiceRef invalid");
         });
+
         it("throws a ClientError if invalid busStopType provided", () => {
             const event = {
                 pathParameters: {

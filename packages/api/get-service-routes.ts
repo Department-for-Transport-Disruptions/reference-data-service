@@ -1,6 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
     getServiceStops,
+    isDataSource,
     isValidBusStopType,
     isValidMode,
     ServiceStop,
@@ -17,17 +18,15 @@ export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResul
     executeClient(event, getQueryInput, getServiceStops, formatStopsRoutes);
 
 export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput => {
-    const { pathParameters } = event;
+    const { pathParameters, queryStringParameters } = event;
 
-    const serviceId = pathParameters?.serviceId;
+    const serviceRef = pathParameters?.serviceId;
 
-    if (!serviceId) {
-        throw new ClientError("Service ID must be provided");
+    if (!serviceRef) {
+        throw new ClientError("Service Ref must be provided");
     }
 
-    if (isNaN(Number(serviceId))) {
-        throw new ClientError("Provided service ID is not valid");
-    }
+    const dataSourceInput = queryStringParameters?.dataSource;
 
     const stopTypes = pathParameters.stopTypes || "";
     const stopTypesArray = stopTypes
@@ -59,8 +58,25 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid bus stop type provided");
     }
 
+    if (dataSourceInput && isDataSource(dataSourceInput)) {
+        return {
+            serviceRef,
+            dataSource: dataSourceInput,
+            ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
+                ? { busStopTypes: filteredBusStopTypesArray }
+                : {}),
+            ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
+            ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
+            useTracks: true,
+        };
+    }
+
+    if (isNaN(Number(serviceRef))) {
+        throw new ClientError("ServiceRef invalid");
+    }
+
     return {
-        serviceId: Number(serviceId),
+        serviceRef: Number(serviceRef),
         ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
             ? { busStopTypes: filteredBusStopTypesArray }
             : {}),
