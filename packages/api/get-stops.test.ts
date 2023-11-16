@@ -15,14 +15,14 @@ describe("get-stops", () => {
             expect(getQueryInput(event)).toEqual({ atcoCodes: ["test123", "test456"], page: 0 });
         });
 
-        it("handles commonName", () => {
+        it("handles search input", () => {
             const event = {
                 queryStringParameters: {
                     search: "test",
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ commonName: "test", page: 0 });
+            expect(getQueryInput(event)).toEqual({ searchInput: "test", page: 0 });
         });
 
         it("handles naptanCodes", () => {
@@ -50,7 +50,7 @@ describe("get-stops", () => {
             });
         });
 
-        it("handles commonName and atcoCodes and naptanCodes", () => {
+        it("handles searchInput and atcoCodes and naptanCodes", () => {
             const event = {
                 queryStringParameters: {
                     search: "test",
@@ -60,7 +60,7 @@ describe("get-stops", () => {
             } as unknown as APIGatewayEvent;
 
             expect(getQueryInput(event)).toEqual({
-                commonName: "test",
+                searchInput: "test",
                 atcoCodes: ["test123", "test456"],
                 naptanCodes: ["abcde", "fghij"],
                 page: 0,
@@ -77,7 +77,7 @@ describe("get-stops", () => {
             expect(getQueryInput(event)).toEqual({ adminAreaCodes: ["009", "001"], page: 0 });
         });
 
-        it("handles commonName and adminAreaCode", () => {
+        it("handles searchInput and adminAreaCode", () => {
             const event = {
                 queryStringParameters: {
                     search: "test",
@@ -85,7 +85,7 @@ describe("get-stops", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ commonName: "test", adminAreaCodes: ["009"], page: 0 });
+            expect(getQueryInput(event)).toEqual({ searchInput: "test", adminAreaCodes: ["009"], page: 0 });
         });
 
         it("handles polygons and adminAreaCode", () => {
