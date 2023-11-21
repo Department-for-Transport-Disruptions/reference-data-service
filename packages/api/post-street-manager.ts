@@ -4,11 +4,7 @@ import * as logger from "lambda-log";
 import { snsMessageSchema } from "./utils/snsMesssageTypes.zod";
 import { confirmSubscription, isValidSignature } from "./utils/snsMessageValidator";
 
-const allowedTopicArns = [
-    "arn:aws:sns:eu-west-2:287813576808:prod-activity-topic",
-    "arn:aws:sns:eu-west-2:287813576808:prod-permit-topic",
-    "arn:aws:sns:eu-west-2:287813576808:prod-section-58-topic",
-];
+const allowedTopicArns = ["arn:aws:sns:eu-west-2:287813576808:prod-permit-topic"];
 
 const s3Client = new S3Client({ region: "eu-west-2" });
 
