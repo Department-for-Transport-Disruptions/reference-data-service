@@ -1,33 +1,28 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import * as logger from "lambda-log";
-import { snsMessageSchema } from "./utils/snsMesssageTypes.zod";
+import { BaseMessage, PermitMessage, permitMessageSchema, snsMessageSchema } from "./utils/snsMesssageTypes.zod";
 import { confirmSubscription, isValidSignature } from "./utils/snsMessageValidator";
+import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 
-const allowedTopicArns = ["arn:aws:sns:eu-west-2:287813576808:prod-permit-topic"];
+const allowedTopicArns = [
+    "arn:aws:sns:eu-west-2:287813576808:prod-permit-topic",
+    "arn:aws:sns:eu-west-2:899289342948:test-street-manager-topic",
+];
 
-const s3Client = new S3Client({ region: "eu-west-2" });
+const sqsClient = new SQSClient({ region: "eu-west-2" });
 
-export const uploadToS3 = async (
-    s3Client: S3Client,
-    data: string,
-    keyName: string,
-    bucketName: string | undefined,
-    contentType = "application/json",
-) => {
-    if (!bucketName) {
-        throw Error("No bucket name provided");
+const sendPermitMessageToSqs = async (queueUrl: string | undefined, message: PermitMessage) => {
+    if (!queueUrl) {
+        throw Error("No url for SQS queue provided");
     }
 
-    const putCommand: PutObjectCommand = new PutObjectCommand({
-        Bucket: bucketName,
-        Key: keyName,
-        Body: data,
-        ContentType: contentType,
+    const sendMessageCommand: SendMessageCommand = new SendMessageCommand({
+        QueueUrl: queueUrl,
+        MessageBody: JSON.stringify(message),
     });
 
-    await s3Client.send(putCommand);
-    logger.info(`Successfully uploaded data to ${bucketName}/${keyName}`);
+    await sqsClient.send(sendMessageCommand);
+    logger.info(`Successfully sent permit message ${message.permitReferenceNumber} to SQS queue`);
 };
 
 export const main = async (event: APIGatewayEvent) => {
@@ -58,16 +53,41 @@ export const main = async (event: APIGatewayEvent) => {
         const subscribeUrl = snsMessage.SubscribeURL ?? "";
         await confirmSubscription(subscribeUrl);
     } else if (snsMessage.Type === "Notification") {
-        const currentTime = new Date();
+        const permitMessage = permitMessageSchema.safeParse(JSON.parse(parsedBody.data.Message));
 
-        const { STREET_MANAGER_BUCKET_NAME: streetManagerBucketName } = process.env;
+        if (!permitMessage.success) {
+            const body = JSON.parse(parsedBody.data.Message) as BaseMessage;
+            logger.error(
+                `Failed to parse ${body.event_type} SNS message ${
+                    body.event_reference
+                }, ${permitMessage.error.toString()}`,
+            );
+            return;
+        }
 
-        await uploadToS3(
-            s3Client,
-            snsMessage.Message,
-            `${new Date(currentTime).valueOf()}-street-manager-data.json`,
-            streetManagerBucketName,
-            "application/json",
-        );
+        try {
+            logger.info(`Sending message: ${permitMessage.data.permitReferenceNumber} to SQS queue`);
+            const { STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsUrl } = process.env;
+
+            await sendPermitMessageToSqs(streetManagerSqsUrl, permitMessage.data);
+        } catch (e) {
+            if (e instanceof Error) {
+                logger.error(e);
+
+                return {
+                    statusCode: 500,
+                    body: JSON.stringify({
+                        error: "There was a problem with processing street manager data",
+                    }),
+                };
+            }
+
+            return {
+                statusCode: 500,
+                body: JSON.stringify({
+                    error: "There was a problem with with processing street manager data",
+                }),
+            };
+        }
     }
 };

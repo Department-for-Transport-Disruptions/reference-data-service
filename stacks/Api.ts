@@ -1,12 +1,12 @@
 import { Api, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
 import { DnsStack } from "./Dns";
-import { S3Stack } from "./S3";
+import { QueueStack } from "./Queue";
 
 export function ApiStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
     const { hostedZone } = use(DnsStack);
-    const { streetManagerBucket } = use(S3Stack);
+    const { streetManagerSqsQueue } = use(QueueStack);
 
     const { ROOT_DOMAIN: rootDomain } = process.env;
 
@@ -166,13 +166,13 @@ export function ApiStack({ stack }: StackContext) {
     });
 
     const postStreetManagerFunction = new Function(stack, "ref-data-service-post-street-manager-function", {
-        bind: [streetManagerBucket],
+        bind: [streetManagerSqsQueue],
         functionName: `ref-data-service-post-street-manager-function-${stack.stage}`,
         handler: "packages/api/post-street-manager.main",
         timeout: 10,
         memorySize: 512,
         environment: {
-            STREET_MANAGER_BUCKET_NAME: streetManagerBucket.bucketName,
+            STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsQueue.queueUrl,
         },
         runtime: "nodejs18.x",
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
