@@ -1,5 +1,6 @@
 import { DataSource, Service, ServiceStops, ServicesByStops } from "../client";
 import { APIGatewayEvent } from "aws-lambda";
+import { SQSMessageAttributes, SQSRecordAttributes } from "aws-lambda/trigger/sqs";
 
 export const serviceDbData: Service = [
     {

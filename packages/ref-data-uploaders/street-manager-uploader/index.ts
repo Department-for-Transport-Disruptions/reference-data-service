@@ -1,55 +1,13 @@
 import { SQSEvent } from "aws-lambda";
-import { PermitMessage, Roadwork, roadworkSchema } from "@reference-data-service/api/utils/snsMesssageTypes.zod";
+import { roadworkSchema } from "@reference-data-service/api/utils/snsMesssageTypes.zod";
 import * as logger from "lambda-log";
-import { Database, getDbClient, RoadworksTable } from "@reference-data-service/core/db";
-import { Kysely, sql } from "kysely";
+import { getDbClient } from "@reference-data-service/core/db";
+import { getRoadworkByPermitReferenceNumber, updateToRoadworksTable, writeToRoadworksTable } from "./utils";
 
-async function getRoadworkByPermitReferenceNumber(permitReferenceNumber: string, dbClient: Kysely<Database>) {
-    return await dbClient
-        .selectFrom("roadworks")
-        .where("permitReferenceNumber", "=", permitReferenceNumber)
-        .selectAll()
-        .executeTakeFirst();
-}
-
-const writeToRoadworksTable = async (roadwork: RoadworksTable, dbClient: Kysely<Database>) => {
-    await dbClient.insertInto("roadworks").values(roadwork).execute();
-};
-
-const updateToRoadworksTable = async (roadwork: RoadworksTable, dbClient: Kysely<Database>) => {
-    await dbClient
-        .updateTable("roadworks")
-        .set({
-            highwayAuthority: roadwork.highwayAuthority,
-            highwayAuthoritySwaCode: roadwork.highwayAuthoritySwaCode,
-            worksLocationCoordinates: roadwork.worksLocationCoordinates,
-            streetName: roadwork.streetName,
-            areaName: roadwork.areaName,
-            workCategory: roadwork.workCategory,
-            trafficManagementType: roadwork.trafficManagementType,
-            proposedStartDateTime: roadwork.proposedStartDateTime,
-            proposedEndDateTime: roadwork.proposedEndDateTime,
-            actualStartDateTime: roadwork.actualStartDateTime,
-            actualEndDateTime: roadwork.actualEndDateTime,
-            workStatus: roadwork.workStatus,
-            usrn: roadwork.usrn,
-            activityType: roadwork.activityType,
-            worksLocationType: roadwork.worksLocationType,
-            isTrafficSensitive: roadwork.isTrafficSensitive,
-            permitStatus: roadwork.permitStatus,
-            town: roadwork.town,
-            currentTrafficManagementType: roadwork.currentTrafficManagementType,
-            currentTrafficManagementTypeUpdateDate: roadwork.currentTrafficManagementTypeUpdateDate,
-            createdDateTime: roadwork.createdDateTime,
-            lastUpdatedDateTime: roadwork.lastUpdatedDateTime,
-        })
-        .where("permitReferenceNumber", "=", roadwork.permitReferenceNumber)
-        .execute();
-};
+const dbClient = getDbClient();
 
 export const main = async (event: SQSEvent) => {
     const currentDateTime = new Date();
-    const dbClient = getDbClient();
 
     const roadwork = roadworkSchema.safeParse(JSON.parse(event.Records[0].body));
 
