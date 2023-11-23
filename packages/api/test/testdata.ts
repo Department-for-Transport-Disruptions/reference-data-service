@@ -1,4 +1,5 @@
 import { DataSource, Service, ServiceStops, ServicesByStops } from "../client";
+import { APIGatewayEvent } from "aws-lambda";
 
 export const serviceDbData: Service = [
     {
@@ -3682,3 +3683,73 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
         },
     },
 ];
+
+const message = {
+    event_reference: 529770,
+    event_type: "work-start",
+    object_data: {
+        work_reference_number: "TSR1591199404915",
+        permit_reference_number: "TSR1591199404915-01",
+        promoter_swa_code: "STPR",
+        promoter_organisation: "Smoke Test Promoter",
+        highway_authority: "CITY OF WESTMINSTER",
+        works_location_coordinates: "LINESTRING(501251.53 222574.64,501305.92 222506.65)",
+        street_name: "HIGH STREET NORTH",
+        area_name: "LONDON",
+        work_category: "Standard",
+        traffic_management_type: "Road closure",
+        proposed_start_date: "2020-06-10T00:00:00.000Z",
+        proposed_start_time: "2020-06-10T13:50:00.000Z",
+        proposed_end_date: "2020-06-12T00:00:00.000Z",
+        proposed_end_time: "2020-06-12T00:00:00.000Z",
+        actual_start_date_time: "2020-06-11T10:11:00.000Z",
+        actual_end_date_time: "2020-06-13T00:00:00.000Z",
+        work_status: "Works in progress",
+        usrn: "8401426",
+        highway_authority_swa_code: "5990",
+        work_category_ref: "standard",
+        traffic_management_type_ref: "road_closure",
+        work_status_ref: "in_progress",
+        activity_type: "Remedial works",
+        is_ttro_required: "No",
+        is_covid_19_response: "No",
+        works_location_type: "Cycleway, Footpath",
+        permit_conditions: "NCT01a, NCT01b, NCT11a",
+        road_category: "3",
+        is_traffic_sensitive: "Yes",
+        is_deemed: "No",
+        permit_status: "permit_modification_request",
+        town: "LONDON",
+        collaborative_working: "Yes",
+        collaboration_type: "Other",
+        collaboration_type_ref: "other",
+        close_footway: "Yes, a pedestrian walkway will be provided",
+        close_footway_ref: "yes_provide_pedestrian_walkway",
+        current_traffic_management_type: "Multi-way signals",
+        current_traffic_management_type_ref: "multi_way_signals",
+        current_traffic_management_update_date: "2020-06-15T10:11:00.000Z",
+    },
+    event_time: "2020-06-04T08:00:00.000Z",
+    object_type: "PERMIT",
+    object_reference: "TSR1591199404915-01",
+    version: 1,
+};
+
+const body = {
+    Type: "Notification",
+    MessageId: "df0ebbe1-0a9a-5b59-b481-e63846415a86",
+    TopicArn: "arn:aws:sns:eu-west-2:899289342948:test-street-manager-topic",
+    Message: JSON.stringify(message),
+    Timestamp: "2023-10-02T14:22:45.889Z",
+    SignatureVersion: "1",
+    Signature: "test-signature",
+    SigningCertURL: "https://wwww.testurl.com",
+    UnsubscribeURL: "https://wwww.testurl.com",
+};
+
+export const mockStreetManagerNotification = {
+    headers: {
+        "x-amz-sns-message-type": "Notification",
+    },
+    body: JSON.stringify(body),
+} as unknown as APIGatewayEvent;

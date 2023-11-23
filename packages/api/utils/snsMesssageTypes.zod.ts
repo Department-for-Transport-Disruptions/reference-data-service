@@ -83,7 +83,7 @@ export const permitMessageSchema = baseMessageSchema
         permitStatus: data.object_data.permit_status ?? null,
         town: data.object_data.town ?? null,
         currentTrafficManagementType: data.object_data.current_traffic_management_type ?? null,
-        currentTrafficManageTypeUpdateDate: data.object_data.current_traffic_manage_type_update_date ?? null,
+        currentTrafficManagementTypeUpdateDate: data.object_data.current_traffic_manage_type_update_date ?? null,
         lastUpdatedDateTime: data.event_time ?? null,
     }));
 
@@ -110,9 +110,9 @@ export const roadworkSchema = z.object({
     permitStatus: z.string().nullable(),
     town: z.string().nullable(),
     currentTrafficManagementType: z.string().nullable(),
-    currentTrafficManageTypeUpdateDate: z.string().datetime().nullable(),
+    currentTrafficManagementTypeUpdateDate: z.string().datetime().nullable(),
     lastUpdatedDateTime: z.string().datetime(),
-    createdDateTime: z.string().datetime(),
+    createdDateTime: z.string().datetime().optional(),
 });
 
 export type Roadwork = z.infer<typeof roadworkSchema>;

@@ -242,7 +242,7 @@ export interface RoadworksTable {
     permitStatus: string | null;
     town: string | null;
     currentTrafficManagementType: string | null;
-    currentTrafficManageTypeUpdateDate: string | null;
+    currentTrafficManagementTypeUpdateDate: string | null;
     createdDateTime: string;
     lastUpdatedDateTime: string;
 }
@@ -305,9 +305,7 @@ export type Tables =
     | "localities"
     | "vehicle_journeys"
     | "tracks"
-    | "nptg_admin_areas"
-    | "roadworks"
-    | "highway_authority_admin_areas";
+    | "nptg_admin_areas";
 export type TablesNew =
     | "stops_new"
     | "operator_lines_new"

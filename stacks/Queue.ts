@@ -24,6 +24,11 @@ export function QueueStack({ stack }: StackContext) {
                 },
             },
         },
+        cdk: {
+            queue: {
+                fifo: true,
+            },
+        },
     });
 
     return { streetManagerSqsQueue };

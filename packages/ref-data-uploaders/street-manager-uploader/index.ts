@@ -27,7 +27,7 @@ const updateToRoadworksTable = async (roadwork: RoadworksTable, dbClient: Kysely
             areaName: roadwork.areaName,
             workCategory: roadwork.workCategory,
             trafficManagementType: roadwork.trafficManagementType,
-            proposedStartDateTime: sql`CAST(${roadwork.proposedStartDateTime} AS DATETIME)`,
+            proposedStartDateTime: roadwork.proposedStartDateTime,
             proposedEndDateTime: roadwork.proposedEndDateTime,
             actualStartDateTime: roadwork.actualStartDateTime,
             actualEndDateTime: roadwork.actualEndDateTime,
@@ -39,7 +39,7 @@ const updateToRoadworksTable = async (roadwork: RoadworksTable, dbClient: Kysely
             permitStatus: roadwork.permitStatus,
             town: roadwork.town,
             currentTrafficManagementType: roadwork.currentTrafficManagementType,
-            currentTrafficManageTypeUpdateDate: roadwork.currentTrafficManageTypeUpdateDate,
+            currentTrafficManagementTypeUpdateDate: roadwork.currentTrafficManagementTypeUpdateDate,
             createdDateTime: roadwork.createdDateTime,
             lastUpdatedDateTime: roadwork.lastUpdatedDateTime,
         })
@@ -66,7 +66,7 @@ export const main = async (event: SQSEvent) => {
 
     const existingRoadwork = await getRoadworkByPermitReferenceNumber(roadwork.data.permitReferenceNumber, dbClient);
 
-    if (!!existingRoadwork) {
+    if (!!existingRoadwork?.permitReferenceNumber) {
         logger.info(`Uploading update to permit: ${roadwork.data.permitReferenceNumber.toString()} to the database`);
         const roadworkDbInput = {
             ...existingRoadwork,
@@ -79,15 +79,8 @@ export const main = async (event: SQSEvent) => {
 
         const roadworkDbInput = {
             ...roadwork.data,
-            proposedStartDateTime: sql`CAST(${roadwork.data.proposedStartDateTime} AS DATETIME)`,
-            proposedEndDateTime: sql`CAST(${roadwork.data.proposedEndDateTime} AS DATETIME)`,
-            actualStartDateTime: sql`CAST(${roadwork.data.actualStartDateTime} AS DATETIME)`,
-            actualEndDateTime: sql`CAST(${roadwork.data.actualEndDateTime} AS DATETIME)`
-            createdDateTime: sql`CAST(${roadwork.data.actualEndDateTime} AS DATETIME)`
-            currentDateTime.toISOString(),
+            createdDateTime: currentDateTime.toISOString(),
         };
-
-        //move the above into the query builder instead
 
         await writeToRoadworksTable(roadworkDbInput, dbClient);
     }
