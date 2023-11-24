@@ -135,7 +135,7 @@ export function RetrieversStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-tnds-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/txc-retriever/index.main",
-        runtime: "python3.10",
+        runtime: "python3.11",
         timeout: 900,
         memorySize: 3008,
         environment: {
@@ -172,7 +172,7 @@ export function RetrieversStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-bods-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/txc-retriever/index.main",
-        runtime: "python3.10",
+        runtime: "python3.11",
         timeout: 900,
         memorySize: 3008,
         environment: {
@@ -226,7 +226,7 @@ export function RetrieversStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-txc-unzipper-${stack.stage}`,
         handler: "packages/ref-data-retrievers/txc-unzipper/index.main",
-        runtime: "python3.10",
+        runtime: "python3.11",
         timeout: 900,
         memorySize: 1024,
         retryAttempts: 0,

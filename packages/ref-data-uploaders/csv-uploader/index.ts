@@ -1,13 +1,13 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getDbClient, Tables, TablesNew, waitForDb } from "@reference-data-service/core/db";
 import { S3Event } from "aws-lambda";
-import { Promise } from "bluebird";
+import { Promise as BluebirdPromise } from "bluebird";
 import { randomUUID } from "crypto";
 import { RawBuilder, sql } from "kysely";
 import * as logger from "lambda-log";
 import OsPoint from "ospoint";
 import { parse } from "papaparse";
-import { SSMClient, PutParameterCommand } from "@aws-sdk/client-ssm";
+import { SSMClient, PutParameterCommand, PutParameterCommandInput } from "@aws-sdk/client-ssm";
 
 const dbClient = getDbClient();
 const s3Client = new S3Client({ region: "eu-west-2" });
@@ -131,7 +131,7 @@ export const main = async (event: S3Event) => {
         await dbClient.schema.dropTable(newTable).ifExists().execute();
         await sqlString.execute(dbClient);
 
-        await Promise.map(
+        await BluebirdPromise.map(
             batches,
             (batch) => {
                 return dbClient
@@ -170,7 +170,7 @@ export const main = async (event: S3Event) => {
 
 const putParameter = async (key: string, value: string) => {
     try {
-        const input = {
+        const input: PutParameterCommandInput = {
             Name: key,
             Value: value,
             Type: "String",

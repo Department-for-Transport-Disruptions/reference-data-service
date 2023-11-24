@@ -1,7 +1,7 @@
 import { Database, getDbClient, Tables } from "@reference-data-service/core/db";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
-import { SSMClient, PutParameterCommand, GetParameterCommand } from "@aws-sdk/client-ssm";
+import { SSMClient, PutParameterCommand, GetParameterCommand, PutParameterCommandInput } from "@aws-sdk/client-ssm";
 
 const ssm = new SSMClient({ region: "eu-west-2" });
 
@@ -73,7 +73,7 @@ export const main = async () => {
 
 const putParameter = async (key: string, value: string) => {
     try {
-        const input = {
+        const input: PutParameterCommandInput = {
             Name: key,
             Value: value,
             Type: "String",
