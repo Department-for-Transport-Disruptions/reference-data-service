@@ -820,7 +820,7 @@ export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQ
             "roadworks.highwayAuthoritySwaCode",
         )
         .$if(!!input.adminAreaCodes && input.adminAreaCodes.length > 0, (qb) =>
-            qb.where("highway_authority_admin_area.adminAreaCode", "in", input.adminAreaCodes ?? []),
+            qb.where("highway_authority_admin_area.administrativeAreaCode", "in", input.adminAreaCodes ?? []),
         )
         .select([
             "roadworks.permitReferenceNumber",
@@ -836,7 +836,7 @@ export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQ
             "roadworks.actualEndDateTime",
             "roadworks.permitStatus",
             "roadworks.workStatus",
-            "highway_authority_admin_area.adminAreaCode",
+            "highway_authority_admin_area.administrativeAreaCode",
         ])
         .distinct()
         .orderBy("roadworks.permitReferenceNumber")
@@ -855,8 +855,8 @@ export const getRoadworkById = async (dbClient: Kysely<Database>, input: Roadwor
     return dbClient
         .selectFrom("roadworks")
         .innerJoin(
-            "highwayAuthorityAdminArea",
-            "highwayAuthorityAdminArea.highwayAuthoritySwaCode",
+            "highway_authority_admin_area",
+            "highway_authority_admin_area.highwayAuthoritySwaCode",
             "roadworks.highwayAuthoritySwaCode",
         )
         .where("roadworks.permitReferenceNumber", "=", input.permitReferenceNumber)
@@ -874,7 +874,7 @@ export const getRoadworkById = async (dbClient: Kysely<Database>, input: Roadwor
             "roadworks.actualEndDateTime",
             "roadworks.permitStatus",
             "roadworks.workStatus",
-            "highwayAuthorityAdminArea.adminAreaCode",
+            "highway_authority_admin_area.administrativeAreaCode",
         ])
         .distinct()
         .limit(1)
