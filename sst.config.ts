@@ -6,6 +6,7 @@ import { RetrieversStack } from "./stacks/Retrievers";
 import { S3Stack } from "./stacks/S3";
 import { TableRenamerStack } from "./stacks/TableRenamer";
 import { UploadersStack } from "./stacks/Uploaders";
+import { QueueStack } from "./stacks/Queue";
 
 export default {
     config() {
@@ -21,6 +22,7 @@ export default {
         app.stack(RetrieversStack);
         app.stack(UploadersStack);
         app.stack(TableRenamerStack);
+        app.stack(QueueStack);
         app.stack(ApiStack);
     },
 } satisfies SSTConfig;

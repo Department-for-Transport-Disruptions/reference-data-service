@@ -290,7 +290,7 @@ export interface Database {
     nptg_admin_areas_new?: NptgAdminAreasTable;
     nptg_admin_areas_old?: NptgAdminAreasTable;
     roadworks: RoadworksTable;
-    highway_authority_admin_area: HighwayAuthorityAdminAreaTable;
+    highway_authority_admin_areas: HighwayAuthorityAdminAreaTable;
 }
 
 export type Tables =
