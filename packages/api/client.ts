@@ -839,7 +839,7 @@ export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQ
             "highway_authority_admin_areas.administrativeAreaCode",
         ])
         .distinct()
-        .orderBy("roadworks.permitReferenceNumber")
+        .orderBy("roadworks.proposedStartDateTime")
         .offset((input.page || 0) * ROADWORKS_PAGE_SIZE)
         .limit(ROADWORKS_PAGE_SIZE)
         .execute();
@@ -877,8 +877,7 @@ export const getRoadworkById = async (dbClient: Kysely<Database>, input: Roadwor
             "highway_authority_admin_areas.administrativeAreaCode",
         ])
         .distinct()
-        .limit(1)
-        .execute();
+        .executeTakeFirst();
 };
 
 export type Roadworks = Awaited<ReturnType<typeof getRoadworks>>;
