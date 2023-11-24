@@ -221,6 +221,37 @@ export interface NptgAdminAreasTable {
     shortName: string | null;
 }
 
+export interface RoadworksTable {
+    permitReferenceNumber: string;
+    highwayAuthority: string | null;
+    highwayAuthoritySwaCode: number;
+    worksLocationCoordinates: string | null;
+    streetName: string | null;
+    areaName: string | null;
+    workCategory: string | null;
+    trafficManagementType: string | null;
+    proposedStartDateTime: string | null;
+    proposedEndDateTime: string | null;
+    actualStartDateTime: string | null;
+    actualEndDateTime: string | null;
+    workStatus: string | null;
+    usrn: string | null;
+    activityType: string | null;
+    worksLocationType: string | null;
+    isTrafficSensitive: string | null;
+    permitStatus: string | null;
+    town: string | null;
+    currentTrafficManagementType: string | null;
+    currentTrafficManagementTypeUpdateDate: string | null;
+    createdDateTime: string;
+    lastUpdatedDateTime: string;
+}
+
+export interface HighwayAuthorityAdminAreaTable {
+    highwayAuthoritySwaCode: number;
+    administrativeAreaCode: string;
+}
+
 export interface Database {
     stops: StopsTable;
     stops_new?: StopsTable;
@@ -258,6 +289,8 @@ export interface Database {
     nptg_admin_areas: NptgAdminAreasTable;
     nptg_admin_areas_new?: NptgAdminAreasTable;
     nptg_admin_areas_old?: NptgAdminAreasTable;
+    roadworks: RoadworksTable;
+    highway_authority_admin_area: HighwayAuthorityAdminAreaTable;
 }
 
 export type Tables =

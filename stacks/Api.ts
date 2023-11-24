@@ -178,6 +178,38 @@ export function ApiStack({ stack }: StackContext) {
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
+    const roadworksFunction = new Function(stack, "ref-data-service-get-roadworks-function", {
+        bind: [cluster],
+        functionName: `ref-data-service-get-roadworks-function-${stack.stage}`,
+        handler: "packages/api/get-roadworks.main",
+        timeout: 10,
+        memorySize: 512,
+        environment: {
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
+            MAX_ADMIN_AREA_CODES: "50",
+            IS_LOCAL: !["test", "preprod", "prod"].includes(stack.stage) ? "true" : "false",
+        },
+        runtime: "nodejs18.x",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+    });
+
+    const roadworkByIdFunction = new Function(stack, "ref-data-service-get-roadwork-by-id-function", {
+        bind: [cluster],
+        functionName: `ref-data-service-get-roadwork-by-id-function-${stack.stage}`,
+        handler: "packages/api/get-roadwork-by-id.main",
+        timeout: 10,
+        memorySize: 512,
+        environment: {
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
+        },
+        runtime: "nodejs18.x",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+    });
+
     const subDomain = ["test", "preprod", "prod"].includes(stack.stage) ? "api" : `api.${stack.stage}`;
 
     const allowedOrigins = [
@@ -201,6 +233,8 @@ export function ApiStack({ stack }: StackContext) {
             "GET /area-codes": areaCodeFunction,
             "GET /admin-areas": adminAreasFunction,
             "POST /street-manager": postStreetManagerFunction,
+            "GET /roadworks": roadworksFunction,
+            "GET /roadwork/{pathReferenceNumber}": roadworkByIdFunction,
         },
         customDomain: {
             domainName: `${subDomain}.${hostedZone.zoneName}`,

@@ -801,3 +801,84 @@ export const getAdminAreas = async (dbClient: Kysely<Database>) => {
 };
 
 export type AdminAreas = Awaited<ReturnType<typeof getAdminAreas>>;
+
+export type RoadworksQueryInput = {
+    adminAreaCodes?: string[];
+    page?: number;
+};
+
+export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQueryInput) => {
+    logger.info("Starting getRoadworks...");
+
+    const ROADWORKS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 2000;
+
+    return dbClient
+        .selectFrom("roadworks")
+        .innerJoin(
+            "highway_authority_admin_area",
+            "highway_authority_admin_area.highwayAuthoritySwaCode",
+            "roadworks.highwayAuthoritySwaCode",
+        )
+        .$if(!!input.adminAreaCodes && input.adminAreaCodes.length > 0, (qb) =>
+            qb.where("highway_authority_admin_area.adminAreaCode", "in", input.adminAreaCodes ?? []),
+        )
+        .select([
+            "roadworks.permitReferenceNumber",
+            "roadworks.highwayAuthoritySwaCode",
+            "roadworks.streetName",
+            "roadworks.areaName",
+            "roadworks.town",
+            "roadworks.worksLocationCoordinates",
+            "roadworks.activityType",
+            "roadworks.proposedStartDateTime",
+            "roadworks.proposedEndDateTime",
+            "roadworks.actualStartDateTime",
+            "roadworks.actualEndDateTime",
+            "roadworks.permitStatus",
+            "roadworks.workStatus",
+            "highway_authority_admin_area.adminAreaCode",
+        ])
+        .distinct()
+        .orderBy("roadworks.permitReferenceNumber")
+        .offset((input.page || 0) * ROADWORKS_PAGE_SIZE)
+        .limit(ROADWORKS_PAGE_SIZE)
+        .execute();
+};
+
+export type RoadworkByIdQueryInput = {
+    permitReferenceNumber: string;
+};
+
+export const getRoadworkById = async (dbClient: Kysely<Database>, input: RoadworkByIdQueryInput) => {
+    logger.info("Starting getRoadworkById...");
+
+    return dbClient
+        .selectFrom("roadworks")
+        .innerJoin(
+            "highwayAuthorityAdminArea",
+            "highwayAuthorityAdminArea.highwayAuthoritySwaCode",
+            "roadworks.highwayAuthoritySwaCode",
+        )
+        .where("roadworks.permitReferenceNumber", "=", input.permitReferenceNumber)
+        .select([
+            "roadworks.permitReferenceNumber",
+            "roadworks.highwayAuthoritySwaCode",
+            "roadworks.streetName",
+            "roadworks.areaName",
+            "roadworks.town",
+            "roadworks.worksLocationCoordinates",
+            "roadworks.activityType",
+            "roadworks.proposedStartDateTime",
+            "roadworks.proposedEndDateTime",
+            "roadworks.actualStartDateTime",
+            "roadworks.actualEndDateTime",
+            "roadworks.permitStatus",
+            "roadworks.workStatus",
+            "highwayAuthorityAdminArea.adminAreaCode",
+        ])
+        .distinct()
+        .limit(1)
+        .execute();
+};
+
+export type Roadworks = Awaited<ReturnType<typeof getRoadworks>>;
