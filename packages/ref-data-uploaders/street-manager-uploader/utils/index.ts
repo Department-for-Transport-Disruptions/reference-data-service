@@ -1,6 +1,5 @@
 import { Kysely } from "kysely";
 import { Database, RoadworksTable } from "@reference-data-service/core/db";
-import { Roadwork, roadworkSchema } from "@reference-data-service/api/utils/roadworkTypes.zod";
 
 export async function getRoadworkByPermitReferenceNumber(permitReferenceNumber: string, dbClient: Kysely<Database>) {
     return await dbClient
@@ -8,12 +7,6 @@ export async function getRoadworkByPermitReferenceNumber(permitReferenceNumber: 
         .where("permitReferenceNumber", "=", permitReferenceNumber)
         .selectAll()
         .executeTakeFirst();
-
-    // const parsedRoadworks = roadworkSchema.safeParse(roadworks);
-    // if (!parsedRoadworks.success) {
-    //     return {};
-    // }
-    // return parsedRoadworks.data;
 }
 
 export const writeToRoadworksTable = async (roadwork: RoadworksTable, dbClient: Kysely<Database>) => {

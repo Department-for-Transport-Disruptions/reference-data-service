@@ -3,7 +3,6 @@ import * as logger from "lambda-log";
 import { getDbClient } from "@reference-data-service/core/db";
 import { getRoadworkByPermitReferenceNumber, updateToRoadworksTable, writeToRoadworksTable } from "./utils";
 import { roadworkSchema } from "@reference-data-service/api/utils/roadworkTypes.zod";
-import { permitMessageSchema } from "@reference-data-service/api/utils/snsMesssageTypes.zod";
 
 export const main = async (event: SQSEvent) => {
     const currentDateTime = new Date();
