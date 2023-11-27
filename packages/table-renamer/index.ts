@@ -90,7 +90,6 @@ const putParameter = async (key: string, value: string) => {
 
 export const checkReferenceDataImportHasCompleted = async (tableName: Tables, db: Kysely<Database>): Promise<void> => {
     logger.info(`Check if reference data import has completed for table ${tableName}`);
-
     const [newCount] = await db.selectFrom(`${tableName}_new`).select(db.fn.count("id").as("count")).execute();
 
     if (newCount.count === 0) {

@@ -1,8 +1,9 @@
 import { SQSEvent } from "aws-lambda";
-import { roadworkSchema } from "@reference-data-service/api/utils/snsMesssageTypes.zod";
 import * as logger from "lambda-log";
 import { getDbClient } from "@reference-data-service/core/db";
 import { getRoadworkByPermitReferenceNumber, updateToRoadworksTable, writeToRoadworksTable } from "./utils";
+import { roadworkSchema } from "@reference-data-service/api/utils/roadworkTypes.zod";
+import { permitMessageSchema } from "@reference-data-service/api/utils/snsMesssageTypes.zod";
 
 export const main = async (event: SQSEvent) => {
     const currentDateTime = new Date();
@@ -23,11 +24,12 @@ export const main = async (event: SQSEvent) => {
 
     const existingRoadwork = await getRoadworkByPermitReferenceNumber(roadwork.data.permitReferenceNumber, dbClient);
 
-    if (!!existingRoadwork?.permitReferenceNumber) {
+    if (!!existingRoadwork) {
         logger.info(`Uploading update to permit: ${roadwork.data.permitReferenceNumber.toString()} to the database`);
         const roadworkDbInput = {
             ...existingRoadwork,
             ...roadwork.data,
+            createdDateTime: existingRoadwork.createdDateTime,
         };
 
         await updateToRoadworksTable(roadworkDbInput, dbClient);

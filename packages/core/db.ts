@@ -2,6 +2,12 @@ import { RDSData } from "@aws-sdk/client-rds-data";
 import { Generated, Kysely } from "kysely";
 import { DataApiDialect } from "kysely-data-api";
 import * as logger from "lambda-log";
+import {
+    PermitStatus,
+    TrafficManagementType,
+    WorkCategory,
+    WorkStatus,
+} from "@reference-data-service/api/utils/roadworkTypes.zod";
 
 export interface StopsTable {
     id: number;
@@ -228,20 +234,20 @@ export interface RoadworksTable {
     worksLocationCoordinates: string | null;
     streetName: string | null;
     areaName: string | null;
-    workCategory: string | null;
-    trafficManagementType: string | null;
+    workCategory: WorkCategory | null;
+    trafficManagementType: TrafficManagementType | null;
     proposedStartDateTime: string | null;
     proposedEndDateTime: string | null;
     actualStartDateTime: string | null;
     actualEndDateTime: string | null;
-    workStatus: string | null;
+    workStatus: WorkStatus | null;
     usrn: string | null;
     activityType: string | null;
     worksLocationType: string | null;
     isTrafficSensitive: string | null;
-    permitStatus: string | null;
+    permitStatus: PermitStatus | null;
     town: string | null;
-    currentTrafficManagementType: string | null;
+    currentTrafficManagementType: TrafficManagementType | null;
     currentTrafficManagementTypeUpdateDate: string | null;
     createdDateTime: string;
     lastUpdatedDateTime: string;

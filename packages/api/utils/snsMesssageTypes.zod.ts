@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { worksLocationType } from "./roadworkTypes.zod";
 
 export const snsMessageAttributeSchema = z.record(
     z.object({
@@ -62,6 +63,17 @@ export const permitMessageSchema = baseMessageSchema
             }),
         }),
     )
+    .refine((data) => {
+        if (data.object_data.works_location_type) {
+            const worksLocationArray = data.object_data.works_location_type.split(",").map((item) => item.trim());
+
+            const isWorksLocationArrayValid = worksLocationArray?.map((location) =>
+                worksLocationType.includes(location) ? true : false,
+            );
+
+            return isWorksLocationArrayValid.includes(false) ? false : true;
+        }
+    })
     .transform((data) => ({
         permitReferenceNumber: data.object_data.permit_reference_number,
         highwayAuthority: data.object_data.highway_authority,
@@ -88,31 +100,3 @@ export const permitMessageSchema = baseMessageSchema
     }));
 
 export type PermitMessage = z.infer<typeof permitMessageSchema>;
-
-export const roadworkSchema = z.object({
-    permitReferenceNumber: z.string(),
-    highwayAuthority: z.string(),
-    highwayAuthoritySwaCode: z.coerce.number(),
-    worksLocationCoordinates: z.string().nullable(),
-    streetName: z.string().nullable(),
-    areaName: z.string().nullable(),
-    workCategory: z.string().nullable(),
-    trafficManagementType: z.string().nullable(),
-    proposedStartDateTime: z.string().datetime().nullable(),
-    proposedEndDateTime: z.string().datetime().nullable(),
-    actualStartDateTime: z.string().datetime().nullable(),
-    actualEndDateTime: z.string().datetime().nullable(),
-    workStatus: z.string().nullable(),
-    usrn: z.string().nullable(),
-    activityType: z.string().nullable(),
-    worksLocationType: z.string().nullable(),
-    isTrafficSensitive: z.string().nullable(),
-    permitStatus: z.string().nullable(),
-    town: z.string().nullable(),
-    currentTrafficManagementType: z.string().nullable(),
-    currentTrafficManagementTypeUpdateDate: z.string().datetime().nullable(),
-    lastUpdatedDateTime: z.string().datetime(),
-    createdDateTime: z.string().datetime().optional(),
-});
-
-export type Roadwork = z.infer<typeof roadworkSchema>;
