@@ -1,4 +1,4 @@
-import { Database, getDbClient, Tables, TablesNew } from "@reference-data-service/core/db";
+import { Database, getDbClient, Tables } from "@reference-data-service/core/db";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { SSMClient, PutParameterCommand, GetParameterCommand } from "@aws-sdk/client-ssm";
