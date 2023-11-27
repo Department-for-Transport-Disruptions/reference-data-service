@@ -4,10 +4,9 @@ import * as logger from "lambda-log";
 import { getDbClient } from "@reference-data-service/core/db";
 import { getRoadworkByPermitReferenceNumber, updateToRoadworksTable, writeToRoadworksTable } from "./utils";
 
-const dbClient = getDbClient();
-
 export const main = async (event: SQSEvent) => {
     const currentDateTime = new Date();
+    const dbClient = getDbClient();
 
     const roadwork = roadworkSchema.safeParse(JSON.parse(event.Records[0].body));
 

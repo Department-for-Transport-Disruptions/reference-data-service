@@ -1,4 +1,4 @@
-import { beforeAll, afterEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, afterEach, describe, expect, it, vi, beforeEach } from "vitest";
 import { main } from "./index";
 import * as utils from "./utils";
 
@@ -63,16 +63,31 @@ describe("street manager uploader", () => {
         updateToRoadworksTable: vi.fn(),
     }));
 
+    vi.mock("../../core/db", () => ({
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        getDbClient: vi.fn().mockImplementation(() => {}),
+    }));
+
     const getRoadworksByPermitReferenceNumberSpy = vi.spyOn(utils, "getRoadworkByPermitReferenceNumber");
     const writeToRoadworksTableSpy = vi.spyOn(utils, "writeToRoadworksTable");
     const updateToRoadworksTableSpy = vi.spyOn(utils, "updateToRoadworksTable");
+
+    beforeEach(() => {
+        writeToRoadworksTableSpy.mockResolvedValue();
+        updateToRoadworksTableSpy.mockResolvedValue();
+    });
 
     afterEach(() => {
         vi.resetAllMocks();
     });
 
     it("should error if SQS event message does not match roadwork schema", async () => {
-        await main(mockSqsEvent);
+        getRoadworksByPermitReferenceNumberSpy.mockResolvedValue(undefined);
+        const invalidSqsEvent = {
+            ...mockSqsEvent,
+            Records: [{ ...mockSqsEvent.Records[0], body: JSON.stringify({}) }],
+        };
+        await main(invalidSqsEvent);
         expect(writeToRoadworksTableSpy).not.toBeCalled();
         expect(updateToRoadworksTableSpy).not.toBeCalled();
     });
