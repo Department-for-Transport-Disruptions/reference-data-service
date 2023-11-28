@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { worksLocationType } from "./roadworkTypes.zod";
+import { worksLocationTypes } from "./roadworkTypes.zod";
 
 export const snsMessageAttributeSchema = z.record(
     z.object({
@@ -67,11 +67,7 @@ export const permitMessageSchema = baseMessageSchema
         if (data.object_data.works_location_type) {
             const worksLocationArray = data.object_data.works_location_type.split(",").map((item) => item.trim());
 
-            const isWorksLocationArrayValid = worksLocationArray?.map((location) =>
-                worksLocationType.includes(location) ? true : false,
-            );
-
-            return isWorksLocationArrayValid.includes(false) ? false : true;
+            return worksLocationArray.every((location) => worksLocationTypes.includes(location));
         }
     })
     .transform((data) => ({

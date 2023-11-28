@@ -1,6 +1,6 @@
 import { APIGatewayEvent } from "aws-lambda";
 import * as logger from "lambda-log";
-import { BaseMessage, PermitMessage, permitMessageSchema, snsMessageSchema } from "./utils/snsMesssageTypes.zod";
+import { BaseMessage, PermitMessage, permitMessageSchema, snsMessageSchema } from "./utils/snsMessageTypes.zod";
 import { confirmSubscription, isValidSignature } from "./utils/snsMessageValidator";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 

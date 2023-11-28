@@ -1,13 +1,13 @@
 import { Kysely } from "kysely";
 import { Database, RoadworksTable } from "@reference-data-service/core/db";
 
-export async function getRoadworkByPermitReferenceNumber(permitReferenceNumber: string, dbClient: Kysely<Database>) {
+export const getRoadworkByPermitReferenceNumber = async (permitReferenceNumber: string, dbClient: Kysely<Database>) => {
     return await dbClient
         .selectFrom("roadworks")
         .where("permitReferenceNumber", "=", permitReferenceNumber)
         .selectAll()
         .executeTakeFirst();
-}
+};
 
 export const writeToRoadworksTable = async (roadwork: RoadworksTable, dbClient: Kysely<Database>) => {
     await dbClient.insertInto("roadworks").values(roadwork).execute();

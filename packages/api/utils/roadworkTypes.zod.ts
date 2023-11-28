@@ -13,7 +13,7 @@ const workStatus = z.union([
 
 export type WorkStatus = z.infer<typeof workStatus>;
 
-export const worksLocationType = [
+export const worksLocationTypes = [
     "Footway",
     "Carriageway",
     "Verge",
@@ -24,8 +24,6 @@ export const worksLocationType = [
     "Taxi rank",
     "Cycleway",
 ];
-
-// export type WorksLocationType = z.infer<typeof worksLocationType>;
 
 const trafficManagementTypes = z.union([
     z.literal("Road closure"),
