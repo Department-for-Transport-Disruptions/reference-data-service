@@ -3767,7 +3767,7 @@ const sqsMessage = {
     proposedEndDateTime: "2020-06-12T00:00:00.000Z",
     actualStartDateTime: null,
     actualEndDateTime: null,
-    workStatus: "Works in progress",
+    workStatus: "planned",
     usrn: "8401426",
     activityType: "Remedial works",
     worksLocationType: "Cycleway, Footpath",
