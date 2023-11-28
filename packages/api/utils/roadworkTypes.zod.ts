@@ -13,18 +13,6 @@ const workStatus = z.union([
 
 export type WorkStatus = z.infer<typeof workStatus>;
 
-// const worksLocationType = z.union([
-//     z.literal("Footway"),
-//     z.literal("Carriageway"),
-//     z.literal("Verge"),
-//     z.literal("Footpath"),
-//     z.literal("Parking place"),
-//     z.literal("Bus stop or stand"),
-//     z.literal("Cycle hire docking station"),
-//     z.literal("Taxi rank"),
-//     z.literal("Cycleway"),
-// ]);
-
 export const worksLocationType = [
     "Footway",
     "Carriageway",
