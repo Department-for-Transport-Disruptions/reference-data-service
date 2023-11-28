@@ -234,7 +234,7 @@ export function ApiStack({ stack }: StackContext) {
             "GET /admin-areas": adminAreasFunction,
             "POST /street-manager": postStreetManagerFunction,
             "GET /roadworks": roadworksFunction,
-            "GET /roadwork/{pathReferenceNumber}": roadworkByIdFunction,
+            "GET /roadwork/{permitReferenceNumber}": roadworkByIdFunction,
         },
         customDomain: {
             domainName: `${subDomain}.${hostedZone.zoneName}`,
