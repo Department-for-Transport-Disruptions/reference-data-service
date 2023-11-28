@@ -37,7 +37,10 @@ trigger-nptg-retriever:
 trigger-bods-retriever:
 	aws lambda invoke --function-name ref-data-service-bods-retriever-$(stage) --invocation-type Event /tmp/outfile.txt > /dev/null
 
-trigger-all-csv-retrievers: trigger-noc-retriever trigger-localities-retriever trigger-naptan-retriever
+trigger-table-renamer:
+	aws lambda invoke --function-name ref-data-service-table-renamer-$(stage) --invocation-type Event /tmp/outfile.txt > /dev/null
+
+trigger-all-csv-retrievers: trigger-noc-retriever trigger-naptan-retriever
 
 test-bods-uploader: cleardown-txc-tables upload-bods-file
 

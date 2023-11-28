@@ -228,15 +228,28 @@ def iterate_through_journey_patterns_and_run_insert_queries(
     data: dict,
     operator_service_id: str,
     service: dict,
+    vehicle_journeys: list,
+    journey_pattern_to_use_for_tracks: str,
     logger,
-    journey_pattern_to_use: str,
 ):
     journey_patterns = collect_journey_patterns(data, service)
     admin_area_codes = set()
     route_ref_for_tracks = None
     link_refs_for_tracks = None
+
+    vehicle_journey_journey_pattern_refs = [
+        vehicle_journey["journey_pattern_ref"] for vehicle_journey in vehicle_journeys
+    ]
+
     for journey_pattern in journey_patterns:
         journey_pattern_info = journey_pattern["journey_pattern_info"]
+
+        if (
+            journey_pattern_info["journey_pattern_ref"]
+            not in vehicle_journey_journey_pattern_refs
+        ):
+            continue
+
         journey_pattern_section_refs: list = journey_pattern[
             "journey_pattern_section_refs"
         ]
@@ -272,8 +285,9 @@ def iterate_through_journey_patterns_and_run_insert_queries(
         admin_area_codes.update(get_admin_area_codes(cursor, stop_codes))
 
         if (
-            journey_pattern_to_use is not None
-            and journey_pattern_to_use == journey_pattern_info["journey_pattern_ref"]
+            journey_pattern_to_use_for_tracks is not None
+            and journey_pattern_to_use_for_tracks
+            == journey_pattern_info["journey_pattern_ref"]
         ):
             route_ref_for_tracks = journey_pattern_info["route_ref"]
             link_refs_for_tracks = list(
@@ -650,6 +664,53 @@ def select_route_and_run_insert_query(
             insert_into_txc_tracks_table(cursor, tracks, operator_service_id)
 
 
+def format_vehicle_journeys(vehicle_journeys: list, line_id: str):
+    vehicle_journey_refs = [
+        journey["VehicleJourneyRef"]
+        for journey in vehicle_journeys
+        if journey["LineRef"] == line_id
+        and "JourneyPatternRef" not in journey
+        and "VehicleJourneyRef" in journey
+        and "LineRef" in journey
+    ]
+    vehicle_journeys_for_line = [
+        journey
+        for journey in vehicle_journeys
+        if "JourneyPatternRef" in journey
+        and (
+            ("LineRef" in journey and journey["LineRef"] == line_id)
+            or (
+                "VehicleJourneyCode" in journey
+                and journey["VehicleJourneyCode"] in vehicle_journey_refs
+            )
+        )
+    ]
+
+    vehicle_journeys_data = []
+    journey_pattern_count = {}
+
+    for vehicle_journey in vehicle_journeys_for_line:
+        journey_pattern_ref = (
+            vehicle_journey["JourneyPatternRef"]
+            if "JourneyPatternRef" in vehicle_journey
+            else None
+        )
+
+        if journey_pattern_ref not in journey_pattern_count:
+            if journey_pattern_ref is not None:
+                journey_pattern_count[journey_pattern_ref] = 1
+        else:
+            journey_pattern_count[journey_pattern_ref] += 1
+
+        vehicle_journeys_data.append(collect_vehicle_journey(vehicle_journey))
+
+    journey_pattern_to_use = (
+        max(journey_pattern_count) if journey_pattern_count else None
+    )
+
+    return vehicle_journeys_data, journey_pattern_to_use
+
+
 def write_to_database(
     data: dict,
     region_code: Optional[str],
@@ -702,30 +763,6 @@ def write_to_database(
 
                 file_has_vehicle_journeys = True
 
-                vehicle_journeys_data = []
-                journey_pattern_count = {}
-                for vehicle in vehicle_journeys:
-                    if not valid_noc:
-                        break
-
-                    journey_pattern_ref = (
-                        vehicle["JourneyPatternRef"]
-                        if "JourneyPatternRef" in vehicle
-                        else None
-                    )
-
-                    if journey_pattern_ref not in journey_pattern_count:
-                        if journey_pattern_ref is not None:
-                            journey_pattern_count[journey_pattern_ref] = 1
-                    else:
-                        journey_pattern_count[journey_pattern_ref] += 1
-
-                    vehicle_journeys_data.append(collect_vehicle_journey(vehicle))
-
-                journey_pattern_to_use = (
-                    max(journey_pattern_count) if journey_pattern_count else None
-                )
-
                 for service in services:
                     route_ref_for_tracks = None
                     link_refs_for_tracks = None
@@ -769,6 +806,13 @@ def write_to_database(
                             valid_noc = False
                             break
 
+                        line_id = line["@id"]
+
+                        (
+                            vehicle_journeys_for_line,
+                            journey_pattern_to_use_for_tracks,
+                        ) = format_vehicle_journeys(vehicle_journeys, line_id)
+
                         file_has_useable_data = check_file_has_usable_data(
                             data, service
                         )
@@ -781,8 +825,9 @@ def write_to_database(
                                 data,
                                 operator_service_id,
                                 service,
+                                vehicle_journeys_for_line,
+                                journey_pattern_to_use_for_tracks,
                                 logger,
-                                journey_pattern_to_use,
                             )
 
                     if route_ref_for_tracks and link_refs_for_tracks:
@@ -796,7 +841,7 @@ def write_to_database(
 
                 insert_into_txc_vehicle_journey_table(
                     cursor,
-                    vehicle_journeys_data,
+                    vehicle_journeys_for_line,
                 )
 
             if not file_has_nocs:
