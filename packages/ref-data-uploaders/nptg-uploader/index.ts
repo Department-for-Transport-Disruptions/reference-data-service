@@ -1,5 +1,5 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { SSMClient, PutParameterCommand } from "@aws-sdk/client-ssm";
+import { SSMClient, PutParameterCommand, PutParameterCommandInput } from "@aws-sdk/client-ssm";
 import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
 import { S3Event } from "aws-lambda";
 import { Promise as BluebirdPromise } from "bluebird";
@@ -138,7 +138,7 @@ const putParameter = async (key: string, value: string) => {
     const ssm = new SSMClient({ region: "eu-west-2" });
 
     try {
-        const input = {
+        const input: PutParameterCommandInput = {
             Name: key,
             Value: value,
             Type: "String",

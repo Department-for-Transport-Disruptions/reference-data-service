@@ -9,6 +9,7 @@ from txc_processor import (
     extract_data_for_txc_operator_service_table,
     collect_journey_pattern_section_refs_and_info,
     collect_journey_patterns,
+    format_vehicle_journeys,
     iterate_through_journey_patterns_and_run_insert_queries,
     check_file_has_usable_data,
     create_unique_line_id,
@@ -61,11 +62,22 @@ class TestDatabaseInsertQuerying:
     ):
         service = mock_data_dict["TransXChange"]["Services"]["Service"]
         mock_journey_patterns = collect_journey_patterns(mock_data_dict, service)
+        vehicle_journeys, _ = format_vehicle_journeys(
+            mock_data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"],
+            "l_4_ANW",
+        )
         mock_jp_insert.side_effect = [9, 27, 13, 1, 11, 5, 28, 12, 10, 6, 13, 27, 4]
         mock_cursor = MagicMock()
         mock_op_service_id = 12
+
         iterate_through_journey_patterns_and_run_insert_queries(
-            mock_cursor, mock_data_dict, mock_op_service_id, service, logger, "JP4"
+            mock_cursor,
+            mock_data_dict,
+            mock_op_service_id,
+            service,
+            vehicle_journeys,
+            "JP4",
+            logger,
         )
 
         assert mock_jp_insert.call_count == len(mock_journey_patterns)
@@ -151,13 +163,18 @@ class TestDataCollectionFunctionality:
         service = mock_tracks_data_dict["TransXChange"]["Services"]["Service"]
         mock_cursor = MagicMock()
         mock_op_service_id = 12
+        vehicle_journeys, _ = format_vehicle_journeys(
+            mock_data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"],
+            "l_4_ANW",
+        )
         route_ref, link_refs = iterate_through_journey_patterns_and_run_insert_queries(
             mock_cursor,
             mock_tracks_data_dict,
             mock_op_service_id,
             service,
-            logger,
+            vehicle_journeys,
             "JP1",
+            logger,
         )
 
         assert route_ref == "RT1"

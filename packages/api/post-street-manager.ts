@@ -18,6 +18,7 @@ const sendPermitMessageToSqs = async (queueUrl: string | undefined, message: Per
 
     const sendMessageCommand: SendMessageCommand = new SendMessageCommand({
         QueueUrl: queueUrl,
+        MessageGroupId: "streetmanager",
         MessageBody: JSON.stringify(message),
     });
 

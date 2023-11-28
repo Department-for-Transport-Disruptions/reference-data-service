@@ -27,6 +27,7 @@ export function QueueStack({ stack }: StackContext) {
         cdk: {
             queue: {
                 fifo: true,
+                contentBasedDeduplication: true,
             },
         },
     });
