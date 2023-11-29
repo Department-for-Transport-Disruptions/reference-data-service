@@ -394,6 +394,7 @@ def insert_into_txc_operator_service_table(
     line,
     region_code,
     data_source,
+    file_path,
     cloudwatch,
     logger,
 ):
@@ -411,8 +412,8 @@ def insert_into_txc_operator_service_table(
         mode,
     ) = extract_data_for_txc_operator_service_table(operator, service, line)
 
-    query = """INSERT INTO services_new (nocCode, lineName, lineId, startDate, endDate, operatorShortName, inboundDirectionDescription, outboundDirectionDescription, serviceDescription, serviceCode, regionCode, dataSource, origin, destination, mode)
-        VALUES (:noc_code, :line_name, :line_id, :start_date, :end_date, :operator_short_name, :inbound_direction_description, :outbound_direction_description, :service_description, :service_code, :region_code, :data_source, :origin, :destination, :mode)"""
+    query = """INSERT INTO services_new (nocCode, lineName, lineId, startDate, endDate, operatorShortName, inboundDirectionDescription, outboundDirectionDescription, serviceDescription, serviceCode, regionCode, dataSource, origin, destination, mode, filePath)
+        VALUES (:noc_code, :line_name, :line_id, :start_date, :end_date, :operator_short_name, :inbound_direction_description, :outbound_direction_description, :service_description, :service_code, :region_code, :data_source, :origin, :destination, :mode, :file_path)"""
 
     line_id = line.get("@id", "")
     line_name = line.get("LineName", "")
@@ -439,6 +440,7 @@ def insert_into_txc_operator_service_table(
                 "origin": origin,
                 "destination": destination,
                 "mode": mode,
+                "file_path": file_path,
             },
         )
         operator_service_id = cursor.lastrowid
@@ -798,6 +800,7 @@ def write_to_database(
                                     line,
                                     region_code,
                                     data_source,
+                                    key,
                                     cloudwatch,
                                     logger,
                                 )
@@ -816,6 +819,7 @@ def write_to_database(
                         file_has_useable_data = check_file_has_usable_data(
                             data, service
                         )
+
                         if file_has_useable_data:
                             (
                                 route_ref_for_tracks,

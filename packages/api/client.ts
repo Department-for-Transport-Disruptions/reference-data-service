@@ -584,24 +584,6 @@ export const getServiceStopsV2 = async (
         }
     }
 
-    const journeyPatternRefsResult = await dbClient
-        .selectFrom("services")
-        .innerJoin(
-            "vehicle_journeys",
-            input.dataSource === DataSource.bods ? "vehicle_journeys.lineRef" : "vehicle_journeys.serviceRef",
-            input.dataSource === DataSource.bods ? "services.lineId" : "services.serviceCode",
-        )
-        .select("vehicle_journeys.journeyPatternRef")
-        .where("services.id", "=", service.id)
-        .distinct()
-        .execute();
-
-    if (!journeyPatternRefsResult?.length) {
-        return [];
-    }
-
-    const journeyPatternRefs = journeyPatternRefsResult.map((ref) => ref.journeyPatternRef);
-
     const stops = await dbClient
         .selectFrom("services")
         .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
@@ -664,7 +646,6 @@ export const getServiceStopsV2 = async (
         .groupBy(["fromId", "toId"])
         .where("services.id", "=", service.id)
         .where("dataSource", "=", input.dataSource)
-        .where("service_journey_patterns.journeyPatternRef", "in", journeyPatternRefs)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) => qb.or([qb("fromStop.status", "=", "active"), qb("toStop.status", "=", "active")]))
