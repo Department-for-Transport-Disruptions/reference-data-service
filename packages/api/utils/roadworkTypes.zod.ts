@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 const workStatus = z.union([
-    z.literal("planned"),
-    z.literal("in_progress"),
-    z.literal("completed"),
-    z.literal("cancelled"),
-    z.literal("non_notifiable"),
-    z.literal("unattributable"),
-    z.literal("historical"),
-    z.literal("section_81"),
+    z.literal("Works planned"),
+    z.literal("Works in progress"),
+    z.literal("Works completed"),
+    z.literal("Works cancelled"),
+    z.literal("Non notifiable works"),
+    z.literal("Unattributable works"),
+    z.literal("Historical works"),
+    z.literal("Section 81 works"),
 ]);
 
 export type WorkStatus = z.infer<typeof workStatus>;
