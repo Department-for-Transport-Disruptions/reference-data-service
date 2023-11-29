@@ -29,7 +29,7 @@ export function ApiStack({ stack }: StackContext) {
 
     let streetManagerTestTopic: Topic | null = null;
 
-    if (isSandbox) {
+    if (isSandbox || stack.stage === "test") {
         streetManagerTestTopic = new Topic(stack, "street-manager-test-topic", {
             topicName: `street-manager-test-topic-${stack.stage}`,
         });
@@ -265,7 +265,7 @@ export function ApiStack({ stack }: StackContext) {
         },
     });
 
-    if (isSandbox && streetManagerTestTopic) {
+    if ((isSandbox || stack.stage === "test") && streetManagerTestTopic) {
         new Subscription(stack, "street-manager-test-subscription", {
             endpoint: `${api.url}/street-manager`,
             protocol: SubscriptionProtocol.HTTPS,
