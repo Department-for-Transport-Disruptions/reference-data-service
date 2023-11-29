@@ -4,10 +4,11 @@ import { BaseMessage, PermitMessage, permitMessageSchema, snsMessageSchema } fro
 import { confirmSubscription, isValidSignature } from "./utils/snsMessageValidator";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 
-const allowedTopicArns = [
-    "arn:aws:sns:eu-west-2:287813576808:prod-permit-topic",
-    "arn:aws:sns:eu-west-2:899289342948:test-street-manager-topic",
-];
+const allowedTopicArns = ["arn:aws:sns:eu-west-2:287813576808:prod-permit-topic"];
+
+if (process.env.TEST_STREET_MANAGER_TOPIC_ARN) {
+    allowedTopicArns.push(process.env.TEST_STREET_MANAGER_TOPIC_ARN);
+}
 
 const sqsClient = new SQSClient({ region: "eu-west-2" });
 
@@ -74,13 +75,6 @@ export const main = async (event: APIGatewayEvent) => {
         } catch (e) {
             if (e instanceof Error) {
                 logger.error(e);
-
-                return {
-                    statusCode: 500,
-                    body: JSON.stringify({
-                        error: "There was a problem with processing street manager data",
-                    }),
-                };
             }
 
             return {

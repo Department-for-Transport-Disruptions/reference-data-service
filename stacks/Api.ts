@@ -2,6 +2,7 @@ import { Api, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
 import { DnsStack } from "./Dns";
 import { QueueStack } from "./Queue";
+import { Subscription, SubscriptionProtocol, Topic } from "aws-cdk-lib/aws-sns";
 
 export function ApiStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
@@ -9,6 +10,8 @@ export function ApiStack({ stack }: StackContext) {
     const { streetManagerSqsQueue } = use(QueueStack);
 
     const { ROOT_DOMAIN: rootDomain } = process.env;
+
+    const isSandbox = !["test", "preprod", "prod"].includes(stack.stage);
 
     if (!rootDomain) {
         throw new Error("ROOT_DOMAIN must be set");
@@ -22,6 +25,14 @@ export function ApiStack({ stack }: StackContext) {
         if (!prodDomain) {
             throw new Error("PROD_DOMAIN must be set in production");
         }
+    }
+
+    let streetManagerTestTopic: Topic | null = null;
+
+    if (isSandbox) {
+        streetManagerTestTopic = new Topic(stack, "street-manager-test-topic", {
+            topicName: `street-manager-test-topic-${stack.stage}`,
+        });
     }
 
     const stopsFunction = new Function(stack, "ref-data-service-get-stops-function", {
@@ -173,6 +184,7 @@ export function ApiStack({ stack }: StackContext) {
         memorySize: 512,
         environment: {
             STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsQueue.queueUrl,
+            TEST_STREET_MANAGER_TOPIC_ARN: streetManagerTestTopic?.topicArn ?? "",
         },
         runtime: "nodejs18.x",
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
@@ -189,7 +201,7 @@ export function ApiStack({ stack }: StackContext) {
             DATABASE_SECRET_ARN: cluster.secretArn,
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
             MAX_ADMIN_AREA_CODES: "50",
-            IS_LOCAL: !["test", "preprod", "prod"].includes(stack.stage) ? "true" : "false",
+            IS_LOCAL: isSandbox ? "true" : "false",
         },
         runtime: "nodejs18.x",
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
@@ -210,7 +222,7 @@ export function ApiStack({ stack }: StackContext) {
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
-    const subDomain = ["test", "preprod", "prod"].includes(stack.stage) ? "api" : `api.${stack.stage}`;
+    const subDomain = !isSandbox ? "api" : `api.${stack.stage}`;
 
     const allowedOrigins = [
         stack.stage === "prod" ? `https://${prodDomain}` : `https://${stack.stage}.cdd.${rootDomain}`,
@@ -252,6 +264,14 @@ export function ApiStack({ stack }: StackContext) {
             },
         },
     });
+
+    if (isSandbox && streetManagerTestTopic) {
+        new Subscription(stack, "street-manager-test-subscription", {
+            endpoint: `${api.url}/street-manager`,
+            protocol: SubscriptionProtocol.HTTPS,
+            topic: streetManagerTestTopic,
+        });
+    }
 
     stack.addOutputs({
         ApiEndpoint: api.url,

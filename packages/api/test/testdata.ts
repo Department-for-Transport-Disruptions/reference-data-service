@@ -3738,7 +3738,7 @@ const message = {
 const body = {
     Type: "Notification",
     MessageId: "df0ebbe1-0a9a-5b59-b481-e63846415a86",
-    TopicArn: "arn:aws:sns:eu-west-2:899289342948:test-street-manager-topic",
+    TopicArn: "arn:aws:sns:eu-west-2:287813576808:prod-permit-topic",
     Message: JSON.stringify(message),
     Timestamp: "2023-10-02T14:22:45.889Z",
     SignatureVersion: "1",
@@ -3767,7 +3767,7 @@ const sqsMessage = {
     proposedEndDateTime: "2020-06-12T00:00:00.000Z",
     actualStartDateTime: null,
     actualEndDateTime: null,
-    workStatus: "planned",
+    workStatus: "Works planned",
     usrn: "8401426",
     activityType: "Remedial works",
     worksLocationType: "Cycleway, Footpath",
