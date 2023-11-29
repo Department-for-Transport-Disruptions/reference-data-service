@@ -2,6 +2,12 @@ import { RDSData } from "@aws-sdk/client-rds-data";
 import { Generated, Kysely } from "kysely";
 import { DataApiDialect } from "kysely-data-api";
 import * as logger from "lambda-log";
+import {
+    PermitStatus,
+    TrafficManagementType,
+    WorkCategory,
+    WorkStatus,
+} from "@reference-data-service/api/utils/roadworkTypes.zod";
 
 export interface StopsTable {
     id: number;
@@ -221,6 +227,37 @@ export interface NptgAdminAreasTable {
     shortName: string | null;
 }
 
+export interface RoadworksTable {
+    permitReferenceNumber: string;
+    highwayAuthority: string | null;
+    highwayAuthoritySwaCode: number;
+    worksLocationCoordinates: string | null;
+    streetName: string | null;
+    areaName: string | null;
+    workCategory: WorkCategory | null;
+    trafficManagementType: TrafficManagementType | null;
+    proposedStartDateTime: string | null;
+    proposedEndDateTime: string | null;
+    actualStartDateTime: string | null;
+    actualEndDateTime: string | null;
+    workStatus: WorkStatus | null;
+    usrn: string | null;
+    activityType: string | null;
+    worksLocationType: string | null;
+    isTrafficSensitive: string | null;
+    permitStatus: PermitStatus | null;
+    town: string | null;
+    currentTrafficManagementType: TrafficManagementType | null;
+    currentTrafficManagementTypeUpdateDate: string | null;
+    createdDateTime: string;
+    lastUpdatedDateTime: string;
+}
+
+export interface HighwayAuthorityAdminAreaTable {
+    highwayAuthoritySwaCode: number;
+    administrativeAreaCode: string;
+}
+
 export interface Database {
     stops: StopsTable;
     stops_new?: StopsTable;
@@ -258,6 +295,8 @@ export interface Database {
     nptg_admin_areas: NptgAdminAreasTable;
     nptg_admin_areas_new?: NptgAdminAreasTable;
     nptg_admin_areas_old?: NptgAdminAreasTable;
+    roadworks: RoadworksTable;
+    highway_authority_admin_areas: HighwayAuthorityAdminAreaTable;
 }
 
 export type Tables =

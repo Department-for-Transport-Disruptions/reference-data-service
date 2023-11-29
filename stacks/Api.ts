@@ -1,14 +1,17 @@
 import { Api, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
 import { DnsStack } from "./Dns";
-import { S3Stack } from "./S3";
+import { QueueStack } from "./Queue";
+import { Subscription, SubscriptionProtocol, Topic } from "aws-cdk-lib/aws-sns";
 
 export function ApiStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
     const { hostedZone } = use(DnsStack);
-    const { streetManagerBucket } = use(S3Stack);
+    const { streetManagerSqsQueue } = use(QueueStack);
 
     const { ROOT_DOMAIN: rootDomain } = process.env;
+
+    const isSandbox = !["test", "preprod", "prod"].includes(stack.stage);
 
     if (!rootDomain) {
         throw new Error("ROOT_DOMAIN must be set");
@@ -22,6 +25,14 @@ export function ApiStack({ stack }: StackContext) {
         if (!prodDomain) {
             throw new Error("PROD_DOMAIN must be set in production");
         }
+    }
+
+    let streetManagerTestTopic: Topic | null = null;
+
+    if (isSandbox) {
+        streetManagerTestTopic = new Topic(stack, "street-manager-test-topic", {
+            topicName: `street-manager-test-topic-${stack.stage}`,
+        });
     }
 
     const stopsFunction = new Function(stack, "ref-data-service-get-stops-function", {
@@ -166,19 +177,52 @@ export function ApiStack({ stack }: StackContext) {
     });
 
     const postStreetManagerFunction = new Function(stack, "ref-data-service-post-street-manager-function", {
-        bind: [streetManagerBucket],
+        bind: [streetManagerSqsQueue],
         functionName: `ref-data-service-post-street-manager-function-${stack.stage}`,
         handler: "packages/api/post-street-manager.main",
         timeout: 10,
         memorySize: 512,
         environment: {
-            STREET_MANAGER_BUCKET_NAME: streetManagerBucket.bucketName,
+            STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsQueue.queueUrl,
+            TEST_STREET_MANAGER_TOPIC_ARN: streetManagerTestTopic?.topicArn ?? "",
         },
         runtime: "nodejs18.x",
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
-    const subDomain = ["test", "preprod", "prod"].includes(stack.stage) ? "api" : `api.${stack.stage}`;
+    const roadworksFunction = new Function(stack, "ref-data-service-get-roadworks-function", {
+        bind: [cluster],
+        functionName: `ref-data-service-get-roadworks-function-${stack.stage}`,
+        handler: "packages/api/get-roadworks.main",
+        timeout: 10,
+        memorySize: 512,
+        environment: {
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
+            MAX_ADMIN_AREA_CODES: "50",
+            IS_LOCAL: isSandbox ? "true" : "false",
+        },
+        runtime: "nodejs18.x",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+    });
+
+    const roadworkByIdFunction = new Function(stack, "ref-data-service-get-roadwork-by-id-function", {
+        bind: [cluster],
+        functionName: `ref-data-service-get-roadwork-by-id-function-${stack.stage}`,
+        handler: "packages/api/get-roadwork-by-id.main",
+        timeout: 10,
+        memorySize: 512,
+        environment: {
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
+        },
+        runtime: "nodejs18.x",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+    });
+
+    const subDomain = !isSandbox ? "api" : `api.${stack.stage}`;
 
     const allowedOrigins = [
         stack.stage === "prod" ? `https://${prodDomain}` : `https://${stack.stage}.cdd.${rootDomain}`,
@@ -201,6 +245,8 @@ export function ApiStack({ stack }: StackContext) {
             "GET /area-codes": areaCodeFunction,
             "GET /admin-areas": adminAreasFunction,
             "POST /street-manager": postStreetManagerFunction,
+            "GET /roadworks": roadworksFunction,
+            "GET /roadworks/{permitReferenceNumber}": roadworkByIdFunction,
         },
         customDomain: {
             domainName: `${subDomain}.${hostedZone.zoneName}`,
@@ -218,6 +264,14 @@ export function ApiStack({ stack }: StackContext) {
             },
         },
     });
+
+    if (isSandbox && streetManagerTestTopic) {
+        new Subscription(stack, "street-manager-test-subscription", {
+            endpoint: `${api.url}/street-manager`,
+            protocol: SubscriptionProtocol.HTTPS,
+            topic: streetManagerTestTopic,
+        });
+    }
 
     stack.addOutputs({
         ApiEndpoint: api.url,

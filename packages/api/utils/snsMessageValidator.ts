@@ -1,4 +1,4 @@
-import { SnsMessage } from "./snsMesssageTypes.zod";
+import { SnsMessage } from "./snsMessageTypes.zod";
 import url from "url";
 import axios from "axios";
 import * as logger from "lambda-log";
