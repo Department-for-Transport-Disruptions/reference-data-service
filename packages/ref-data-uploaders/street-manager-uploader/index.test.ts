@@ -68,7 +68,7 @@ describe("street manager uploader", () => {
             proposedEndDateTime: "2020-06-12T00:00:00.000Z",
             actualStartDateTime: null,
             actualEndDateTime: null,
-            workStatus: "planned",
+            workStatus: "Works planned",
             usrn: "8401426",
             activityType: "Remedial works",
             worksLocationType: "Cycleway, Footpath",
