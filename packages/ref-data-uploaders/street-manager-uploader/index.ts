@@ -5,7 +5,6 @@ import { getRoadworkByPermitReferenceNumber, updateToRoadworksTable, writeToRoad
 import { roadworkSchema } from "@reference-data-service/api/utils/roadworkTypes.zod";
 
 export const main = async (event: SQSEvent) => {
-    const currentDateTime = new Date();
     const dbClient = getDbClient();
 
     const roadwork = roadworkSchema.safeParse(JSON.parse(event.Records[0].body));
@@ -37,7 +36,7 @@ export const main = async (event: SQSEvent) => {
 
         const roadworkDbInput = {
             ...roadwork.data,
-            createdDateTime: currentDateTime.toISOString(),
+            createdDateTime: roadwork.data.lastUpdatedDateTime,
         };
 
         await writeToRoadworksTable(roadworkDbInput, dbClient);
