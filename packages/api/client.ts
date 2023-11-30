@@ -844,11 +844,13 @@ export const getRoadworkById = async (dbClient: Kysely<Database>, input: Roadwor
         .select([
             "roadworks.permitReferenceNumber",
             "roadworks.highwayAuthoritySwaCode",
+            "roadworks.highwayAuthority",
             "roadworks.streetName",
             "roadworks.areaName",
             "roadworks.town",
             "roadworks.worksLocationCoordinates",
             "roadworks.activityType",
+            "roadworks.trafficManagementType",
             "roadworks.proposedStartDateTime",
             "roadworks.proposedEndDateTime",
             "roadworks.actualStartDateTime",
@@ -856,6 +858,8 @@ export const getRoadworkById = async (dbClient: Kysely<Database>, input: Roadwor
             "roadworks.permitStatus",
             "roadworks.workStatus",
             "highway_authority_admin_areas.administrativeAreaCode",
+            "roadworks.createdDateTime",
+            "roadworks.lastUpdatedDateTime",
         ])
         .distinct()
         .executeTakeFirst();

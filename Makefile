@@ -60,5 +60,8 @@ upload-nptg-file:
 	aws s3 rm s3://ref-data-service-nptg-data-$(stage)/nptg.xml
 	aws s3 cp ./test-data/nptg.xml s3://ref-data-service-nptg-data-$(stage)
 
-publish-street-manager-data:
+publish-street-manager-data-to-dev:
 	aws sns publish --topic-arn arn:aws:sns:eu-west-2:$(shell aws sts get-caller-identity | jq -r .Account):street-manager-test-topic-$(stage) --message file://test-data/street-manager.json
+
+publish-street-manager-data-to-test:
+	aws sns publish --topic-arn arn:aws:sns:eu-west-2:$(shell aws sts get-caller-identity | jq -r .Account):street-manager-test-topic-test --message file://test-data/street-manager.json

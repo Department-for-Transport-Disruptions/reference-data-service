@@ -1,8 +1,8 @@
-import { SnsMessage } from "./snsMessageTypes.zod";
 import url from "url";
 import axios from "axios";
 import * as logger from "lambda-log";
 import crypto from "crypto";
+import { SnsMessage } from "./snsMessageTypes.zod";
 
 export const isValidSignature = async (body: SnsMessage) => {
     verifyMessageSignatureVersion(body.SignatureVersion);
