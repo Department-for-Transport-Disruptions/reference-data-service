@@ -850,6 +850,7 @@ export const getRoadworkById = async (dbClient: Kysely<Database>, input: Roadwor
             "roadworks.town",
             "roadworks.worksLocationCoordinates",
             "roadworks.activityType",
+            "roadworks.workCategory",
             "roadworks.trafficManagementType",
             "roadworks.proposedStartDateTime",
             "roadworks.proposedEndDateTime",
