@@ -6,7 +6,7 @@ import { Kysely, sql } from "kysely";
 export const deleteOldRoadworks = async (dbClient: Kysely<Database>) => {
     await dbClient
         .deleteFrom("roadworks")
-        .where(sql`DATE_ADD(STR_TO_DATE(actualEndDatetime, '%Y-%m-%d'), INTERVAL 1 WEEK)`, "<", sql`CURDATE()`)
+        .where(sql`DATE_ADD(DATE_FORMAT(left(actualEndDateTime,10),'%Y-%m-%d'), INTERVAL 7 DAY)`, "<", sql`CURDATE()`)
         .execute();
 };
 
