@@ -120,7 +120,7 @@ export function UploadersStack({ stack }: StackContext) {
         handler: "packages/ref-data-uploaders/cleanup-roadworks/index.main",
         runtime: "nodejs18.x",
         timeout: 600,
-        memorySize: 3008,
+        memorySize: 1024,
         environment: {
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
