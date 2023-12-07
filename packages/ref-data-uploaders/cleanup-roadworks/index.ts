@@ -7,7 +7,13 @@ export const deleteOldRoadworks = async (dbClient: Kysely<Database>) => {
     await dbClient
         .deleteFrom("roadworks")
         .where(sql`DATE_ADD(DATE_FORMAT(left(actualEndDateTime,10),'%Y-%m-%d'), INTERVAL 7 DAY)`, "<", sql`CURDATE()`)
-        .where("permitStatus", "=", "closed")
+        .where((query) =>
+            query.or([
+                query("permitStatus", "=", "closed"),
+                query("permitStatus", "=", "revoked"),
+                query("permitStatus", "=", "refused"),
+            ]),
+        )
         .execute();
 };
 
