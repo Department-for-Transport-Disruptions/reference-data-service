@@ -6,12 +6,28 @@ import { Kysely, sql } from "kysely";
 export const deleteOldRoadworks = async (dbClient: Kysely<Database>) => {
     await dbClient
         .deleteFrom("roadworks")
-        .where(sql`DATE_ADD(DATE_FORMAT(left(actualEndDateTime,10),'%Y-%m-%d'), INTERVAL 7 DAY)`, "<", sql`CURDATE()`)
-        .where((query) =>
-            query.or([
-                query("permitStatus", "=", "closed"),
-                query("permitStatus", "=", "revoked"),
-                query("permitStatus", "=", "refused"),
+        .where((qb) =>
+            qb.or([
+                qb.and([
+                    qb(
+                        sql`DATE_ADD(DATE_FORMAT(left(actualEndDateTime,10),'%Y-%m-%d'), INTERVAL 7 DAY)`,
+                        "<",
+                        sql`CURDATE()`,
+                    ),
+                    qb("permitStatus", "=", "closed"),
+                ]),
+                qb.and([
+                    qb(
+                        sql`DATE_ADD(DATE_FORMAT(left(lastUpdatedDateTime,10),'%Y-%m-%d'), INTERVAL 7 DAY)`,
+                        "<",
+                        sql`CURDATE()`,
+                    ),
+                    qb.or([
+                        qb("permitStatus", "=", "revoked"),
+                        qb("permitStatus", "=", "refused"),
+                        qb("permitStatus", "=", "cancelled"),
+                    ]),
+                ]),
             ]),
         )
         .execute();
