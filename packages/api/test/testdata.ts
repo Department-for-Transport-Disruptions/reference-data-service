@@ -48,6 +48,8 @@ export const serviceDbData: Service = [
         toStreet: "A684",
         toLatitude: "54.305902",
         toLongitude: "-1.557902",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -95,6 +97,8 @@ export const serviceDbData: Service = [
         toStreet: "Boroughbridge Road",
         toLatitude: "54.333257",
         toLongitude: "-1.440455",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -142,6 +146,8 @@ export const serviceDbData: Service = [
         toStreet: "High Street",
         toLatitude: "54.341667",
         toLongitude: "-1.435589",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -189,6 +195,8 @@ export const serviceDbData: Service = [
         toStreet: "Northallerton Road",
         toLatitude: "54.361475",
         toLongitude: "-1.424637",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -236,6 +244,8 @@ export const serviceDbData: Service = [
         toStreet: "A684",
         toLatitude: "54.364232",
         toLongitude: "-1.338321",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -283,6 +293,8 @@ export const serviceDbData: Service = [
         toStreet: "South End",
         toLatitude: "54.368433",
         toLongitude: "-1.299159",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -330,6 +342,8 @@ export const serviceDbData: Service = [
         toStreet: "Main Street",
         toLatitude: "54.399449",
         toLongitude: "-1.308766",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -377,6 +391,8 @@ export const serviceDbData: Service = [
         toStreet: "Black Horse Lane",
         toLatitude: "54.413202",
         toLongitude: "-1.269474",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -424,6 +440,8 @@ export const serviceDbData: Service = [
         toStreet: "Station Lane",
         toLatitude: "54.426963",
         toLongitude: "-1.271171",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -471,6 +489,8 @@ export const serviceDbData: Service = [
         toStreet: "Enterpen",
         toLatitude: "54.446832",
         toLongitude: "-1.281428",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -518,6 +538,8 @@ export const serviceDbData: Service = [
         toStreet: "N/A",
         toLatitude: "54.463415",
         toLongitude: "-1.223532",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -565,6 +587,8 @@ export const serviceDbData: Service = [
         toStreet: "High Street",
         toLatitude: "54.470143",
         toLongitude: "-1.19148",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -612,6 +636,8 @@ export const serviceDbData: Service = [
         toStreet: "N/A",
         toLatitude: "54.463379",
         toLongitude: "-1.223502",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -659,6 +685,8 @@ export const serviceDbData: Service = [
         toStreet: "Enterpen",
         toLatitude: "54.447711",
         toLongitude: "-1.279516",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -706,6 +734,8 @@ export const serviceDbData: Service = [
         toStreet: "Station Lane",
         toLatitude: "54.426962",
         toLongitude: "-1.271002",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -753,6 +783,8 @@ export const serviceDbData: Service = [
         toStreet: "Black Horse Lane",
         toLatitude: "54.413139",
         toLongitude: "-1.269475",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -800,6 +832,8 @@ export const serviceDbData: Service = [
         toStreet: "Main Street",
         toLatitude: "54.399162",
         toLongitude: "-1.30874",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -847,6 +881,8 @@ export const serviceDbData: Service = [
         toStreet: "South End",
         toLatitude: "54.368433",
         toLongitude: "-1.299159",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -894,6 +930,8 @@ export const serviceDbData: Service = [
         toStreet: "A684",
         toLatitude: "54.364095",
         toLongitude: "-1.337908",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -941,6 +979,8 @@ export const serviceDbData: Service = [
         toStreet: "Northallerton Road",
         toLatitude: "54.361259",
         toLongitude: "-1.424748",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -988,6 +1028,8 @@ export const serviceDbData: Service = [
         toStreet: "High Street",
         toLatitude: "54.341667",
         toLongitude: "-1.435589",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1035,6 +1077,8 @@ export const serviceDbData: Service = [
         toStreet: "High Street",
         toLatitude: "54.340194",
         toLongitude: "-1.43444",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1082,6 +1126,8 @@ export const serviceDbData: Service = [
         toStreet: "Zetland Street",
         toLatitude: "54.338927",
         toLongitude: "-1.432473",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1129,6 +1175,8 @@ export const serviceDbData: Service = [
         toStreet: "Friarage Street",
         toLatitude: "54.342092",
         toLongitude: "-1.431014",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1176,6 +1224,8 @@ export const serviceDbData: Service = [
         toStreet: "Northallerton Road",
         toLatitude: "54.361475",
         toLongitude: "-1.424637",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1223,6 +1273,8 @@ export const serviceDbData: Service = [
         toStreet: "A684",
         toLatitude: "54.364232",
         toLongitude: "-1.338321",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1270,6 +1322,8 @@ export const serviceDbData: Service = [
         toStreet: "South End",
         toLatitude: "54.368433",
         toLongitude: "-1.299159",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1317,6 +1371,8 @@ export const serviceDbData: Service = [
         toStreet: "Main Street",
         toLatitude: "54.399449",
         toLongitude: "-1.308766",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1364,6 +1420,8 @@ export const serviceDbData: Service = [
         toStreet: "Black Horse Lane",
         toLatitude: "54.413202",
         toLongitude: "-1.269474",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1411,6 +1469,8 @@ export const serviceDbData: Service = [
         toStreet: "Station Lane",
         toLatitude: "54.426963",
         toLongitude: "-1.271171",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1458,6 +1518,8 @@ export const serviceDbData: Service = [
         toStreet: "Enterpen",
         toLatitude: "54.446832",
         toLongitude: "-1.281428",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1505,6 +1567,8 @@ export const serviceDbData: Service = [
         toStreet: "N/A",
         toLatitude: "54.463415",
         toLongitude: "-1.223532",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1552,6 +1616,8 @@ export const serviceDbData: Service = [
         toStreet: "High Street",
         toLatitude: "54.470143",
         toLongitude: "-1.19148",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1599,6 +1665,8 @@ export const serviceDbData: Service = [
         toStreet: "N/A",
         toLatitude: "54.463379",
         toLongitude: "-1.223502",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1646,6 +1714,8 @@ export const serviceDbData: Service = [
         toStreet: "Enterpen",
         toLatitude: "54.447711",
         toLongitude: "-1.279516",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1693,6 +1763,8 @@ export const serviceDbData: Service = [
         toStreet: "Station Lane",
         toLatitude: "54.426962",
         toLongitude: "-1.271002",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1740,6 +1812,8 @@ export const serviceDbData: Service = [
         toStreet: "Black Horse Lane",
         toLatitude: "54.413139",
         toLongitude: "-1.269475",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1787,6 +1861,8 @@ export const serviceDbData: Service = [
         toStreet: "Main Street",
         toLatitude: "54.399162",
         toLongitude: "-1.30874",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1834,6 +1910,8 @@ export const serviceDbData: Service = [
         toStreet: "South End",
         toLatitude: "54.368433",
         toLongitude: "-1.299159",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1881,6 +1959,8 @@ export const serviceDbData: Service = [
         toStreet: "A684",
         toLatitude: "54.364095",
         toLongitude: "-1.337908",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1928,6 +2008,8 @@ export const serviceDbData: Service = [
         toStreet: "Northallerton Road",
         toLatitude: "54.361259",
         toLongitude: "-1.424748",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -1975,6 +2057,8 @@ export const serviceDbData: Service = [
         toStreet: "High Street",
         toLatitude: "54.341667",
         toLongitude: "-1.435589",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2022,6 +2106,8 @@ export const serviceDbData: Service = [
         toStreet: "High Street",
         toLatitude: "54.340194",
         toLongitude: "-1.43444",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2069,6 +2155,8 @@ export const serviceDbData: Service = [
         toStreet: "Zetland Street",
         toLatitude: "54.338927",
         toLongitude: "-1.432473",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2116,6 +2204,8 @@ export const serviceDbData: Service = [
         toStreet: "Friarage Street",
         toLatitude: "54.342092",
         toLongitude: "-1.431014",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2163,6 +2253,8 @@ export const serviceDbData: Service = [
         toStreet: "Northallerton Road",
         toLatitude: "54.361475",
         toLongitude: "-1.424637",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2210,6 +2302,8 @@ export const serviceDbData: Service = [
         toStreet: "A684",
         toLatitude: "54.364232",
         toLongitude: "-1.338321",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2257,6 +2351,8 @@ export const serviceDbData: Service = [
         toStreet: "South End",
         toLatitude: "54.368433",
         toLongitude: "-1.299159",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2304,6 +2400,8 @@ export const serviceDbData: Service = [
         toStreet: "Main Street",
         toLatitude: "54.399449",
         toLongitude: "-1.308766",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2351,6 +2449,8 @@ export const serviceDbData: Service = [
         toStreet: "Black Horse Lane",
         toLatitude: "54.413202",
         toLongitude: "-1.269474",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2398,6 +2498,8 @@ export const serviceDbData: Service = [
         toStreet: "Station Lane",
         toLatitude: "54.426963",
         toLongitude: "-1.271171",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2445,6 +2547,8 @@ export const serviceDbData: Service = [
         toStreet: "Enterpen",
         toLatitude: "54.446832",
         toLongitude: "-1.281428",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2492,6 +2596,8 @@ export const serviceDbData: Service = [
         toStreet: "N/A",
         toLatitude: "54.463415",
         toLongitude: "-1.223532",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2539,6 +2645,8 @@ export const serviceDbData: Service = [
         toStreet: "High Street",
         toLatitude: "54.470143",
         toLongitude: "-1.19148",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2586,6 +2694,8 @@ export const serviceDbData: Service = [
         toStreet: "Northallerton Road",
         toLatitude: "54.361259",
         toLongitude: "-1.424748",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2633,6 +2743,8 @@ export const serviceDbData: Service = [
         toStreet: "High Street",
         toLatitude: "54.341667",
         toLongitude: "-1.435589",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 14638,
@@ -2680,6 +2792,8 @@ export const serviceDbData: Service = [
         toStreet: "Northallerton Road",
         toLatitude: "54.305874",
         toLongitude: "-1.557764",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
 ];
 
@@ -3179,6 +3293,8 @@ export const serviceWithStopsData: ServicesByStops = [
         mode: "",
         fromAtcoCode: "370031007",
         toAtcoCode: "370023899",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 1,
@@ -3199,6 +3315,8 @@ export const serviceWithStopsData: ServicesByStops = [
         mode: "",
         fromAtcoCode: "370023899",
         toAtcoCode: "370021015",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 2,
@@ -3219,6 +3337,8 @@ export const serviceWithStopsData: ServicesByStops = [
         mode: "",
         fromAtcoCode: "370020031",
         toAtcoCode: "370025036",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 2,
@@ -3239,6 +3359,8 @@ export const serviceWithStopsData: ServicesByStops = [
         mode: "",
         fromAtcoCode: "370025036",
         toAtcoCode: "370020034",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 3,
@@ -3259,6 +3381,8 @@ export const serviceWithStopsData: ServicesByStops = [
         mode: "",
         fromAtcoCode: "370020117",
         toAtcoCode: "370025036",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 3,
@@ -3279,6 +3403,8 @@ export const serviceWithStopsData: ServicesByStops = [
         mode: "",
         fromAtcoCode: "370025036",
         toAtcoCode: "370023508",
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
 ];
 
@@ -3301,6 +3427,8 @@ export const expectedFormattedServicesWithStops = [
         outboundDirectionDescription: "Rotherham Town Centre Rotherham Interchange/B4 - Sheffield Interchange/C3",
         mode: "",
         stops: ["370023899"],
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 2,
@@ -3320,6 +3448,8 @@ export const expectedFormattedServicesWithStops = [
         outboundDirectionDescription: "Sheffield Intc - Maynard Road",
         mode: "",
         stops: ["370025036"],
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
     {
         id: 3,
@@ -3339,6 +3469,8 @@ export const expectedFormattedServicesWithStops = [
         outboundDirectionDescription: "Sheffield, Mft - Maltby, Salisbury Rd",
         mode: "",
         stops: ["370025036"],
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
     },
 ];
 
@@ -3361,6 +3493,8 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
         outboundDirectionDescription: "Rotherham Town Centre Rotherham Interchange/B4 - Sheffield Interchange/C3",
         mode: "",
         stops: ["370023899"],
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
         routes: {
             outbound: [
                 {
@@ -3474,6 +3608,8 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
         outboundDirectionDescription: "Sheffield Intc - Maynard Road",
         mode: "",
         stops: ["370025036"],
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
         routes: {
             outbound: [
                 {
@@ -3587,6 +3723,8 @@ export const expectedFormattedServicesWithStopsAndRoutes = [
         outboundDirectionDescription: "Sheffield, Mft - Maltby, Salisbury Rd",
         mode: "",
         stops: ["370025036"],
+        centrePointLat: "54.295902",
+        centrePointLon: "-1.577902",
         routes: {
             outbound: [
                 {
