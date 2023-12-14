@@ -236,6 +236,7 @@ def iterate_through_journey_patterns_and_run_insert_queries(
     admin_area_codes = set()
     route_ref_for_tracks = None
     link_refs_for_tracks = None
+    centre_stop = None
 
     vehicle_journey_journey_pattern_refs = [
         vehicle_journey["journey_pattern_ref"] for vehicle_journey in vehicle_journeys
@@ -294,10 +295,45 @@ def iterate_through_journey_patterns_and_run_insert_queries(
                 map(lambda link: link.get("route_link_ref", None), links)
             )
 
+            centre_stop = (
+                links[len(links) // 2]["from_atco_code"] if len(links) > 0 else None
+            )
+
     if admin_area_codes:
         insert_admin_area_codes(cursor, admin_area_codes, operator_service_id)
 
+    if centre_stop:
+        stop_location = get_stop_location_by_atco_code(cursor, centre_stop)
+
+        insert_centre_point(cursor, stop_location, operator_service_id)
+
     return route_ref_for_tracks, link_refs_for_tracks
+
+
+def get_stop_location_by_atco_code(
+    cursor: aurora_data_api.AuroraDataAPICursor, centre_stop
+):
+    query = "SELECT longitude, latitude FROM stops_new WHERE atcoCode = :centre_stop"
+    cursor.execute(
+        query,
+        {"centre_stop": centre_stop},
+    )
+
+    return cursor.fetchone()
+
+
+def insert_centre_point(
+    cursor: aurora_data_api.AuroraDataAPICursor, centre_point, service_id
+):
+    query = "UPDATE services_new SET centrePointLon = :centre_point_lon, centrePointLat = :centre_point_lat WHERE id = :service_id"
+    cursor.execute(
+        query,
+        {
+            "centre_point_lon": centre_point[0],
+            "centre_point_lat": centre_point[1],
+            "service_id": service_id,
+        },
+    )
 
 
 def insert_admin_area_codes(
