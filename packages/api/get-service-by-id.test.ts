@@ -13,7 +13,21 @@ describe("get-service-by-id", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ nocCode: "TEST", serviceId: 234 });
+            expect(getQueryInput(event)).toEqual({ nocCode: "TEST", serviceRef: "234", dataSource: "bods" });
+        });
+
+        it("handles nocCode and serviceId", () => {
+            const event = {
+                pathParameters: {
+                    nocCode: "TEST",
+                    serviceId: "234",
+                },
+                queryStringParameters: {
+                    dataSource: "tnds",
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({ nocCode: "TEST", serviceRef: "234", dataSource: "tnds" });
         });
 
         it("throws a ClientError if no nocCode provided", () => {
@@ -33,18 +47,7 @@ describe("get-service-by-id", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(() => getQueryInput(event)).toThrowError("Service ID must be provided");
-        });
-
-        it("throws a ClientError if invalid serviceId provided", () => {
-            const event = {
-                pathParameters: {
-                    nocCode: "TEST",
-                    serviceId: "abc",
-                },
-            } as unknown as APIGatewayEvent;
-
-            expect(() => getQueryInput(event)).toThrowError("Provided service ID is not valid");
+            expect(() => getQueryInput(event)).toThrowError("Service ref must be provided");
         });
     });
 
