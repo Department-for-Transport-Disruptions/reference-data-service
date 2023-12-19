@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { getServiceById, Service, ServiceByIdQueryInput } from "./client";
+import { getServiceById, isDataSource, Service, ServiceByIdQueryInput } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 
@@ -33,6 +33,8 @@ type ServiceResponse = {
     inboundDirectionDescription: string | null;
     outboundDirectionDescription: string | null;
     mode: string | null;
+    centrePointLat: string | null;
+    centrePointLon: string | null;
     journeyPatterns: {
         id: number;
         direction: string | null;
@@ -54,7 +56,7 @@ export const main = async (event: APIGatewayEvent): Promise<APIGatewayProxyResul
     executeClient(event, getQueryInput, getServiceById, formatService);
 
 export const getQueryInput = (event: APIGatewayEvent): ServiceByIdQueryInput => {
-    const { pathParameters } = event;
+    const { pathParameters, queryStringParameters } = event;
 
     const nocCode = pathParameters?.nocCode ?? "";
 
@@ -62,19 +64,18 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceByIdQueryInput => 
         throw new ClientError("NOC must be provided");
     }
 
-    const serviceId = pathParameters?.serviceId;
+    const serviceRef = pathParameters?.serviceId;
 
-    if (!serviceId) {
-        throw new ClientError("Service ID must be provided");
+    if (!serviceRef) {
+        throw new ClientError("Service ref must be provided");
     }
 
-    if (isNaN(Number(serviceId))) {
-        throw new ClientError("Provided service ID is not valid");
-    }
+    const dataSourceInput = queryStringParameters?.dataSource;
 
     return {
         nocCode,
-        serviceId: Number(serviceId),
+        serviceRef: serviceRef,
+        dataSource: dataSourceInput && isDataSource(dataSourceInput) ? dataSourceInput : "bods",
     };
 };
 
@@ -149,6 +150,8 @@ export const formatService = async (service: Service): Promise<ServiceResponse |
                 inboundDirectionDescription: service[0].inboundDirectionDescription,
                 outboundDirectionDescription: service[0].outboundDirectionDescription,
                 mode: service[0].mode,
+                centrePointLat: service[0].centrePointLat,
+                centrePointLon: service[0].centrePointLon,
                 journeyPatterns: [],
             },
         ) ?? null

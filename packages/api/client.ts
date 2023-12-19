@@ -269,11 +269,14 @@ export type ServicesForOperator = Awaited<ReturnType<typeof getServicesForOperat
 
 export type ServiceByIdQueryInput = {
     nocCode: string;
-    serviceId: number;
+    serviceRef: string;
+    dataSource: string;
 };
 
 export const getServiceById = async (dbClient: Kysely<Database>, input: ServiceByIdQueryInput) => {
     logger.info("Starting getService...");
+
+    const keyToUse = input.dataSource === "bods" ? "services.lineId" : "services.serviceCode";
 
     const service = await dbClient
         .selectFrom("services")
@@ -318,7 +321,7 @@ export const getServiceById = async (dbClient: Kysely<Database>, input: ServiceB
             "toStop.longitude as toLongitude",
         ])
         .where("services.nocCode", "=", input.nocCode)
-        .where("services.id", "=", input.serviceId)
+        .where(keyToUse, "=", input.serviceRef)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
         .where((qb) =>
@@ -850,6 +853,7 @@ export const getRoadworkById = async (dbClient: Kysely<Database>, input: Roadwor
             "roadworks.town",
             "roadworks.worksLocationCoordinates",
             "roadworks.activityType",
+            "roadworks.workCategory",
             "roadworks.trafficManagementType",
             "roadworks.proposedStartDateTime",
             "roadworks.proposedEndDateTime",

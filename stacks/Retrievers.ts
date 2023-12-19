@@ -7,6 +7,7 @@ import { Cron, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
 import { S3Stack } from "./S3";
 import { StringParameter } from "aws-cdk-lib/aws-ssm";
+import { disableTableRenamerParamName } from "@reference-data-service/core/ssm";
 
 export function RetrieversStack({ stack }: StackContext) {
     const { csvBucket, txcBucket, txcZippedBucket, nptgBucket } = use(S3Stack);
@@ -132,18 +133,14 @@ export function RetrieversStack({ stack }: StackContext) {
     );
 
     const tndsRetriever = new Function(stack, "ref-data-service-tnds-retriever", {
-        bind: [cluster],
         functionName: `ref-data-service-tnds-retriever-${stack.stage}`,
-        handler: "packages/ref-data-retrievers/txc-retriever/index.main",
+        handler: "packages/ref-data-retrievers/tnds-retriever/index.main",
         runtime: "python3.11",
-        timeout: 900,
-        memorySize: 3008,
+        timeout: 300,
+        memorySize: 1024,
         environment: {
             TXC_BUCKET_NAME: txcBucket.bucketName,
             ZIPPED_BUCKET_NAME: txcZippedBucket.bucketName,
-            DATABASE_NAME: cluster.defaultDatabaseName,
-            DATABASE_SECRET_ARN: cluster.secretArn,
-            CLUSTER_ARN: cluster.clusterArn,
             FTP_CREDENTIALS_SECRET_ARN: ftpSecret.secretArn || "",
         },
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
@@ -168,21 +165,16 @@ export function RetrieversStack({ stack }: StackContext) {
         enableLiveDev: false,
     });
 
-    const bodsRetriever = new Function(stack, "ref-data-service-bods-retriever", {
-        bind: [cluster],
-        functionName: `ref-data-service-bods-retriever-${stack.stage}`,
-        handler: "packages/ref-data-retrievers/txc-retriever/index.main",
-        runtime: "python3.11",
-        timeout: 900,
-        memorySize: 3008,
+    const bodsRegionRetriever = new Function(stack, "ref-data-service-bods-region-retriever", {
+        functionName: `ref-data-service-bods-region-retriever-${stack.stage}`,
+        handler: "packages/ref-data-retrievers/bods-retriever/region-retriever.main",
+        runtime: "nodejs20.x",
+        timeout: 120,
+        memorySize: 1024,
         environment: {
+            BASE_DATA_URL: "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive",
             TXC_BUCKET_NAME: txcBucket.bucketName,
-            ZIPPED_BUCKET_NAME: txcZippedBucket.bucketName,
-            DATABASE_NAME: cluster.defaultDatabaseName,
-            DATABASE_SECRET_ARN: cluster.secretArn,
-            CLUSTER_ARN: cluster.clusterArn,
-            BODS_URL: "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive",
-            TNDS_FUNCTION: tndsRetriever.functionName,
+            TXC_ZIPPED_BUCKET_NAME: txcZippedBucket.bucketName,
             STAGE: stack.stage,
         },
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
@@ -190,10 +182,6 @@ export function RetrieversStack({ stack }: StackContext) {
             new PolicyStatement({
                 actions: ["s3:PutObject"],
                 resources: [`${txcBucket.bucketArn}/*`, `${txcZippedBucket.bucketArn}/*`],
-            }),
-            new PolicyStatement({
-                actions: ["lambda:invokeAsync", "lambda:invokeFunction"],
-                resources: [tndsRetriever.functionArn],
             }),
             new PolicyStatement({
                 actions: ["cloudwatch:PutMetricData"],
@@ -204,7 +192,34 @@ export function RetrieversStack({ stack }: StackContext) {
                 resources: ["*"],
             }),
         ],
-        enableLiveDev: false,
+    });
+
+    const bodsRetriever = new Function(stack, `ref-data-service-bods-retriever`, {
+        bind: [cluster],
+        functionName: `ref-data-service-bods-retriever-${stack.stage}`,
+        handler: "packages/ref-data-retrievers/bods-retriever/index.main",
+        runtime: "nodejs20.x",
+        timeout: 180,
+        memorySize: 512,
+        environment: {
+            REGION_RETRIEVER_FUNCTION_NAME: bodsRegionRetriever.functionName,
+            TNDS_RETRIEVER_FUNCTION_NAME: tndsRetriever.functionName,
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
+            STAGE: stack.stage,
+        },
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+        permissions: [
+            new PolicyStatement({
+                actions: ["lambda:invokeAsync", "lambda:invokeFunction"],
+                resources: [bodsRegionRetriever.functionArn, tndsRetriever.functionArn],
+            }),
+            new PolicyStatement({
+                actions: ["ssm:PutParameter"],
+                resources: ["*"],
+            }),
+        ],
     });
 
     const txcRetrieverSchedule: { [key: string]: Schedule } = {
@@ -228,7 +243,8 @@ export function RetrieversStack({ stack }: StackContext) {
         handler: "packages/ref-data-retrievers/txc-unzipper/index.main",
         runtime: "python3.11",
         timeout: 900,
-        memorySize: 1024,
+        memorySize: 1536,
+        diskSize: "3072 MB",
         retryAttempts: 0,
         environment: {
             BUCKET_NAME: txcBucket.bucketName,
@@ -237,7 +253,7 @@ export function RetrieversStack({ stack }: StackContext) {
         permissions: [
             new PolicyStatement({
                 actions: ["s3:PutObject"],
-                resources: [`${txcBucket.bucketArn}/*`],
+                resources: [`${txcBucket.bucketArn}/*`, `${txcZippedBucket.bucketArn}/*`],
             }),
             new PolicyStatement({
                 actions: ["s3:GetObject"],
@@ -254,7 +270,7 @@ export function RetrieversStack({ stack }: StackContext) {
     txcZippedBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(unzipper));
 
     new StringParameter(stack, "disableTableRenamer", {
-        parameterName: `/scheduled/disable-table-renamer-${stack.stage}`,
+        parameterName: `${disableTableRenamerParamName}-${stack.stage}`,
         stringValue: "false",
     });
 }

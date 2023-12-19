@@ -149,6 +149,8 @@ export interface ServicesTable {
     inboundDirectionDescription: string | null;
     outboundDirectionDescription: string | null;
     mode: string | null;
+    centrePointLon: string | null;
+    centrePointLat: string | null;
 }
 
 export interface ServiceJourneyPatternsTable {

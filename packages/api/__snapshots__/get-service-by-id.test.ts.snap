@@ -2,6 +2,8 @@
 
 exports[`get-service-by-id > format service > correctly formats db response 1`] = `
 {
+  "centrePointLat": "54.295902",
+  "centrePointLon": "-1.577902",
   "dataSource": "bods",
   "destination": "Fairview Flats",
   "endDate": "2023-04-22",

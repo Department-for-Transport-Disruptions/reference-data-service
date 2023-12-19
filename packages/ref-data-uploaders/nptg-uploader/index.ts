@@ -1,5 +1,4 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { SSMClient, PutParameterCommand, PutParameterCommandInput } from "@aws-sdk/client-ssm";
 import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
 import { S3Event } from "aws-lambda";
 import { Promise as BluebirdPromise } from "bluebird";
@@ -8,6 +7,7 @@ import * as logger from "lambda-log";
 import { parseStringPromise } from "xml2js";
 import { Nptg, nptgSchema } from "./zod";
 import { Kysely, sql } from "kysely";
+import { putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
 
 export const setupTables = async (dbClient: Kysely<Database>) => {
     await dbClient.schema.dropTable("nptg_admin_areas_new").ifExists().execute();
@@ -112,7 +112,7 @@ export const main = async (event: S3Event) => {
         logger.info("NPTG upload complete");
     } catch (e) {
         if (stage) {
-            await putParameter(`/scheduled/disable-table-renamer-${stage}`, "true");
+            await putTableRenamerDisableParameter(stage, "true", logger);
         }
         if (e instanceof Error) {
             logger.error(e);
@@ -131,24 +131,5 @@ export const main = async (event: S3Event) => {
                 error: "There was a problem with the nptg uploader",
             }),
         };
-    }
-};
-
-const putParameter = async (key: string, value: string) => {
-    const ssm = new SSMClient({ region: "eu-west-2" });
-
-    try {
-        const input: PutParameterCommandInput = {
-            Name: key,
-            Value: value,
-            Type: "String",
-            Overwrite: true,
-        };
-        const command = new PutParameterCommand(input);
-        await ssm.send(command);
-    } catch (error) {
-        if (error instanceof Error) {
-            logger.error(error);
-        }
     }
 };

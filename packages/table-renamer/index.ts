@@ -1,7 +1,8 @@
 import { Database, getDbClient, Tables } from "@reference-data-service/core/db";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
-import { SSMClient, PutParameterCommand, GetParameterCommand, PutParameterCommandInput } from "@aws-sdk/client-ssm";
+import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
+import { disableTableRenamerParamName, putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
 
 const ssm = new SSMClient({ region: "eu-west-2" });
 
@@ -20,7 +21,7 @@ export const main = async () => {
 
         try {
             const input = {
-                Name: `/scheduled/disable-table-renamer-${stage}`,
+                Name: `${disableTableRenamerParamName}-${stage}`,
             };
             const command = new GetParameterCommand(input);
             const ssmOutput = await ssm.send(command);
@@ -44,13 +45,13 @@ export const main = async () => {
 
             await deleteAndRenameTables(dbClient);
         } else {
-            await putParameter(`/scheduled/disable-table-renamer-${stage}`, "false");
+            await putTableRenamerDisableParameter(stage, "false", logger);
             throw new Error(
                 "The SSM Parameter used to check for errors in the scheduled job has returned TRUE indicating an issue",
             );
         }
     } catch (e) {
-        if (stage) await putParameter(`/scheduled/disable-table-renamer-${stage}`, "false");
+        if (stage) await putTableRenamerDisableParameter(stage, "false", logger);
         if (e instanceof Error) {
             logger.error(e);
 
@@ -68,23 +69,6 @@ export const main = async () => {
                 error: "There was a problem with the table renamer",
             }),
         };
-    }
-};
-
-const putParameter = async (key: string, value: string) => {
-    try {
-        const input: PutParameterCommandInput = {
-            Name: key,
-            Value: value,
-            Type: "String",
-            Overwrite: true,
-        };
-        const command = new PutParameterCommand(input);
-        await ssm.send(command);
-    } catch (error) {
-        if (error instanceof Error) {
-            logger.error(error);
-        }
     }
 };
 
