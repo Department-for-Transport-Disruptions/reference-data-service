@@ -19,6 +19,8 @@ def main(event, context):
         event["Records"][0]["s3"]["object"]["key"], encoding="utf-8")
 
     try:
+        logger.info(f"Unzipping file {key}")
+
         s3.download_file(bucket, key, file_dir)
         zipfile = ZipFile(file_dir)
 
@@ -26,14 +28,25 @@ def main(event, context):
 
         namelist = zipfile.namelist()
         xml_files = list(filter(lambda x: x.endswith(".xml"), namelist))
+        zip_files = list(filter(lambda x: x.endswith(".zip"), namelist))
 
         for filename in xml_files:
             s3.upload_fileobj(
                 zipfile.open(filename),
                 os.getenv("BUCKET_NAME"),
-                key_base + "/" + os.path.basename(filename),
+                key_base + "/" + filename,
                 ExtraArgs={
                     "ContentType": "application/xml"
+                }
+            )
+
+        for filename in zip_files:
+            s3.upload_fileobj(
+                zipfile.open(filename),
+                bucket,
+                key_base + "/" + filename,
+                ExtraArgs={
+                    "ContentType": "application/zip"
                 }
             )
 
