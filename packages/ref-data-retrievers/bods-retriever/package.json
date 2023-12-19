@@ -1,0 +1,24 @@
+{
+    "name": "@reference-data-service/bods-retriever",
+    "version": "0.1.0",
+    "scripts": {
+        "test": "sst bind vitest",
+        "typecheck": "tsc -noEmit"
+    },
+    "devDependencies": {
+        "@types/lambda-log": "^2.2.1",
+        "@types/node": "^18.13.0",
+        "@types/unzipper": "^0.10.9",
+        "vitest": "^0.29.1"
+    },
+    "dependencies": {
+        "@aws-sdk/client-lambda": "^3.474.0",
+        "@aws-sdk/client-s3": "^3.267.0",
+        "@aws-sdk/lib-storage": "^3.476.0",
+        "adm-zip": "^0.5.10",
+        "axios": "^1.6.2",
+        "basic-ftp": "^5.0.2",
+        "lambda-log": "^3.1.0",
+        "unzipper": "^0.10.14"
+    }
+}

@@ -305,7 +305,8 @@ def iterate_through_journey_patterns_and_run_insert_queries(
     if centre_stop:
         stop_location = get_stop_location_by_atco_code(cursor, centre_stop)
 
-        insert_centre_point(cursor, stop_location, operator_service_id)
+        if stop_location:
+            insert_centre_point(cursor, stop_location, operator_service_id)
 
     return route_ref_for_tracks, link_refs_for_tracks
 
