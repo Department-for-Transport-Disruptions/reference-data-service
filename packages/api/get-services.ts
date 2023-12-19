@@ -159,7 +159,7 @@ export const formatServicesWithStops = async (
         const serviceRoutePromises = groupedServices.map(
             (service) =>
                 getServiceStops(dbClient, {
-                    serviceRef: input.dataSource === "bods" ? service.lineId || "" : service.serviceCode || "",
+                    serviceRef: input.dataSource === DataSource.bods ? service.lineId || "" : service.serviceCode || "",
                     dataSource: input.dataSource,
                 }) as Promise<ServiceStops>,
         );
