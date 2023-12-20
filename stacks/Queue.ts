@@ -15,7 +15,7 @@ export function QueueStack({ stack }: StackContext) {
                     DATABASE_SECRET_ARN: cluster.secretArn,
                     DATABASE_RESOURCE_ARN: cluster.clusterArn,
                 },
-                runtime: "nodejs18.x",
+                runtime: "nodejs20.x",
                 logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
             },
             cdk: {
