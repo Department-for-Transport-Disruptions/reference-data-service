@@ -10,6 +10,7 @@
     },
     "dependencies": {
         "@reference-data-service/core": "file:../core",
+        "dayjs": "^1.11.10",
         "geolib": "^3.3.3",
         "zod": "^3.22.3"
     }

@@ -1,6 +1,14 @@
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import isBetween from "dayjs/plugin/isBetween";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { Database } from "@reference-data-service/core/db";
+
+dayjs.extend(isBetween);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(customParseFormat);
 
 export enum VehicleMode {
     bus = "bus",
@@ -552,9 +560,9 @@ export const getServiceStopsV2 = async (
 
     const keyToUse = input.dataSource === "bods" ? "services.lineId" : "services.serviceCode";
 
-    const service = await dbClient
+    const services = await dbClient
         .selectFrom("services")
-        .select(["id"])
+        .select(["id", "startDate", "endDate"])
         .where(keyToUse, "=", input.serviceRef)
         .where("dataSource", "=", input.dataSource)
         .where((eb) =>
@@ -569,10 +577,28 @@ export const getServiceStopsV2 = async (
                 ]),
             ]),
         )
-        .executeTakeFirst();
+        .execute();
 
-    if (!service) {
+    if (!services.length) {
         return [];
+    }
+
+    let service: (typeof services)[0] | null = null;
+
+    if (services.length > 1) {
+        service =
+            services.find((s) => {
+                const start = s.startDate ? dayjs(s.startDate, "YYYY-MM-DD") : null;
+                const end = s.endDate ? dayjs(s.endDate, "YYYY-MM-DD") : null;
+                const currentDate = dayjs();
+
+                return (
+                    (start && end && currentDate.isBetween(start, end, "date", "[]")) ||
+                    (!end && start && currentDate.isSameOrAfter(start, "date"))
+                );
+            }) || services[0];
+    } else {
+        service = services[0];
     }
 
     if (input.useTracks) {
