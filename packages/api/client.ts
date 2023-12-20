@@ -558,25 +558,13 @@ export const getServiceStopsV2 = async (
         return getServiceStops(dbClient, input);
     }
 
-    const keyToUse = input.dataSource === "bods" ? "services.lineId" : "services.serviceCode";
+    const keyToUse = input.dataSource === DataSource.bods ? "services.lineId" : "services.serviceCode";
 
     const services = await dbClient
         .selectFrom("services")
         .select(["id", "startDate", "endDate"])
         .where(keyToUse, "=", input.serviceRef)
         .where("dataSource", "=", input.dataSource)
-        .where((eb) =>
-            eb.or([
-                eb.and([
-                    eb(sql`CURDATE()`, ">=", sql`STR_TO_DATE(services.startDate, '%Y-%m-%d')`),
-                    eb(sql`CURDATE()`, "<=", sql`STR_TO_DATE(services.endDate, '%Y-%m-%d')`),
-                ]),
-                eb.and([
-                    eb(sql`CURDATE()`, ">=", sql`STR_TO_DATE(services.startDate, '%Y-%m-%d')`),
-                    eb("services.endDate", "is", null),
-                ]),
-            ]),
-        )
         .execute();
 
     if (!services.length) {

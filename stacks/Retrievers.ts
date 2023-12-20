@@ -51,7 +51,7 @@ export function RetrieversStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: Schedule.cron({ minute: "0", hour: "2" }),
+                schedule: Schedule.cron({ minute: "50", hour: "1" }),
             },
         },
     });
@@ -86,7 +86,7 @@ export function RetrieversStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: Schedule.cron({ minute: "0", hour: "2" }),
+                schedule: Schedule.cron({ minute: "55", hour: "1" }),
             },
         },
     });
@@ -169,8 +169,8 @@ export function RetrieversStack({ stack }: StackContext) {
         functionName: `ref-data-service-bods-region-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/bods-retriever/region-retriever.main",
         runtime: "nodejs20.x",
-        timeout: 120,
-        memorySize: 1024,
+        timeout: 300,
+        memorySize: 2048,
         environment: {
             BASE_DATA_URL: "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive",
             TXC_BUCKET_NAME: txcBucket.bucketName,
@@ -223,7 +223,7 @@ export function RetrieversStack({ stack }: StackContext) {
     });
 
     const txcRetrieverSchedule: { [key: string]: Schedule } = {
-        preprod: Schedule.cron({ minute: "30", hour: "3" }),
+        preprod: Schedule.cron({ minute: "00", hour: "3" }),
         prod: Schedule.cron({ minute: "30", hour: "2" }),
     };
 
@@ -232,7 +232,7 @@ export function RetrieversStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: txcRetrieverSchedule[stack.stage] || Schedule.cron({ minute: "00", hour: "4" }),
+                schedule: txcRetrieverSchedule[stack.stage] || Schedule.cron({ minute: "45", hour: "2" }),
             },
         },
     });
