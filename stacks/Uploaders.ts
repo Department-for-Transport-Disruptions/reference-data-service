@@ -20,7 +20,7 @@ export function UploadersStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-csv-uploader-${stack.stage}`,
         handler: "packages/ref-data-uploaders/csv-uploader/index.main",
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         timeout: 600,
         memorySize: 3008,
         environment: {
@@ -86,7 +86,7 @@ export function UploadersStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-nptg-uploader-${stack.stage}`,
         handler: "packages/ref-data-uploaders/nptg-uploader/index.main",
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         timeout: 450,
         memorySize: 2048,
         environment: {
@@ -118,7 +118,7 @@ export function UploadersStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-cleanup-roadworks-${stack.stage}`,
         handler: "packages/ref-data-uploaders/cleanup-roadworks/index.main",
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         timeout: 600,
         memorySize: 1024,
         environment: {
