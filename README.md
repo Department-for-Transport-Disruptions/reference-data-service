@@ -28,7 +28,7 @@ All data is initially imported into tables suffixed with "\_new", this TypeScrip
 
 ### Dependencies
 
--   Node 20+
+-   Node 18+
 -   Python3
 -   AWS CLI
 -   jq

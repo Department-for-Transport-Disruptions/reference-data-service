@@ -24,7 +24,7 @@ export function RetrieversStack({ stack }: StackContext) {
     const nocRetriever = new Function(stack, `ref-data-service-noc-retriever`, {
         functionName: `ref-data-service-noc-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/data-retriever/index.main",
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         timeout: 60,
         memorySize: 256,
         environment: {
@@ -59,7 +59,7 @@ export function RetrieversStack({ stack }: StackContext) {
     const naptanRetriever = new Function(stack, `ref-data-service-naptan-retriever`, {
         functionName: `ref-data-service-naptan-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/data-retriever/index.main",
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         timeout: 60,
         memorySize: 512,
         environment: {
@@ -94,7 +94,7 @@ export function RetrieversStack({ stack }: StackContext) {
     const nptgRetriever = new Function(stack, `ref-data-service-nptg-retriever`, {
         functionName: `ref-data-service-nptg-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/data-retriever/index.main",
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         timeout: 60,
         memorySize: 512,
         environment: {

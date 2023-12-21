@@ -12,7 +12,7 @@ export function TableRenamerStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-table-renamer-${stack.stage}`,
         handler: "packages/table-renamer/index.main",
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         timeout: 600,
         memorySize: 256,
         environment: {
