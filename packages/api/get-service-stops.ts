@@ -28,7 +28,11 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Service Ref must be provided");
     }
 
-    const dataSourceInput = queryStringParameters?.dataSource;
+    const dataSourceInput = queryStringParameters?.dataSource || "bods";
+
+    if (!isDataSource(dataSourceInput)) {
+        throw new ClientError("Invalid datasource provided");
+    }
 
     const stopTypes = pathParameters.stopTypes || "";
     const stopTypesArray = stopTypes
@@ -70,25 +74,9 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid bus stop type provided");
     }
 
-    if (dataSourceInput && isDataSource(dataSourceInput)) {
-        return {
-            serviceRef,
-            dataSource: dataSourceInput,
-            ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
-                ? { busStopTypes: filteredBusStopTypesArray }
-                : {}),
-            ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
-            ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
-            ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
-        };
-    }
-
-    if (isNaN(Number(serviceRef))) {
-        throw new ClientError("ServiceRef invalid");
-    }
-
     return {
-        serviceRef: Number(serviceRef),
+        serviceRef,
+        dataSource: dataSourceInput,
         ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
             ? { busStopTypes: filteredBusStopTypesArray }
             : {}),
