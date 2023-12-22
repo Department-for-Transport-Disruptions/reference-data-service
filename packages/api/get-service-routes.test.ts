@@ -2,7 +2,7 @@ import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
 import { formatStopsRoutes, getQueryInput } from "./get-service-routes";
 import { stopsDbData } from "./test/testdata";
-import { BusStopType, ServiceStop, ServiceTracks, VehicleMode } from "./client";
+import { BusStopType, DataSource, ServiceStop, ServiceTracks, VehicleMode } from "./client";
 
 describe("get-service-routes", () => {
     describe("input generation", () => {
@@ -14,7 +14,7 @@ describe("get-service-routes", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ serviceRef: 234, useTracks: true });
+            expect(getQueryInput(event)).toEqual({ serviceRef: "234", useTracks: true, dataSource: DataSource.bods });
         });
 
         it("handles serviceCode or lineId with datasource", () => {
@@ -30,22 +30,32 @@ describe("get-service-routes", () => {
             expect(getQueryInput(event)).toEqual({ dataSource: "bods", serviceRef: "abc", useTracks: true });
         });
 
+        it("defaults to bods if no datasource provided", () => {
+            const event = {
+                pathParameters: {
+                    serviceId: "234",
+                    stopTypes: "BCT",
+                    busStopTypes: BusStopType.MKD,
+                    modes: VehicleMode.bus,
+                },
+            } as unknown as APIGatewayEvent;
+
+            expect(getQueryInput(event)).toEqual({
+                serviceRef: "234",
+                stopTypes: ["BCT"],
+                busStopTypes: [BusStopType.MKD],
+                modes: [VehicleMode.bus],
+                dataSource: DataSource.bods,
+                useTracks: true,
+            });
+        });
+
         it("throws a ClientError if no serviceId provided", () => {
             const event = {
                 pathParameters: {},
             } as unknown as APIGatewayEvent;
 
             expect(() => getQueryInput(event)).toThrowError("Service Ref must be provided");
-        });
-
-        it("throws a ClientError if serviceCode or lineId provided without dataSource", () => {
-            const event = {
-                pathParameters: {
-                    serviceId: "abc",
-                },
-            } as unknown as APIGatewayEvent;
-
-            expect(() => getQueryInput(event)).toThrowError("ServiceRef invalid");
         });
 
         it("handles serviceId, stopTypes, busStopType and modes", () => {
@@ -60,11 +70,12 @@ describe("get-service-routes", () => {
             } as unknown as APIGatewayEvent;
 
             expect(getQueryInput(event)).toEqual({
-                serviceRef: 234,
+                serviceRef: "234",
                 stopTypes: ["BCT"],
                 busStopTypes: [BusStopType.MKD],
                 modes: [VehicleMode.bus],
                 useTracks: true,
+                dataSource: DataSource.bods,
             });
         });
 

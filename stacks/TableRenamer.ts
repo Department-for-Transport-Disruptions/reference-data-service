@@ -35,7 +35,7 @@ export function TableRenamerStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: Schedule.cron({ minute: "30", hour: "5" }),
+                schedule: Schedule.cron({ minute: "00", hour: "6" }),
             },
         },
     });
