@@ -886,40 +886,45 @@ def write_to_database(
                 )
 
             if not file_has_nocs:
-                db_connection.rollback()
                 logger.info(f"No NOCs found in TXC file: '{key}'")
+
+                db_connection.rollback()
                 put_metric_data_by_data_source(
                     cloudwatch, data_source, "NoNOCsInFile", 1
                 )
                 return False
 
             if not file_has_services:
-                db_connection.rollback()
                 logger.info(f"No service data found in TXC file: '{key}'")
+
+                db_connection.rollback()
                 put_metric_data_by_data_source(
                     cloudwatch, data_source, "NoServiceDataInFile", 1
                 )
                 return False
 
             if not file_has_vehicle_journeys:
-                db_connection.rollback()
                 logger.info(f"No vehicle journeys data found in TXC file: '{key}'")
+
+                db_connection.rollback()
                 put_metric_data_by_data_source(
                     cloudwatch, data_source, "NoVehicleJourneysDataInFile", 1
                 )
                 return False
 
             if not file_has_lines:
-                db_connection.rollback()
                 logger.info(f"No line data found in TXC file: '{key}'")
+
+                db_connection.rollback()
                 put_metric_data_by_data_source(
                     cloudwatch, data_source, "NoLineDataInFile", 1
                 )
                 return False
 
             if not file_has_useable_data:
-                db_connection.rollback()
                 logger.info(f"No useable data found in TXC file: '{key}'")
+
+                db_connection.rollback()
                 put_metric_data_by_data_source(
                     cloudwatch, data_source, "NoUseableDataInFile", 1
                 )
