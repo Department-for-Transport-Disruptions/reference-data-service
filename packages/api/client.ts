@@ -275,73 +275,56 @@ export const getServicesForOperator = async (dbClient: Kysely<Database>, input: 
 
 export type ServicesForOperator = Awaited<ReturnType<typeof getServicesForOperator>>;
 
+const getMostRelevantService = <
+    T extends {
+        id: number;
+        startDate: string | null;
+        endDate: string | null;
+    },
+>(
+    services: T[],
+) => {
+    if (services.length === 1) {
+        return services[0];
+    }
+
+    return (
+        services.find((s) => {
+            const start = s.startDate ? dayjs(s.startDate, "YYYY-MM-DD") : null;
+            const end = s.endDate ? dayjs(s.endDate, "YYYY-MM-DD") : null;
+            const currentDate = dayjs();
+
+            return (
+                (start && end && currentDate.isBetween(start, end, "date", "[]")) ||
+                (!end && start && currentDate.isSameOrAfter(start, "date"))
+            );
+        }) || services[0]
+    );
+};
+
 export type ServiceByIdQueryInput = {
     nocCode: string;
     serviceRef: string;
-    dataSource: string;
+    dataSource: DataSource;
 };
 
 export const getServiceById = async (dbClient: Kysely<Database>, input: ServiceByIdQueryInput) => {
     logger.info("Starting getService...");
 
-    const keyToUse = input.dataSource === "bods" ? "services.lineId" : "services.serviceCode";
+    const keyToUse = input.dataSource === DataSource.bods ? "services.lineId" : "services.serviceCode";
 
-    const service = await dbClient
+    const services = await dbClient
         .selectFrom("services")
-        .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
-        .innerJoin(
-            "service_journey_pattern_links",
-            "service_journey_pattern_links.journeyPatternId",
-            "service_journey_patterns.id",
-        )
-        .innerJoin("stops as fromStop", "fromStop.atcoCode", "service_journey_pattern_links.fromAtcoCode")
-        .innerJoin("stops as toStop", "toStop.atcoCode", "service_journey_pattern_links.toAtcoCode")
-        .selectAll(["services"])
-        .select([
-            "service_journey_patterns.id as journeyPatternId",
-            "service_journey_patterns.direction",
-            "service_journey_patterns.destinationDisplay",
-            "service_journey_pattern_links.fromTimingStatus",
-            "service_journey_pattern_links.toTimingStatus",
-            "service_journey_pattern_links.orderInSequence",
-            "service_journey_pattern_links.fromSequenceNumber",
-            "service_journey_pattern_links.toSequenceNumber",
-            "service_journey_pattern_links.runtime",
-            "fromStop.naptanCode as fromNaptanCode",
-            "fromStop.atcoCode as fromAtcoCode",
-            "fromStop.commonName as fromCommonName",
-            "fromStop.nptgLocalityCode as fromNptgLocalityCode",
-            "fromStop.localityName as fromLocalityName",
-            "fromStop.parentLocalityName as fromParentLocalityName",
-            "fromStop.indicator as fromIndicator",
-            "fromStop.street as fromStreet",
-            "fromStop.latitude as fromLatitude",
-            "fromStop.longitude as fromLongitude",
-            "toStop.naptanCode as toNaptanCode",
-            "toStop.atcoCode as toAtcoCode",
-            "toStop.commonName as toCommonName",
-            "toStop.nptgLocalityCode as toNptgLocalityCode",
-            "toStop.localityName as toLocalityName",
-            "toStop.parentLocalityName as toParentLocalityName",
-            "toStop.indicator as toIndicator",
-            "toStop.street as toStreet",
-            "toStop.latitude as toLatitude",
-            "toStop.longitude as toLongitude",
-        ])
+        .selectAll()
         .where("services.nocCode", "=", input.nocCode)
         .where(keyToUse, "=", input.serviceRef)
-        .where("fromStop.stopType", "not in", ignoredStopTypes)
-        .where("toStop.stopType", "not in", ignoredStopTypes)
-        .where((qb) =>
-            qb.or([
-                qb("services.endDate", "is", null),
-                qb(sql`STR_TO_DATE(services.endDate, '%Y-%m-%d')`, ">=", sql`CURDATE()`),
-            ]),
-        )
+        .where("dataSource", "=", input.dataSource)
         .orderBy("services.startDate", "asc")
         .execute();
 
-    if (!service?.[0]?.nocCode) {
+    const service = getMostRelevantService(services);
+
+    if (!service?.nocCode) {
         return null;
     }
 
@@ -418,23 +401,7 @@ export const getServiceStops = async (
         return [];
     }
 
-    let service: (typeof services)[0] | null = null;
-
-    if (services.length > 1) {
-        service =
-            services.find((s) => {
-                const start = s.startDate ? dayjs(s.startDate, "YYYY-MM-DD") : null;
-                const end = s.endDate ? dayjs(s.endDate, "YYYY-MM-DD") : null;
-                const currentDate = dayjs();
-
-                return (
-                    (start && end && currentDate.isBetween(start, end, "date", "[]")) ||
-                    (!end && start && currentDate.isSameOrAfter(start, "date"))
-                );
-            }) || services[0];
-    } else {
-        service = services[0];
-    }
+    const service = getMostRelevantService(services);
 
     if (input.useTracks) {
         const tracks = await dbClient

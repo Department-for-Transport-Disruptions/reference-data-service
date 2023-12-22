@@ -1,7 +1,6 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
-import { formatService, getQueryInput } from "./get-service-by-id";
-import { serviceDbData } from "./test/testdata";
+import { getQueryInput } from "./get-service-by-id";
 
 describe("get-service-by-id", () => {
     describe("input generation", () => {
@@ -48,14 +47,6 @@ describe("get-service-by-id", () => {
             } as unknown as APIGatewayEvent;
 
             expect(() => getQueryInput(event)).toThrowError("Service ref must be provided");
-        });
-    });
-
-    describe("format service", () => {
-        it("correctly formats db response", async () => {
-            const formattedService = await formatService(serviceDbData);
-
-            expect(formattedService).toMatchSnapshot();
         });
     });
 });

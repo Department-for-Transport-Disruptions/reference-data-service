@@ -7,6 +7,7 @@ exports[`get-service-by-id > format service > correctly formats db response 1`] 
   "dataSource": "bods",
   "destination": "Fairview Flats",
   "endDate": "2023-04-22",
+  "id": 14638,
   "inboundDirectionDescription": "Market Place - Fairview Flats - High Street",
   "journeyPatterns": [
     {
@@ -1865,7 +1866,6 @@ exports[`get-service-by-id > format service > correctly formats db response 1`] 
   "regionCode": null,
   "serviceCode": "PB1143803:12",
   "serviceDescription": "Market Place - Fairview Flats - High Street",
-  "serviceId": 14638,
   "startDate": "2019-04-19",
 }
 `;
