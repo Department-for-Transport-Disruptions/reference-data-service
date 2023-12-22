@@ -7,11 +7,11 @@
     },
     "devDependencies": {
         "@types/lambda-log": "^2.2.1",
-        "@types/node": "^18.13.0",
+        "@types/node": "^20.10.5",
         "vitest": "^0.29.1"
     },
     "dependencies": {
-        "@aws-sdk/client-ssm": "^3.362.0",
+        "@aws-sdk/client-ssm": "^3.476.0",
         "@reference-data-service/core": "file:../core",
         "axios": "^1.6.2",
         "basic-ftp": "^5.0.2",

@@ -550,7 +550,7 @@ export const getServiceStopsV2 = async (
         return getServiceStops(dbClient, input);
     }
 
-    const keyToUse = input.dataSource === "bods" ? "services.lineId" : "services.serviceCode";
+    const keyToUse = input.dataSource === DataSource.bods ? "services.lineId" : "services.serviceCode";
 
     const service = await dbClient
         .selectFrom("services")

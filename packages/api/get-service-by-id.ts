@@ -17,7 +17,7 @@ type Stop = {
 };
 
 type ServiceResponse = {
-    serviceId: number;
+    id: number;
     nocCode: string | null;
     lineName: string | null;
     lineId: string | null;
@@ -134,7 +134,7 @@ export const formatService = async (service: Service): Promise<ServiceResponse |
                 return p;
             },
             {
-                serviceId: service[0].id,
+                id: service[0].id,
                 nocCode: service[0].nocCode,
                 lineName: service[0].lineName,
                 lineId: service[0].lineId,
