@@ -21,6 +21,8 @@ export function RetrieversStack({ stack }: StackContext) {
         txcZippedBucket.bucketName,
     );
 
+    const defaultDaySchedule = stack.stage === "test" ? "*/4" : "*/2";
+
     const nocRetriever = new Function(stack, `ref-data-service-noc-retriever`, {
         functionName: `ref-data-service-noc-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/data-retriever/index.main",
@@ -51,7 +53,7 @@ export function RetrieversStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: Schedule.cron({ minute: "50", hour: "1" }),
+                schedule: Schedule.cron({ minute: "50", hour: "1", day: defaultDaySchedule }),
             },
         },
     });
@@ -86,7 +88,7 @@ export function RetrieversStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: Schedule.cron({ minute: "55", hour: "1" }),
+                schedule: Schedule.cron({ minute: "55", hour: "1", day: defaultDaySchedule }),
             },
         },
     });
@@ -121,7 +123,7 @@ export function RetrieversStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: Schedule.cron({ minute: "0", hour: "2" }),
+                schedule: Schedule.cron({ minute: "0", hour: "2", day: defaultDaySchedule }),
             },
         },
     });
@@ -223,8 +225,8 @@ export function RetrieversStack({ stack }: StackContext) {
     });
 
     const txcRetrieverSchedule: { [key: string]: Schedule } = {
-        preprod: Schedule.cron({ minute: "00", hour: "3" }),
-        prod: Schedule.cron({ minute: "30", hour: "2" }),
+        preprod: Schedule.cron({ minute: "00", hour: "3", day: defaultDaySchedule }),
+        prod: Schedule.cron({ minute: "30", hour: "2", day: defaultDaySchedule }),
     };
 
     new Cron(stack, "ref-data-service-bods-retriever-cron", {
@@ -232,7 +234,9 @@ export function RetrieversStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: txcRetrieverSchedule[stack.stage] || Schedule.cron({ minute: "45", hour: "2" }),
+                schedule:
+                    txcRetrieverSchedule[stack.stage] ||
+                    Schedule.cron({ minute: "45", hour: "2", day: defaultDaySchedule }),
             },
         },
     });
