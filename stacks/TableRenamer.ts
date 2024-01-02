@@ -6,6 +6,8 @@ import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 export function TableRenamerStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
 
+    const defaultDaySchedule = stack.stage === "test" ? "*/4" : "*/2";
+
     const enableSchedule = stack.stage === "prod" || stack.stage === "preprod" || stack.stage === "test";
 
     const tableRenamer = new Function(stack, `ref-data-service-table-renamer`, {
@@ -35,7 +37,7 @@ export function TableRenamerStack({ stack }: StackContext) {
         enabled: enableSchedule,
         cdk: {
             rule: {
-                schedule: Schedule.cron({ minute: "00", hour: "6" }),
+                schedule: Schedule.cron({ minute: "00", hour: "6", day: defaultDaySchedule }),
             },
         },
     });
