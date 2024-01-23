@@ -2,10 +2,10 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isBetween from "dayjs/plugin/isBetween";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import {isNoResultErrorConstructor, Kysely, sql} from "kysely";
+import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { Database } from "@reference-data-service/core/db";
-import {PermitStatus} from "./utils/roadworkTypes.zod";
+import { PermitStatus } from "./utils/roadworkTypes.zod";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
