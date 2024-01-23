@@ -5,7 +5,6 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { Database } from "@reference-data-service/core/db";
-import {isNullOrUndefined} from "util";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
