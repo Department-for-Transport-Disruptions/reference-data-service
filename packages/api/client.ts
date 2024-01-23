@@ -2,9 +2,10 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isBetween from "dayjs/plugin/isBetween";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import { Kysely, sql } from "kysely";
+import {isNoResultErrorConstructor, Kysely, sql} from "kysely";
 import * as logger from "lambda-log";
 import { Database } from "@reference-data-service/core/db";
+import {PermitStatus} from "./utils/roadworkTypes.zod";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
@@ -617,7 +618,8 @@ export type AdminAreas = Awaited<ReturnType<typeof getAdminAreas>>;
 export type RoadworksQueryInput = {
     adminAreaCodes?: string[];
     page?: number;
-    showRecentlyCancelled?: boolean;
+    lastUpdatedTimeDelta?: number | null;
+    permitStatus?: PermitStatus | null;
 };
 
 export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQueryInput) => {
@@ -635,9 +637,13 @@ export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQ
         .$if(!!input.adminAreaCodes && input.adminAreaCodes.length > 0, (qb) =>
             qb.where("highway_authority_admin_areas.administrativeAreaCode", "in", input.adminAreaCodes ?? []),
         )
-        .$if(input.showRecentlyCancelled === true, (qb) => qb.where("roadworks.workStatus", "=", "Works cancelled"))
-        .$if(input.showRecentlyCancelled === true, (qb) =>
-            qb.where("roadworks.lastUpdatedDateTime", ">=", sql`DATE_SUB(NOW(), INTERVAL 5 MINUTE)`),
+        .$if(!!input.permitStatus, (qb) => qb.where("roadworks.permitStatus", "=", input.permitStatus ?? null))
+        .$if(!!input.lastUpdatedTimeDelta, (qb) =>
+            qb.where(
+                "roadworks.lastUpdatedDateTime",
+                ">=",
+                sql`DATE_SUB(NOW(), INTERVAL ${input.lastUpdatedTimeDelta} MINUTE)`,
+            ),
         )
         .select([
             "roadworks.permitReferenceNumber",
