@@ -27,8 +27,11 @@ export const getQueryInput = (event: APIGatewayEvent): RoadworksQueryInput => {
         throw new ClientError("Provided page is not valid");
     }
 
+    const showRecentlyCancelled = queryStringParameters?.showRecentlyCancelled ?? "";
+
     return {
         ...(adminAreaCodes ? { adminAreaCodes: adminAreaCodeArray } : {}),
+        ...(showRecentlyCancelled === "true" ? { showRecentlyCancelled: true } : {}),
         page: page - 1,
     };
 };
