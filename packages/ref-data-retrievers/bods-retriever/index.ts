@@ -1,13 +1,16 @@
 import { InvocationType, InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
+import axios from "axios";
 import * as logger from "lambda-log";
 import { randomUUID } from "crypto";
 import { Kysely, sql } from "kysely";
 import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
 import { putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
+import { Stream, PassThrough } from "stream";
+import { Upload } from "@aws-sdk/lib-storage";
+import { S3Client } from "@aws-sdk/client-s3";
 
 const lambdaClient = new LambdaClient({ region: "eu-west-2" });
-
-const regionCodes = ["EA", "EM", "L", "NE", "NW", "S", "SE", "SW", "W", "WM", "Y"];
+const s3Client = new S3Client({ region: "eu-west-2" });
 
 export const setupTables = async (dbClient: Kysely<Database>) => {
     const tables = [
@@ -27,6 +30,28 @@ export const setupTables = async (dbClient: Kysely<Database>) => {
     }
 };
 
+const getBodsDataAndUploadToS3 = async (bodsUrl: string, txcZippedBucketName: string) => {
+    logger.info("Starting retrieval of BODS data");
+
+    const response = await axios.get<Stream>(bodsUrl, {
+        responseType: "stream",
+    });
+
+    const passThrough = new PassThrough();
+
+    const upload = new Upload({
+        client: s3Client,
+        params: { Bucket: txcZippedBucketName, Key: `bods.zip`, Body: passThrough },
+        queueSize: 4,
+        partSize: 1024 * 1024 * 5,
+        leavePartsOnError: false,
+    });
+
+    response.data.pipe(passThrough);
+
+    await upload.done();
+};
+
 export const main = async () => {
     logger.options.dev = process.env.NODE_ENV !== "production";
     logger.options.debug = process.env.ENABLE_DEBUG_LOGS === "true" || process.env.NODE_ENV !== "production";
@@ -36,14 +61,15 @@ export const main = async () => {
     };
 
     const {
-        REGION_RETRIEVER_FUNCTION_NAME: regionRetrieverFunctionName,
+        BODS_URL: bodsUrl,
         TNDS_RETRIEVER_FUNCTION_NAME: tndsRetrieverFunctionName,
         STAGE: stage,
+        TXC_ZIPPED_BUCKET_NAME: txcZippedBucketName,
     } = process.env;
 
-    if (!regionRetrieverFunctionName || !tndsRetrieverFunctionName || !stage) {
+    if (!bodsUrl || !tndsRetrieverFunctionName || !stage || !txcZippedBucketName) {
         throw new Error(
-            "Missing env vars - REGION_RETRIEVER_FUNCTION_NAME, TNDS_RETRIEVER_FUNCTION_NAME and STAGE must be set",
+            "Missing env vars - BODS_URL, TNDS_RETRIEVER_FUNCTION_NAME, STAGE and TXC_ZIPPED_BUCKET_NAME must be set",
         );
     }
 
@@ -52,17 +78,7 @@ export const main = async () => {
 
         await setupTables(dbClient);
 
-        await Promise.all(
-            regionCodes.map((region) =>
-                lambdaClient.send(
-                    new InvokeCommand({
-                        FunctionName: regionRetrieverFunctionName,
-                        InvocationType: InvocationType.Event,
-                        Payload: JSON.stringify({ REGION_CODE: region }),
-                    }),
-                ),
-            ),
-        );
+        await getBodsDataAndUploadToS3(bodsUrl, txcZippedBucketName);
 
         await lambdaClient.send(
             new InvokeCommand({
@@ -75,20 +91,8 @@ export const main = async () => {
 
         if (e instanceof Error) {
             logger.error(e);
-
-            return {
-                statusCode: 500,
-                body: JSON.stringify({
-                    error: "There was a problem with the data retriever",
-                }),
-            };
         }
 
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                error: "There was a problem with the data retriever",
-            }),
-        };
+        throw e;
     }
 };
