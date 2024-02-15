@@ -646,8 +646,8 @@ export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQ
                 sql`DATE_SUB(NOW(), INTERVAL ${input.lastUpdatedTimeDelta} MINUTE)`,
             ),
         )
-        .$if(!!input. createdDateTimeDelta, (qb) =>
-        qb.where(
+        .$if(!!input.createdDateTimeDelta, (qb) =>
+            qb.where(
                 "roadworks.createdDateTime",
                 ">=",
                 sql`DATE_SUB(NOW(), INTERVAL ${input.createdDateTimeDelta} MINUTE)`,
