@@ -38,7 +38,7 @@ export const updateToRoadworksTable = async (roadwork: RoadworksTable, dbClient:
             currentTrafficManagementType: roadwork.currentTrafficManagementType,
             currentTrafficManagementTypeUpdateDate: roadwork.currentTrafficManagementTypeUpdateDate,
             createdDateTime: roadwork.createdDateTime,
-            lastUpdatedDateTime: roadwork.lastUpdatedDateTime,
+            lastUpdatedDatetime: roadwork.lastUpdatedDatetime,
         })
         .where("permitReferenceNumber", "=", roadwork.permitReferenceNumber)
         .execute();

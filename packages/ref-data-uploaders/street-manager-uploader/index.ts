@@ -36,7 +36,7 @@ export const main = async (event: SQSEvent) => {
 
         const roadworkDbInput = {
             ...roadwork.data,
-            createdDateTime: roadwork.data.lastUpdatedDateTime,
+            createdDateTime: roadwork.data.lastUpdatedDatetime,
         };
 
         await writeToRoadworksTable(roadworkDbInput, dbClient);

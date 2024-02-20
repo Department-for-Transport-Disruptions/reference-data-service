@@ -641,7 +641,7 @@ export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQ
         .$if(!!input.permitStatus, (qb) => qb.where("roadworks.permitStatus", "=", input.permitStatus ?? null))
         .$if(!!input.lastUpdatedTimeDelta, (qb) =>
             qb.where(
-                "roadworks.lastUpdatedDateTime",
+                "roadworks.lastUpdatedDatetime",
                 ">=",
                 sql`DATE_SUB(NOW(), INTERVAL ${input.lastUpdatedTimeDelta} MINUTE)`,
             ),
@@ -710,7 +710,7 @@ export const getRoadworkById = async (dbClient: Kysely<Database>, input: Roadwor
             "roadworks.workStatus",
             "highway_authority_admin_areas.administrativeAreaCode",
             "roadworks.createdDateTime",
-            "roadworks.lastUpdatedDateTime",
+            "roadworks.lastUpdatedDatetime",
         ])
         .distinct()
         .executeTakeFirst();
