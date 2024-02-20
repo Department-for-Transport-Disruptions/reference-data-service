@@ -167,45 +167,17 @@ export function RetrieversStack({ stack }: StackContext) {
         enableLiveDev: false,
     });
 
-    const bodsRegionRetriever = new Function(stack, "ref-data-service-bods-region-retriever", {
-        functionName: `ref-data-service-bods-region-retriever-${stack.stage}`,
-        handler: "packages/ref-data-retrievers/bods-retriever/region-retriever.main",
-        runtime: "nodejs20.x",
-        timeout: 300,
-        memorySize: 2048,
-        environment: {
-            BASE_DATA_URL: "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive",
-            TXC_BUCKET_NAME: txcBucket.bucketName,
-            TXC_ZIPPED_BUCKET_NAME: txcZippedBucket.bucketName,
-            STAGE: stack.stage,
-        },
-        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
-        permissions: [
-            new PolicyStatement({
-                actions: ["s3:PutObject"],
-                resources: [`${txcBucket.bucketArn}/*`, `${txcZippedBucket.bucketArn}/*`],
-            }),
-            new PolicyStatement({
-                actions: ["cloudwatch:PutMetricData"],
-                resources: ["*"],
-            }),
-            new PolicyStatement({
-                actions: ["ssm:PutParameter"],
-                resources: ["*"],
-            }),
-        ],
-    });
-
     const bodsRetriever = new Function(stack, `ref-data-service-bods-retriever`, {
         bind: [cluster],
         functionName: `ref-data-service-bods-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/bods-retriever/index.main",
         runtime: "nodejs20.x",
-        timeout: 180,
-        memorySize: 512,
+        timeout: 300,
+        memorySize: 2048,
         environment: {
-            REGION_RETRIEVER_FUNCTION_NAME: bodsRegionRetriever.functionName,
+            BODS_URL: "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive",
             TNDS_RETRIEVER_FUNCTION_NAME: tndsRetriever.functionName,
+            TXC_ZIPPED_BUCKET_NAME: txcZippedBucket.bucketName,
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
@@ -214,8 +186,12 @@ export function RetrieversStack({ stack }: StackContext) {
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
+                actions: ["s3:PutObject"],
+                resources: [`${txcZippedBucket.bucketArn}/*`],
+            }),
+            new PolicyStatement({
                 actions: ["lambda:invokeAsync", "lambda:invokeFunction"],
-                resources: [bodsRegionRetriever.functionArn, tndsRetriever.functionArn],
+                resources: [tndsRetriever.functionArn],
             }),
             new PolicyStatement({
                 actions: ["ssm:PutParameter"],
@@ -226,7 +202,7 @@ export function RetrieversStack({ stack }: StackContext) {
 
     const txcRetrieverSchedule: { [key: string]: Schedule } = {
         preprod: Schedule.cron({ minute: "00", hour: "3", day: defaultDaySchedule }),
-        prod: Schedule.cron({ minute: "30", hour: "2", day: defaultDaySchedule }),
+        prod: Schedule.cron({ minute: "30", hour: "2" }),
     };
 
     new Cron(stack, "ref-data-service-bods-retriever-cron", {
@@ -246,8 +222,8 @@ export function RetrieversStack({ stack }: StackContext) {
         functionName: `ref-data-service-txc-unzipper-${stack.stage}`,
         handler: "packages/ref-data-retrievers/txc-unzipper/index.main",
         runtime: "python3.11",
-        timeout: 900,
-        memorySize: 1536,
+        timeout: 600,
+        memorySize: 2560,
         diskSize: "3072 MB",
         retryAttempts: 0,
         environment: {

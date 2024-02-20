@@ -42,7 +42,7 @@ const trafficManagementTypes = z.union([
 
 export type TrafficManagementType = z.infer<typeof trafficManagementTypes>;
 
-const permitStatus = z.union([
+export const permitStatus = z.union([
     z.literal("submitted"),
     z.literal("granted"),
     z.literal("permit_modification_request"),
