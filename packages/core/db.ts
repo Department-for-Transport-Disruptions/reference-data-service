@@ -252,7 +252,7 @@ export interface RoadworksTable {
     currentTrafficManagementType: TrafficManagementType | null;
     currentTrafficManagementTypeUpdateDate: string | null;
     createdDateTime: string;
-    lastUpdatedDateTime: string;
+    lastUpdatedDatetime: string;
 }
 
 export interface HighwayAuthorityAdminAreaTable {
