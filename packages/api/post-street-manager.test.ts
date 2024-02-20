@@ -71,7 +71,7 @@ describe("post-street-manager", () => {
             town: "LONDON",
             currentTrafficManagementType: "Multi-way signals",
             currentTrafficManagementTypeUpdateDate: null,
-            lastUpdatedDateTime: "2020-06-04T08:00:00.000Z",
+            lastUpdatedDatetime: "2020-06-04T08:00:00.000Z",
         };
 
         expect(sqsMock.send.calledOnce).toBeTruthy();
