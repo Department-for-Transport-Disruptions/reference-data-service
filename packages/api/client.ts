@@ -619,7 +619,7 @@ export type RoadworksQueryInput = {
     adminAreaCodes?: string[];
     page?: number;
     lastUpdatedTimeDelta?: number | null;
-    createdDateTimeDelta?: number | null;
+    createdTimeDelta?: number | null;
     permitStatus?: PermitStatus | null;
 };
 
@@ -646,11 +646,11 @@ export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQ
                 sql`DATE_SUB(NOW(), INTERVAL ${input.lastUpdatedTimeDelta} MINUTE)`,
             ),
         )
-        .$if(!!input.createdDateTimeDelta, (qb) =>
+        .$if(!!input.createdTimeDelta, (qb) =>
             qb.where(
                 "roadworks.createdDateTime",
                 ">=",
-                sql`DATE_SUB(NOW(), INTERVAL ${input.createdDateTimeDelta} MINUTE)`,
+                sql`DATE_SUB(NOW(), INTERVAL ${input.createdTimeDelta} MINUTE)`,
             ),
         )
         .select([
