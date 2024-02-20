@@ -32,10 +32,13 @@ export const getQueryInput = (event: APIGatewayEvent): RoadworksQueryInput => {
 
     const lastUpdatedTimeDelta = Number(queryStringParameters?.lastUpdatedTimeDelta) ?? null;
 
+    const createdTimeDelta = Number(queryStringParameters?.createdTimeDelta) ?? null;
+
     return {
         ...(adminAreaCodes ? { adminAreaCodes: adminAreaCodeArray } : {}),
         ...(parsedPermitStatus.success ? { permitStatus: parsedPermitStatus.data } : {}),
         ...(lastUpdatedTimeDelta ? { lastUpdatedTimeDelta: lastUpdatedTimeDelta } : {}),
+        ...(createdTimeDelta ? { createdTimeDelta: createdTimeDelta } : {}),
         page: page - 1,
     };
 };
