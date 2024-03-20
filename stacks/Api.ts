@@ -27,6 +27,10 @@ export function ApiStack({ stack }: StackContext) {
         }
     }
 
+    const streetManagerMessageTopic = new Topic(stack, "cdd-street-manager-message-topic", {
+        topicName: `cdd-street-manager-message-topic-${stack.stage}`,
+    });
+
     let streetManagerTestTopic: Topic | null = null;
 
     if (isSandbox || stack.stage === "test") {
@@ -185,6 +189,7 @@ export function ApiStack({ stack }: StackContext) {
         environment: {
             STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsQueue.queueUrl,
             TEST_STREET_MANAGER_TOPIC_ARN: streetManagerTestTopic?.topicArn ?? "",
+            STREET_MANAGER_MESSAGE_TOPIC_ARN: streetManagerMessageTopic?.topicArn ?? "",
         },
         runtime: "nodejs20.x",
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
@@ -270,6 +275,14 @@ export function ApiStack({ stack }: StackContext) {
             endpoint: `${api.url}/street-manager`,
             protocol: SubscriptionProtocol.HTTPS,
             topic: streetManagerTestTopic,
+        });
+    }
+
+    if (streetManagerMessageTopic) {
+        new Subscription(stack, "street-manager-message-subscription", {
+            endpoint: `${api.url}/street-manager`,
+            protocol: SubscriptionProtocol.HTTPS,
+            topic: streetManagerMessageTopic,
         });
     }
 
