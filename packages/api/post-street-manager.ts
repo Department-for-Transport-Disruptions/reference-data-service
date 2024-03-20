@@ -33,7 +33,6 @@ const sendPermitMessageToSqs = async (queueUrl: string | undefined, message: Per
     logger.info(`Successfully sent permit message ${message.permitReferenceNumber} to SQS queue`);
 };
 
-
 export const main = async (event: APIGatewayEvent) => {
     if (!event.headers?.["x-amz-sns-message-type"]) {
         logger.error("Invalid headers on request");
@@ -67,24 +66,29 @@ export const main = async (event: APIGatewayEvent) => {
         if (!permitMessage.success) {
             const body = JSON.parse(parsedBody.data.Message) as BaseMessage;
             logger.error(
-                `Failed to parse ${body.event_type} SNS message ${body.event_reference
+                `Failed to parse ${body.event_type} SNS message ${
+                    body.event_reference
                 }, ${permitMessage.error.toString()}`,
             );
             return;
         }
 
         try {
-            const dbClient = getDbClient()
-            const roadwork = await getRoadworkById(dbClient, { permitReferenceNumber: permitMessage.data.permitReferenceNumber })
-            if (!roadwork?.permitReferenceNumber || (roadwork && new Date(roadwork.lastUpdatedDatetime) < new Date(permitMessage.data.lastUpdatedDatetime))) {
+            const dbClient = getDbClient();
+            const roadwork = await getRoadworkById(dbClient, {
+                permitReferenceNumber: permitMessage.data.permitReferenceNumber,
+            });
+            if (
+                !roadwork?.permitReferenceNumber ||
+                (roadwork && new Date(roadwork.lastUpdatedDatetime) < new Date(permitMessage.data.lastUpdatedDatetime))
+            ) {
                 logger.info(`Sending message: ${permitMessage.data.permitReferenceNumber} to SQS queue`);
                 const { STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsUrl } = process.env;
 
                 await sendPermitMessageToSqs(streetManagerSqsUrl, permitMessage.data);
-            }
-            else {
+            } else {
                 logger.info(`Skipped adding message : ${permitMessage.data.permitReferenceNumber} to SQS queue`);
-                return
+                return;
             }
         } catch (e) {
             if (e instanceof Error) {
