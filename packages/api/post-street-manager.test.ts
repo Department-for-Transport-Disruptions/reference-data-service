@@ -5,7 +5,8 @@ import { main } from "./post-street-manager";
 import { APIGatewayEvent } from "aws-lambda";
 import Mockdate from "mockdate";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
-import { mockStreetManagerNotification } from "./test/testdata";
+import { mockStreetManagerNotification, mockStreetManagerNotificationOld } from "./test/testdata";
+import * as db from "./client";
 
 const mockSnsEvent = {
     headers: {
@@ -28,8 +29,14 @@ const mockSnsEvent = {
 const sqsMock = mockClient(SQSClient);
 const isValidSignatureSpy = vi.spyOn(snsMessageValidator, "isValidSignature");
 const confirmSubscriptionSpy = vi.spyOn(snsMessageValidator, "confirmSubscription");
+const getRoadworkByIdSpy = vi.spyOn(db, "getRoadworkById");
 
 describe("post-street-manager", () => {
+    const env = process.env;
+    process.env.DATABASE_NAME = "dbName";
+    process.env.DATABASE_SECRET_ARN = "secretArn";
+    process.env.DATABASE_RESOURCE_ARN = "resourceArn";
+
     beforeAll(() => {
         process.env.STREET_MANAGER_SQS_QUEUE_URL = "https://wwww.testurl.com";
     });
@@ -37,9 +44,31 @@ describe("post-street-manager", () => {
     Mockdate.set("2023-08-17");
 
     beforeEach(() => {
-        vi.resetAllMocks();
+        vi.resetModules();
+        process.env = { ...env };
         sqsMock.reset();
         isValidSignatureSpy.mockResolvedValue(true);
+        getRoadworkByIdSpy.mockResolvedValue({
+            permitReferenceNumber: "TSR1591199404915-01",
+            highwayAuthority: "CITY OF WESTMINSTER",
+            highwayAuthoritySwaCode: 5990,
+            worksLocationCoordinates: "LINESTRING(501251.53 222574.64,501305.92 222506.65)",
+            streetName: "HIGH STREET NORTH",
+            areaName: "LONDON",
+            workCategory: "Standard",
+            trafficManagementType: "Road closure",
+            proposedStartDateTime: "2020-06-10T00:00:00.000Z",
+            proposedEndDateTime: "2020-06-12T00:00:00.000Z",
+            actualStartDateTime: "2020-06-11T10:11:00.000Z",
+            actualEndDateTime: "2020-06-13T00:00:00.000Z",
+            workStatus: "Works in progress",
+            activityType: "Remedial works",
+            permitStatus: "permit_modification_request",
+            town: "LONDON",
+            lastUpdatedDatetime: "2019-06-03T08:00:00.000Z",
+            administrativeAreaCode: "BLAC",
+            createdDateTime: "2018-06-03T08:00:00.000Z",
+        });
     });
 
     afterAll(() => {
@@ -77,6 +106,13 @@ describe("post-street-manager", () => {
         expect(sqsMock.send.calledOnce).toBeTruthy();
         expect(sqsMock.commandCalls(SendMessageCommand)[0].args[0].input.MessageBody).toBe(JSON.stringify(expected));
     });
+
+    it("should not send the validated SNS message body to SQS if permit is older than roadwork", async () => {
+        await main(mockStreetManagerNotificationOld);
+
+        expect(sqsMock.send.calledOnce).toBeFalsy();
+    });
+
     it("should confirm subscription to SNS topic request is of type SubscriptionConfirmation", async () => {
         confirmSubscriptionSpy.mockResolvedValue(undefined);
         const mockSnsEventSubscription = {
