@@ -3,6 +3,7 @@ import { DatabaseStack } from "./Database";
 import { DnsStack } from "./Dns";
 import { QueueStack } from "./Queue";
 import { Subscription, SubscriptionProtocol, Topic } from "aws-cdk-lib/aws-sns";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 export function ApiStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
@@ -181,7 +182,7 @@ export function ApiStack({ stack }: StackContext) {
     });
 
     const postStreetManagerFunction = new Function(stack, "ref-data-service-post-street-manager-function", {
-        bind: [streetManagerSqsQueue],
+        bind: [streetManagerSqsQueue, cluster],
         functionName: `ref-data-service-post-street-manager-function-${stack.stage}`,
         handler: "packages/api/post-street-manager.main",
         timeout: 10,
@@ -190,6 +191,9 @@ export function ApiStack({ stack }: StackContext) {
             STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsQueue.queueUrl,
             TEST_STREET_MANAGER_TOPIC_ARN: streetManagerTestTopic?.topicArn ?? "",
             STREET_MANAGER_MESSAGE_TOPIC_ARN: streetManagerMessageTopic?.topicArn ?? "",
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
         },
         runtime: "nodejs20.x",
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",

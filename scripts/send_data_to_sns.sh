@@ -11,6 +11,7 @@ CURRENT_YEAR=$(date +"%Y")
 YEAR="${2:-$CURRENT_YEAR}"
 
 BASE_URL="https://opendata.manage-roadworks.service.gov.uk/permit/$YEAR"
+# Change the arn below
 SNS_TOPIC_ARN="arn:aws:sns:region:account-id:your-topic-name"
 
 # Months you want to download and process
@@ -19,7 +20,7 @@ MONTHS=("01" "02") # Update this array if you want to process more months
 for month in "${MONTHS[@]}"; do
     echo "Creating folder for street manager data..."
     mkdir "$EXTRACT_PATH/street-manager-data"
-    
+
     ZIP_FILE_URL="$BASE_URL/$month.zip"
     ZIP_FILE="$EXTRACT_PATH/street-manager-data/$month.zip"
     FIXED_ZIP_PATH="$EXTRACT_PATH/street-manager-data/$month-fixed.zip"
@@ -34,9 +35,8 @@ for month in "${MONTHS[@]}"; do
     unzip -q -o "$FIXED_ZIP_PATH" -d"$EXTRACT_PATH/street-manager-data"
 
     FILES="$EXTRACT_PATH/street-manager-data/*"
-    for f in $FILES; do
+    find "$EXTRACT_PATH" -name '*.json' | while read f; do
         if [ -f "$f" ]; then
-
             message=$(cat "$f")
 
             echo "Publishing $f to SNS..."
