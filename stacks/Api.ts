@@ -3,7 +3,6 @@ import { DatabaseStack } from "./Database";
 import { DnsStack } from "./Dns";
 import { QueueStack } from "./Queue";
 import { Subscription, SubscriptionProtocol, Topic } from "aws-cdk-lib/aws-sns";
-import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 export function ApiStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);

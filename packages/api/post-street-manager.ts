@@ -67,8 +67,7 @@ export const main = async (event: APIGatewayEvent) => {
         if (!permitMessage.success) {
             const body = JSON.parse(parsedBody.data.Message) as BaseMessage;
             logger.error(
-                `Failed to parse ${body.event_type} SNS message ${
-                    body.event_reference
+                `Failed to parse ${body.event_type} SNS message ${body.event_reference
                 }, ${permitMessage.error.toString()}`,
             );
             return;
