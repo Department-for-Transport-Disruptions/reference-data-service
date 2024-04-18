@@ -12,10 +12,6 @@ if (process.env.TEST_STREET_MANAGER_TOPIC_ARN) {
     allowedTopicArns.push(process.env.TEST_STREET_MANAGER_TOPIC_ARN);
 }
 
-if (process.env.STREET_MANAGER_MESSAGE_TOPIC_ARN) {
-    allowedTopicArns.push(process.env.STREET_MANAGER_MESSAGE_TOPIC_ARN);
-}
-
 const sqsClient = new SQSClient({ region: "eu-west-2" });
 
 const sendPermitMessageToSqs = async (queueUrl: string | undefined, message: PermitMessage) => {

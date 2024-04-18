@@ -181,7 +181,6 @@ export function ApiStack({ stack }: StackContext) {
         environment: {
             STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsQueue.queueUrl,
             TEST_STREET_MANAGER_TOPIC_ARN: streetManagerTestTopic?.topicArn ?? "",
-            STREET_MANAGER_MESSAGE_TOPIC_ARN: streetManagerTestTopic?.topicArn ?? "",
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
