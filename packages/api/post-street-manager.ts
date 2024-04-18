@@ -3,6 +3,8 @@ import * as logger from "lambda-log";
 import { BaseMessage, PermitMessage, permitMessageSchema, snsMessageSchema } from "./utils/snsMessageTypes.zod";
 import { confirmSubscription, isValidSignature } from "./utils/snsMessageValidator";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { getRoadworkById } from "./client";
+import { getDbClient } from "@reference-data-service/core/db";
 
 const allowedTopicArns = ["arn:aws:sns:eu-west-2:287813576808:prod-permit-topic"];
 
@@ -68,10 +70,22 @@ export const main = async (event: APIGatewayEvent) => {
         }
 
         try {
-            logger.info(`Sending message: ${permitMessage.data.permitReferenceNumber} to SQS queue`);
-            const { STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsUrl } = process.env;
+            const dbClient = getDbClient();
+            const roadwork = await getRoadworkById(dbClient, {
+                permitReferenceNumber: permitMessage.data.permitReferenceNumber,
+            });
+            if (
+                !roadwork?.permitReferenceNumber ||
+                (roadwork && new Date(roadwork.lastUpdatedDatetime) < new Date(permitMessage.data.lastUpdatedDatetime))
+            ) {
+                logger.info(`Sending message: ${permitMessage.data.permitReferenceNumber} to SQS queue`);
+                const { STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsUrl } = process.env;
 
-            await sendPermitMessageToSqs(streetManagerSqsUrl, permitMessage.data);
+                await sendPermitMessageToSqs(streetManagerSqsUrl, permitMessage.data);
+            } else {
+                logger.info(`Skipped adding message : ${permitMessage.data.permitReferenceNumber} to SQS queue`);
+                return;
+            }
         } catch (e) {
             if (e instanceof Error) {
                 logger.error(e);

@@ -27,13 +27,9 @@ export function ApiStack({ stack }: StackContext) {
         }
     }
 
-    let streetManagerTestTopic: Topic | null = null;
-
-    if (isSandbox || stack.stage === "test") {
-        streetManagerTestTopic = new Topic(stack, "street-manager-test-topic", {
-            topicName: `street-manager-test-topic-${stack.stage}`,
-        });
-    }
+    const streetManagerTestTopic: Topic | null = new Topic(stack, "street-manager-test-topic", {
+        topicName: `street-manager-test-topic-${stack.stage}`,
+    });
 
     const stopsFunction = new Function(stack, "ref-data-service-get-stops-function", {
         bind: [cluster],
@@ -177,7 +173,7 @@ export function ApiStack({ stack }: StackContext) {
     });
 
     const postStreetManagerFunction = new Function(stack, "ref-data-service-post-street-manager-function", {
-        bind: [streetManagerSqsQueue],
+        bind: [streetManagerSqsQueue, cluster],
         functionName: `ref-data-service-post-street-manager-function-${stack.stage}`,
         handler: "packages/api/post-street-manager.main",
         timeout: 10,
@@ -185,6 +181,9 @@ export function ApiStack({ stack }: StackContext) {
         environment: {
             STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsQueue.queueUrl,
             TEST_STREET_MANAGER_TOPIC_ARN: streetManagerTestTopic?.topicArn ?? "",
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
         },
         runtime: "nodejs20.x",
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
@@ -265,7 +264,7 @@ export function ApiStack({ stack }: StackContext) {
         },
     });
 
-    if ((isSandbox || stack.stage === "test") && streetManagerTestTopic) {
+    if (streetManagerTestTopic) {
         new Subscription(stack, "street-manager-test-subscription", {
             endpoint: `${api.url}/street-manager`,
             protocol: SubscriptionProtocol.HTTPS,
