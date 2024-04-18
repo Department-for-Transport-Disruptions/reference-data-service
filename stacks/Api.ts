@@ -27,17 +27,9 @@ export function ApiStack({ stack }: StackContext) {
         }
     }
 
-    const streetManagerMessageTopic = new Topic(stack, "cdd-street-manager-message-topic", {
-        topicName: `cdd-street-manager-message-topic-${stack.stage}`,
+    const streetManagerTestTopic: Topic | null = new Topic(stack, "street-manager-test-topic", {
+        topicName: `street-manager-test-topic-${stack.stage}`,
     });
-
-    let streetManagerTestTopic: Topic | null = null;
-
-    if (isSandbox || stack.stage === "test") {
-        streetManagerTestTopic = new Topic(stack, "street-manager-test-topic", {
-            topicName: `street-manager-test-topic-${stack.stage}`,
-        });
-    }
 
     const stopsFunction = new Function(stack, "ref-data-service-get-stops-function", {
         bind: [cluster],
@@ -189,7 +181,7 @@ export function ApiStack({ stack }: StackContext) {
         environment: {
             STREET_MANAGER_SQS_QUEUE_URL: streetManagerSqsQueue.queueUrl,
             TEST_STREET_MANAGER_TOPIC_ARN: streetManagerTestTopic?.topicArn ?? "",
-            STREET_MANAGER_MESSAGE_TOPIC_ARN: streetManagerMessageTopic?.topicArn ?? "",
+            STREET_MANAGER_MESSAGE_TOPIC_ARN: streetManagerTestTopic?.topicArn ?? "",
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
             DATABASE_RESOURCE_ARN: cluster.clusterArn,
@@ -273,19 +265,11 @@ export function ApiStack({ stack }: StackContext) {
         },
     });
 
-    if ((isSandbox || stack.stage === "test") && streetManagerTestTopic) {
+    if (streetManagerTestTopic) {
         new Subscription(stack, "street-manager-test-subscription", {
             endpoint: `${api.url}/street-manager`,
             protocol: SubscriptionProtocol.HTTPS,
             topic: streetManagerTestTopic,
-        });
-    }
-
-    if (streetManagerMessageTopic) {
-        new Subscription(stack, "street-manager-message-subscription", {
-            endpoint: `${api.url}/street-manager`,
-            protocol: SubscriptionProtocol.HTTPS,
-            topic: streetManagerMessageTopic,
         });
     }
 
