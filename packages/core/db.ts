@@ -187,6 +187,8 @@ export interface VehicleJourneysTable {
     serviceRef: string | null;
     lineRef: string | null;
     journeyPatternRef: string | null;
+    departureTime: string | null;
+    journeyCode: string | null;
 }
 
 export interface LocalitiesTable {

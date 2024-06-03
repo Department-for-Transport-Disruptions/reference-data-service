@@ -150,6 +150,10 @@ def collect_vehicle_journey(vehicle):
         "journey_pattern_ref": vehicle["JourneyPatternRef"]
         if "JourneyPatternRef" in vehicle
         else None,
+        "departure_time": vehicle["DepartureTime"] 
+        if "DepartureTime" in vehicle else None,
+        "journey_code": vehicle["Operational"]["TicketMachine"]["JourneyCode"] 
+        if "JourneyCode" in vehicle else None,
     }
 
     return vehicle_journey_info
@@ -394,11 +398,13 @@ def insert_into_txc_vehicle_journey_table(
             "service_ref": vehicle_journey_info["service_ref"],
             "line_ref": vehicle_journey_info["line_ref"],
             "journey_pattern_ref": vehicle_journey_info["journey_pattern_ref"],
+            "departure_time": vehicle_journey_info["departure_time"],
+            "journey_code": vehicle_journey_info["journey_code"],
         }
         for vehicle_journey_info in vehicle_journeys_info
     ]
 
-    query = "INSERT INTO vehicle_journeys_new (vehicleJourneyCode, serviceRef, lineRef, journeyPatternRef) VALUES (:vehicle_journey_code, :service_ref, :line_ref, :journey_pattern_ref)"
+    query = "INSERT INTO vehicle_journeys_new (vehicleJourneyCode, serviceRef, lineRef, journeyPatternRef, departureTime, journeyCode) VALUES (:vehicle_journey_code, :service_ref, :line_ref, :journey_pattern_ref, :departure_time, :journey_code)"
     cursor.executemany(query, values)
 
 

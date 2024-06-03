@@ -927,6 +927,8 @@ expected_vehicle_journey = {
     "service_ref": "NW_01_ANW_4_1",
     "line_ref": "l_4_ANW",
     "journey_pattern_ref": "JP1",
+    "departure_time": "07:35:00",
+    "journey_code": None,
 }
 
 expected_tracks_data_single_section = [
