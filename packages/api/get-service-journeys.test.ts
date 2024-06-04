@@ -12,7 +12,7 @@ describe("get-service-journeys", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ serviceRef: "234", dataSource: DataSource.bods });
+            expect(getQueryInput(event)).toEqual({ serviceRef: "234", dataSource: DataSource.bods, page: 0 });
         });
 
         it("handles serviceCode or lineId with datasource", () => {
@@ -25,7 +25,7 @@ describe("get-service-journeys", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ dataSource: "bods", serviceRef: "abc" });
+            expect(getQueryInput(event)).toEqual({ dataSource: "bods", serviceRef: "abc", page: 0 });
         });
 
         it("throws a ClientError if no serviceId provided", () => {

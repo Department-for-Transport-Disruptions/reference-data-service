@@ -17,6 +17,12 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceJourneysQueryInput
         throw new ClientError("Service Ref must be provided");
     }
 
+    const page = Number(queryStringParameters?.page ?? "1");
+
+    if (isNaN(page)) {
+        throw new ClientError("Provided page is not valid");
+    }
+
     const dataSourceInput = queryStringParameters?.dataSource || "bods";
 
     if (!isDataSource(dataSourceInput)) {
@@ -37,5 +43,6 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceJourneysQueryInput
         serviceRef,
         dataSource: dataSourceInput,
         ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
+        page: page - 1,
     };
 };
