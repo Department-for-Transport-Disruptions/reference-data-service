@@ -371,6 +371,76 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
     return services;
 };
 
+export type ServiceJourneysQueryInput = {
+    serviceRef: string;
+    dataSource: DataSource;
+    adminAreaCodes?: string[];
+};
+
+export type ServiceJourneys = {
+    serviceId: number | null;
+    dataSource: string | null;
+    journeyCode: string | null;
+    vehicleJourneyCode: string | null;
+    departureTime: string | null;
+    destination: string | null;
+    origin: string | null;
+    direction: string | null;
+}[];
+
+export const getServiceJourneys = async (
+    dbClient: Kysely<Database>,
+    input: ServiceJourneysQueryInput,
+): Promise<ServiceJourneys> => {
+    logger.info("Starting getServiceJourneys...");
+
+    const keyToUse = input.dataSource === DataSource.bods ? "services.lineId" : "services.serviceCode";
+
+    const services = await dbClient
+        .selectFrom("services")
+        .select(["id", "startDate", "endDate"])
+        .where(keyToUse, "=", input.serviceRef)
+        .where("dataSource", "=", input.dataSource)
+        .execute();
+
+    if (!services.length) {
+        return [];
+    }
+
+    const service = getMostRelevantService(services);
+
+    const journeys = await dbClient
+        .selectFrom("services")
+        .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
+        .innerJoin(
+            "service_journey_pattern_links",
+            "service_journey_pattern_links.journeyPatternId",
+            "service_journey_patterns.id",
+        )
+        .innerJoin("vehicle_journeys", "vehicle_journeys.serviceRef", keyToUse)
+        .$if(!!input.adminAreaCodes?.[0], (qb) =>
+            qb
+                .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
+                .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
+        )
+        .select([
+            "services.id as serviceId",
+            "services.dataSource as dataSource",
+            "vehicle_journeys.journeyCode",
+            "vehicle_journeys.vehicleJourneyCode",
+            "vehicle_journeys.departureTime",
+            "services.destination",
+            "services.origin",
+            "service_journey_patterns.direction",
+        ])
+        .distinct()
+        .where("services.id", "=", service.id)
+        .where("dataSource", "=", input.dataSource)
+        .execute();
+
+    return journeys;
+};
+
 export type Services = Awaited<ReturnType<typeof getServices>>;
 
 export type ServiceStopsQueryInput = {
