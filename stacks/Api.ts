@@ -127,6 +127,21 @@ export function ApiStack({ stack }: StackContext) {
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
     });
 
+    const serviceJourneysFunction = new Function(stack, "ref-data-service-get-service-journeys-function", {
+        bind: [cluster],
+        functionName: `ref-data-service-get-service-journeys-function-${stack.stage}`,
+        handler: "packages/api/get-service-journeys.main",
+        timeout: 30,
+        memorySize: 512,
+        environment: {
+            DATABASE_NAME: cluster.defaultDatabaseName,
+            DATABASE_SECRET_ARN: cluster.secretArn,
+            DATABASE_RESOURCE_ARN: cluster.clusterArn,
+        },
+        runtime: "nodejs20.x",
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+    });
+
     const serviceRoutesFunction = new Function(stack, "ref-data-service-get-service-routes-function", {
         bind: [cluster],
         functionName: `ref-data-service-get-service-routes-function-${stack.stage}`,
@@ -240,6 +255,7 @@ export function ApiStack({ stack }: StackContext) {
             "GET /operators/{nocCode}/services/{serviceId}": serviceByIdFunction,
             "GET /services": servicesFunction,
             "GET /services/{serviceId}/stops": serviceStopsFunction,
+            "GET /services/{serviceId}/journeys": serviceJourneysFunction,
             "GET /services/{serviceId}/routes": serviceRoutesFunction,
             "GET /area-codes": areaCodeFunction,
             "GET /admin-areas": adminAreasFunction,

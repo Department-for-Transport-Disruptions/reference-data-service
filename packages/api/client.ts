@@ -174,7 +174,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                 .where("localities.administrativeAreaCode", "in", input.adminAreaCodes ?? ["---"])
                 .$if(!!input.polygon, (qb) =>
                     qb.where(
-                        sql`ST_CONTAINS(ST_GEOMFROMTEXT(${input.polygon}), Point(stops.longitude, stops.latitude))`,
+                        sql<boolean>`ST_CONTAINS(ST_GEOMFROMTEXT(${input.polygon}), Point(stops.longitude, stops.latitude))`,
                     ),
                 ),
         )
@@ -369,6 +369,79 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
         .execute();
 
     return services;
+};
+
+export type ServiceJourneysQueryInput = {
+    serviceRef: string;
+    dataSource: DataSource;
+    page?: number;
+};
+
+export type ServiceJourneys = {
+    serviceId: number | null;
+    dataSource: string | null;
+    journeyCode: string | null;
+    vehicleJourneyCode: string | null;
+    departureTime: string | null;
+    destination: string | null;
+    origin: string | null;
+    direction: string | null;
+}[];
+
+export const getServiceJourneys = async (
+    dbClient: Kysely<Database>,
+    input: ServiceJourneysQueryInput,
+): Promise<ServiceJourneys> => {
+    logger.info("Starting getServiceJourneys...");
+
+    const keyToUse = input.dataSource === DataSource.bods ? "services.lineId" : "services.serviceCode";
+
+    const JOURNEY_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 100 : 1000;
+
+    const services = await dbClient
+        .selectFrom("services")
+        .select(["id", "startDate", "endDate"])
+        .where(keyToUse, "=", input.serviceRef)
+        .where("dataSource", "=", input.dataSource)
+        .execute();
+
+    if (!services.length) {
+        return [];
+    }
+
+    const service = getMostRelevantService(services);
+
+    const journeys = await dbClient
+        .selectFrom("services")
+        .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
+        .innerJoin(
+            "service_journey_pattern_links",
+            "service_journey_pattern_links.journeyPatternId",
+            "service_journey_patterns.id",
+        )
+        .innerJoin(
+            "vehicle_journeys",
+            "vehicle_journeys.journeyPatternRef",
+            "service_journey_patterns.journeyPatternRef",
+        )
+        .select([
+            "services.id as serviceId",
+            "services.dataSource as dataSource",
+            "vehicle_journeys.journeyCode",
+            "vehicle_journeys.vehicleJourneyCode",
+            "vehicle_journeys.departureTime",
+            "services.destination",
+            "services.origin",
+            "service_journey_patterns.direction",
+        ])
+        .distinct()
+        .where("services.id", "=", service.id)
+        .where("dataSource", "=", input.dataSource)
+        .offset((input.page || 0) * JOURNEY_PAGE_SIZE)
+        .limit(JOURNEY_PAGE_SIZE)
+        .execute();
+
+    return journeys;
 };
 
 export type Services = Awaited<ReturnType<typeof getServices>>;
@@ -643,14 +716,14 @@ export const getRoadworks = async (dbClient: Kysely<Database>, input: RoadworksQ
             qb.where(
                 "roadworks.lastUpdatedDatetime",
                 ">=",
-                sql`DATE_SUB(NOW(), INTERVAL ${input.lastUpdatedTimeDelta} MINUTE)`,
+                sql<string>`DATE_SUB(NOW(), INTERVAL ${input.lastUpdatedTimeDelta} MINUTE)`,
             ),
         )
         .$if(!!input.createdTimeDelta, (qb) =>
             qb.where(
                 "roadworks.createdDateTime",
                 ">=",
-                sql`DATE_SUB(NOW(), INTERVAL ${input.createdTimeDelta} MINUTE)`,
+                sql<string>`DATE_SUB(NOW(), INTERVAL ${input.createdTimeDelta} MINUTE)`,
             ),
         )
         .select([
