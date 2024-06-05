@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isBetween from "dayjs/plugin/isBetween";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import { Kysely, sql, NotNull } from "kysely";
+import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { Database } from "@reference-data-service/core/db";
 import { PermitStatus } from "./utils/roadworkTypes.zod";
@@ -374,7 +374,6 @@ export const getServices = async (dbClient: Kysely<Database>, input: ServicesQue
 export type ServiceJourneysQueryInput = {
     serviceRef: string;
     dataSource: DataSource;
-    adminAreaCodes?: string[];
     page?: number;
 };
 
@@ -425,11 +424,6 @@ export const getServiceJourneys = async (
             "vehicle_journeys.journeyPatternRef",
             "service_journey_patterns.journeyPatternRef",
         )
-        .$if(!!input.adminAreaCodes?.[0], (qb) =>
-            qb
-                .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
-                .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
-        )
         .select([
             "services.id as serviceId",
             "services.dataSource as dataSource",
@@ -443,8 +437,6 @@ export const getServiceJourneys = async (
         .distinct()
         .where("services.id", "=", service.id)
         .where("dataSource", "=", input.dataSource)
-        .where("vehicle_journeys.departureTime", "is not", null)
-        .$narrowType<{ departureTime: NotNull }>()
         .offset((input.page || 0) * JOURNEY_PAGE_SIZE)
         .limit(JOURNEY_PAGE_SIZE)
         .execute();
