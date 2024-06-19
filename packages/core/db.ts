@@ -190,6 +190,9 @@ export interface VehicleJourneysTable {
     departureTime: string | null;
     journeyCode: string | null;
     operatorServiceId: number | null;
+    daysOfWeek: string | null;
+    daysOfOperation: string | null;
+    daysOfNonOperation: string | null;
 }
 
 export interface LocalitiesTable {
