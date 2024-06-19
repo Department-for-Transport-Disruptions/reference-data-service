@@ -929,6 +929,10 @@ expected_vehicle_journey = {
     "journey_pattern_ref": "JP1",
     "departure_time": "07:35:00",
     "journey_code": None,
+    "days_of_week": "MondayToFriday",
+    "days_of_operation": None,
+    "days_of_non_operation": "AllBankHolidays",
+    
 }
 
 expected_tracks_data_single_section = [
