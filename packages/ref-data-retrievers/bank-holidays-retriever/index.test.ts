@@ -1,7 +1,6 @@
-
 import axios from "axios";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getBankHolidaysAndUploadToS3, handler } from ".";
+import { getBankHolidaysAndUploadToS3, main } from ".";
 import { putS3Object } from "./s3";
 
 const mockBankHolidaysResponse = {
@@ -32,7 +31,7 @@ vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 describe("getBankHolidaysAndUploadToS3", () => {
-    vi.mock("@bods-integrated-data/shared/s3", () => ({
+    vi.mock("./s3", () => ({
         putS3Object: vi.fn(),
     }));
 
@@ -70,8 +69,8 @@ describe("getBankHolidaysAndUploadToS3", () => {
     });
 });
 
-describe("handler", () => {
+describe("main", () => {
     it("should throw an error if bucket name is not set", async () => {
-        await expect(() => handler()).rejects.toThrow("Missing env vars - BANK_HOLIDAYS_BUCKET_NAME must be set");
+        await expect(() => main()).rejects.toThrow("Missing env vars - BANK_HOLIDAYS_BUCKET_NAME must be set");
     });
 });
