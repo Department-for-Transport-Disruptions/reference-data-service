@@ -10,7 +10,7 @@ import { StringParameter } from "aws-cdk-lib/aws-ssm";
 import { disableTableRenamerParamName } from "@reference-data-service/core/ssm";
 
 export function RetrieversStack({ stack }: StackContext) {
-    const { csvBucket, txcBucket, txcZippedBucket, nptgBucket } = use(S3Stack);
+    const { csvBucket, txcBucket, txcZippedBucket, nptgBucket, bankHolidays } = use(S3Stack);
     const { cluster } = use(DatabaseStack);
 
     const enableSchedule = stack.stage === "prod" || stack.stage === "preprod" || stack.stage === "test";
@@ -22,6 +22,38 @@ export function RetrieversStack({ stack }: StackContext) {
     );
 
     const defaultDaySchedule = stack.stage === "test" ? "*/4" : "*/2";
+
+    const bankHolidaysRetriever = new Function(stack, `ref-data-service-bank-holidays-retriever`, {
+        functionName: `ref-data-service-bank-holidays-retriever-${stack.stage}`,
+        handler: "packages/ref-data-retrievers/bank-holidays-retriever/index.main",
+        runtime: "nodejs20.x",
+        timeout: 60,
+        memorySize: 256,
+        environment: {
+            BANK_HOLIDAYS_BUCKET_NAME: bankHolidays.bucketName,
+        },
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+        permissions: [
+            new PolicyStatement({
+                actions: ["s3:PutObject"],
+                resources: [`${bankHolidays.bucketArn}/*`],
+            }),
+            new PolicyStatement({
+                actions: ["cloudwatch:PutMetricData"],
+                resources: ["*"],
+            }),
+        ],
+    });
+
+    new Cron(stack, "ref-data-service-bank-holidays-retriever-cron", {
+        job: bankHolidaysRetriever,
+        enabled: enableSchedule,
+        cdk: {
+            rule: {
+                schedule: Schedule.cron({ minute: "40", hour: "1", day: defaultDaySchedule }),
+            },
+        },
+    });
 
     const nocRetriever = new Function(stack, `ref-data-service-noc-retriever`, {
         functionName: `ref-data-service-noc-retriever-${stack.stage}`,
