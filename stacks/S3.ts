@@ -6,12 +6,14 @@ export function S3Stack({ stack }: StackContext) {
     const txcBucket = createS3Bucket(stack, "txc-data", 5);
     const txcZippedBucket = createS3Bucket(stack, "txc-data-zipped", 5);
     const nptgBucket = createS3Bucket(stack, "nptg-data", 5);
+    const bankHolidays = createS3Bucket(stack, "bank-holidays", 5);
 
     return {
         csvBucket,
         txcBucket,
         txcZippedBucket,
         nptgBucket,
+        bankHolidays
     };
 }
 

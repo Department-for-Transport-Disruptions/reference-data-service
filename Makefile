@@ -25,6 +25,9 @@ cleardown-txc-tables:
 cleardown-nptg-tables:
 	./scripts/cleardown_nptg.sh
 
+trigger-bank-holidays-retriever: 
+	aws lambda invoke --function-name ref-data-service-bank-holidays-retriever-$(stage) --invocation-type Event /tmp/outfile.txt > /dev/null
+
 trigger-naptan-retriever:
 	aws lambda invoke --function-name ref-data-service-naptan-retriever-$(stage) --invocation-type Event /tmp/outfile.txt > /dev/null
 
