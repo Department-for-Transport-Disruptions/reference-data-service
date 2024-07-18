@@ -13,7 +13,7 @@ export function S3Stack({ stack }: StackContext) {
         txcBucket,
         txcZippedBucket,
         nptgBucket,
-        bankHolidays
+        bankHolidays,
     };
 }
 
