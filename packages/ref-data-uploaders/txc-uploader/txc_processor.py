@@ -146,7 +146,20 @@ def collect_journey_pattern_section_refs_and_info(raw_journey_patterns):
     return journey_patterns
 
 
-def collect_vehicle_journey(vehicle):
+def collect_vehicle_journey(vehicle, service_operating_profile):
+    operating_profile =  {
+        "RegularDayType": {
+            "DaysOfWeek": {
+                "MondayToSunday": "",
+            },
+        },
+    }
+    if service_operating_profile and (vehicle["OperatingProfile"] is None):
+        operating_profile = service_operating_profile
+    else:
+        if vehicle["OperatingProfile"] is not None:
+            operating_profile = vehicle["OperatingProfile"]
+        
     vehicle_journey_info = {
         "vehicle_journey_code": (
             vehicle["VehicleJourneyCode"] if "VehicleJourneyCode" in vehicle else None
@@ -168,30 +181,30 @@ def collect_vehicle_journey(vehicle):
         ),
         "days_of_week": (
             process_operation_elements(
-                vehicle["OperatingProfile"]["RegularDayType"]["DaysOfWeek"]
+                operating_profile["RegularDayType"]["DaysOfWeek"]
             )
             if "OperatingProfile" in vehicle
-            and "RegularDayType" in vehicle["OperatingProfile"]
-            and "DaysOfWeek" in vehicle["OperatingProfile"]["RegularDayType"]
+            and "RegularDayType" in operating_profile
+            and "DaysOfWeek" in operating_profile["RegularDayType"]
             else None
         ),
         "days_of_operation": 
             process_operation_elements(
-                vehicle["OperatingProfile"]["BankHolidayOperation"][
+                operating_profile["BankHolidayOperation"][
                 "DaysOfOperation"
             ])
             if "OperatingProfile" in vehicle
-            and "BankHolidayOperation" in vehicle["OperatingProfile"]
-            and "DaysOfOperation" in vehicle["OperatingProfile"]["BankHolidayOperation"]
+            and "BankHolidayOperation" in operating_profile
+            and "DaysOfOperation" in operating_profile["BankHolidayOperation"]
             else None,
         "days_of_non_operation": 
             process_operation_elements(
-                vehicle["OperatingProfile"]["BankHolidayOperation"][
+                operating_profile["BankHolidayOperation"][
                 "DaysOfNonOperation"
             ]) 
             if "OperatingProfile" in vehicle
-            and "BankHolidayOperation" in vehicle["OperatingProfile"]
-            and "DaysOfNonOperation" in vehicle["OperatingProfile"]["BankHolidayOperation"]
+            and "BankHolidayOperation" in operating_profile
+            and "DaysOfNonOperation" in operating_profile["BankHolidayOperation"]
             else None,
     }
 
@@ -761,7 +774,7 @@ def select_route_and_run_insert_query(
             insert_into_txc_tracks_table(cursor, tracks, operator_service_id)
 
 
-def format_vehicle_journeys(vehicle_journeys: list, line_id: str):
+def format_vehicle_journeys(vehicle_journeys: list, line_id: str, service):
     vehicle_journey_refs = [
         journey["VehicleJourneyRef"]
         for journey in vehicle_journeys
@@ -783,6 +796,7 @@ def format_vehicle_journeys(vehicle_journeys: list, line_id: str):
         )
     ]
 
+    service_operating_profile = service["OperatingProfile"]
     vehicle_journeys_data = []
     journey_pattern_count = {}
 
@@ -799,7 +813,7 @@ def format_vehicle_journeys(vehicle_journeys: list, line_id: str):
         else:
             journey_pattern_count[journey_pattern_ref] += 1
 
-        vehicle_journeys_data.append(collect_vehicle_journey(vehicle_journey))
+        vehicle_journeys_data.append(collect_vehicle_journey(vehicle_journey, service_operating_profile))
 
     journey_pattern_to_use = (
         max(journey_pattern_count) if journey_pattern_count else None
@@ -909,7 +923,7 @@ def write_to_database(
                         (
                             vehicle_journeys_for_line,
                             journey_pattern_to_use_for_tracks,
-                        ) = format_vehicle_journeys(vehicle_journeys, line_id)
+                        ) = format_vehicle_journeys(vehicle_journeys, line_id, service)
 
                         file_has_useable_data = check_file_has_usable_data(
                             data, service
