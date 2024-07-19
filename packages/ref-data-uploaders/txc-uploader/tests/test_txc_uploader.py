@@ -65,6 +65,7 @@ class TestDatabaseInsertQuerying:
         vehicle_journeys, _ = format_vehicle_journeys(
             mock_data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"],
             "l_4_ANW",
+            service
         )
         mock_jp_insert.side_effect = [9, 27, 13, 1, 11, 5, 28, 12, 10, 6, 13, 27, 4]
         mock_cursor = MagicMock()
@@ -150,7 +151,8 @@ class TestDataCollectionFunctionality:
     def test_collect_vehicle_journey(self):
         assert (
             collect_vehicle_journey(
-                mock_data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"][0]
+                mock_data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"][0],
+                None
             )
             == test_data.expected_vehicle_journey
         )
@@ -166,6 +168,7 @@ class TestDataCollectionFunctionality:
         vehicle_journeys, _ = format_vehicle_journeys(
             mock_data_dict["TransXChange"]["VehicleJourneys"]["VehicleJourney"],
             "l_4_ANW",
+            service
         )
         route_ref, link_refs = iterate_through_journey_patterns_and_run_insert_queries(
             mock_cursor,

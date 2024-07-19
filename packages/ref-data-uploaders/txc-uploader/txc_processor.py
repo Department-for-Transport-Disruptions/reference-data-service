@@ -796,7 +796,7 @@ def format_vehicle_journeys(vehicle_journeys: list, line_id: str, service):
         )
     ]
 
-    service_operating_profile = service["OperatingProfile"]
+    service_operating_profile = service["OperatingProfile"] if "OperatingProfile" in service else None
     vehicle_journeys_data = []
     journey_pattern_count = {}
 
