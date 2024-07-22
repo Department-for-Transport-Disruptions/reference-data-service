@@ -432,6 +432,7 @@ export const getServiceJourneys = async (
         .distinct()
         .where("services.id", "=", service.id)
         .where("dataSource", "=", input.dataSource)
+        .where("vehicle_journeys.operationalForToday", "=", 1)
         .offset((input.page || 0) * JOURNEY_PAGE_SIZE)
         .limit(JOURNEY_PAGE_SIZE)
         .execute();

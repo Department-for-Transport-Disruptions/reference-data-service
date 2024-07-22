@@ -4,6 +4,7 @@ from typing import Optional
 import aurora_data_api
 import xmltodict
 import xml.etree.ElementTree as eT
+import datetime
 
 NOC_INTEGRITY_ERROR_MSG = "Cannot add or update a child row: a foreign key constraint fails (`ref_data`.`services`, CONSTRAINT `fk_services_operators_nocCode` FOREIGN KEY (`nocCode`) REFERENCES `operators` (`nocCode`))"
 
@@ -145,8 +146,70 @@ def collect_journey_pattern_section_refs_and_info(raw_journey_patterns):
 
     return journey_patterns
 
+# Check if a date is within any given date ranges
+def is_date_within_ranges(date, date_ranges):
+    for date_range in date_ranges:
+        start_date = datetime.datetime.strptime(date_range['StartDate'], '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(date_range['EndDate'], '%Y-%m-%d').date()
+        if start_date <= date <= end_date:
+            return True
+    return False
 
-def collect_vehicle_journey(vehicle):
+# Check if today is a bank holiday
+def is_bank_holiday(today, bank_holidays, region='england-and-wales'):
+    for event in bank_holidays.get(region, {}).get('events', []):
+        if datetime.datetime.strptime(event['date'], '%Y-%m-%d').date() == today:
+            return True
+    return False
+
+# Check if a vehicle service is operationalForToday
+def is_service_operational(vehicle_journey, bank_holidays,  service_operating_profile, service_operating_period, today=None):
+    if today is None:
+            today = datetime.date.today()
+
+    # Check the OperatingPeriod of the service
+    service_start_date = datetime.datetime.strptime(service_operating_period['StartDate'], '%Y-%m-%d').date()
+    service_end_date = datetime.datetime.strptime(service_operating_period['EndDate'], '%Y-%m-%d').date()
+    if not (service_start_date <= today <= service_end_date):
+        return False
+    
+    # Fallback default operating profile
+    default_operating_profile = {
+        "RegularDayType": {
+            "DaysOfWeek": {
+                "Monday": "",
+                "Tuesday": "",
+                "Wednesday": "",
+                "Thursday": "",
+                "Friday": "",
+                "Saturday": "",
+                "Sunday": "",
+            }
+        }
+    }
+
+    # Use the vehicle journey's operating profile or fallback to the service's operating profile or default
+    operating_profile = vehicle_journey.get("OperatingProfile") or service_operating_profile or default_operating_profile
+    
+    # Check if today is a special non-operation day
+    special_days = operating_profile.get('SpecialDaysOperation', {}).get('DaysOfNonOperation', [])
+    if is_date_within_ranges(today, special_days):
+        return False
+
+    # Check if today is a regular operating day
+    days_of_week = operating_profile.get('RegularDayType', {}).get('DaysOfWeek', {})
+    if today.strftime('%A') not in days_of_week:
+        return False
+    
+    # Check bank holiday operation
+    bank_holiday_operation = operating_profile.get('BankHolidayOperation', True)
+    if is_bank_holiday(today, bank_holidays) and not bank_holiday_operation:
+        return False
+
+    return True
+
+
+def collect_vehicle_journey(vehicle, bank_holidays, service_operating_profile, service_operating_period):
     vehicle_journey_info = {
         "vehicle_journey_code": (
             vehicle["VehicleJourneyCode"] if "VehicleJourneyCode" in vehicle else None
@@ -166,6 +229,7 @@ def collect_vehicle_journey(vehicle):
             and "JourneyCode" in vehicle["Operational"]["TicketMachine"]
             else None
         ),
+        "operationalForToday": is_service_operational(vehicle, bank_holidays, service_operating_profile, service_operating_period)
     }
 
     return vehicle_journey_info
@@ -406,18 +470,19 @@ def insert_into_txc_vehicle_journey_table(
 ):
     values = [
         {
-            "vehicle_journey_code": vehicle_journey_info["vehicle_journey_code"],
-            "service_ref": vehicle_journey_info["service_ref"],
-            "line_ref": vehicle_journey_info["line_ref"],
-            "journey_pattern_ref": vehicle_journey_info["journey_pattern_ref"],
-            "departure_time": vehicle_journey_info["departure_time"],
-            "journey_code": vehicle_journey_info["journey_code"],
-            "operator_service_id": operator_service_id,
+        "vehicle_journey_code": vehicle_journey_info["vehicle_journey_code"],
+        "service_ref": vehicle_journey_info["service_ref"],
+        "line_ref": vehicle_journey_info["line_ref"],
+        "journey_pattern_ref": vehicle_journey_info["journey_pattern_ref"],
+        "departure_time": vehicle_journey_info["departure_time"],
+        "journey_code": vehicle_journey_info["journey_code"],
+        "operator_service_id": operator_service_id,
+        "operationalForToday": 1 if vehicle_journey_info["operationalForToday"] == True else 2,
         }
         for vehicle_journey_info in vehicle_journeys_info
     ]
 
-    query = "INSERT INTO vehicle_journeys_new (vehicleJourneyCode, serviceRef, lineRef, journeyPatternRef, departureTime, journeyCode, operatorServiceId) VALUES (:vehicle_journey_code, :service_ref, :line_ref, :journey_pattern_ref, :departure_time, :journey_code, :operator_service_id)"
+    query = "INSERT INTO vehicle_journeys_new (vehicleJourneyCode, serviceRef, lineRef, journeyPatternRef, departureTime, journeyCode, operatorServiceId, operationalForToday) VALUES (:vehicle_journey_code, :service_ref, :line_ref, :journey_pattern_ref, :departure_time, :journey_code, :operator_service_id, :operationalForToday)"
     cursor.executemany(query, values)
 
 
@@ -722,7 +787,9 @@ def select_route_and_run_insert_query(
             insert_into_txc_tracks_table(cursor, tracks, operator_service_id)
 
 
-def format_vehicle_journeys(vehicle_journeys: list, line_id: str):
+def format_vehicle_journeys(vehicle_journeys: list, line_id: str, bank_holidays, service):
+    service_operating_profile = service["OperatingProfile"] if "OperatingProfile" in service else None
+    service_operating_period = service["OperatingPeriod"] if "OperatingPeriod" in service else None
     vehicle_journey_refs = [
         journey["VehicleJourneyRef"]
         for journey in vehicle_journeys
@@ -760,7 +827,7 @@ def format_vehicle_journeys(vehicle_journeys: list, line_id: str):
         else:
             journey_pattern_count[journey_pattern_ref] += 1
 
-        vehicle_journeys_data.append(collect_vehicle_journey(vehicle_journey))
+        vehicle_journeys_data.append(collect_vehicle_journey(vehicle_journey, bank_holidays, service_operating_profile, service_operating_period))
 
     journey_pattern_to_use = (
         max(journey_pattern_count) if journey_pattern_count else None
@@ -777,6 +844,7 @@ def write_to_database(
     db_connection: aurora_data_api.AuroraDataAPIClient,
     logger,
     cloudwatch,
+    bank_holiday_json
 ):
     try:
         operators = get_operators(data, data_source, cloudwatch)
@@ -870,7 +938,7 @@ def write_to_database(
                         (
                             vehicle_journeys_for_line,
                             journey_pattern_to_use_for_tracks,
-                        ) = format_vehicle_journeys(vehicle_journeys, line_id)
+                        ) = format_vehicle_journeys(vehicle_journeys, line_id, bank_holiday_json, service)
 
                         file_has_useable_data = check_file_has_usable_data(
                             data, service
@@ -969,6 +1037,7 @@ def download_from_s3_and_write_to_db(
     file_path,
     db_connection: aurora_data_api.AuroraDataAPIClient,
     logger,
+    bank_holiday_json
 ):
     s3.download_file(bucket, key, file_path)
     logger.info(f"Downloaded S3 file, '{key}' to '{file_path}'")
@@ -986,7 +1055,7 @@ def download_from_s3_and_write_to_db(
 
     logger.info("Starting write to database...")
     written_success = write_to_database(
-        data_dict, region_code, data_source, key, db_connection, logger, cloudwatch
+        data_dict, region_code, data_source, key, db_connection, logger, cloudwatch, bank_holiday_json
     )
 
     if written_success:
