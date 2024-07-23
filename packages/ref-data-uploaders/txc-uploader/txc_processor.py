@@ -169,8 +169,8 @@ def is_service_operational(vehicle_journey, bank_holidays,  service_operating_pr
 
     # Check the OperatingPeriod of the service
     service_start_date = datetime.datetime.strptime(service_operating_period['StartDate'], '%Y-%m-%d').date()
-    service_end_date = datetime.datetime.strptime(service_operating_period['EndDate'], '%Y-%m-%d').date()
-    if not (service_start_date <= today <= service_end_date):
+    service_end_date = datetime.datetime.strptime(service_operating_period['EndDate'], '%Y-%m-%d').date() if 'EndDate' in service_operating_period else None
+    if (service_end_date and service_end_date < today)  or  (service_start_date > today):
         return False
     
     # Fallback default operating profile
@@ -477,7 +477,7 @@ def insert_into_txc_vehicle_journey_table(
         "departure_time": vehicle_journey_info["departure_time"],
         "journey_code": vehicle_journey_info["journey_code"],
         "operator_service_id": operator_service_id,
-        "operationalForToday": 1 if vehicle_journey_info["operationalForToday"] == True else 2,
+        "operationalForToday": vehicle_journey_info["operationalForToday"],
         }
         for vehicle_journey_info in vehicle_journeys_info
     ]

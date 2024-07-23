@@ -190,7 +190,7 @@ export interface VehicleJourneysTable {
     departureTime: string | null;
     journeyCode: string | null;
     operatorServiceId: number | null;
-    operationalForToday: number;
+    operationalForToday: boolean;
 }
 
 export interface LocalitiesTable {

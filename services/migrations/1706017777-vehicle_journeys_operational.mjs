@@ -6,7 +6,7 @@ import { Kysely } from "kysely";
 export async function up(db) {
     await db.schema
         .alterTable("vehicle_journeys")
-        .addColumn("operationalForToday", "integer")
+        .addColumn("operationalForToday", "boolean")
         .execute();
 }
 
