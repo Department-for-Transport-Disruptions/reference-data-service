@@ -7,7 +7,7 @@ import { DatabaseStack } from "./Database";
 import { S3Stack } from "./S3";
 
 export function UploadersStack({ stack }: StackContext) {
-    const { csvBucket, txcBucket, nptgBucket } = use(S3Stack);
+    const { csvBucket, txcBucket, nptgBucket, bankHolidays } = use(S3Stack);
     const { cluster } = use(DatabaseStack);
 
     const csvBucketCdk = Bucket.fromBucketName(stack, "ref-data-service-csv-bucket", csvBucket.bucketName);
@@ -60,12 +60,17 @@ export function UploadersStack({ stack }: StackContext) {
             DATABASE_NAME: cluster.defaultDatabaseName,
             DATABASE_SECRET_ARN: cluster.secretArn,
             CLUSTER_ARN: cluster.clusterArn,
+            BANK_HOLIDAYS_BUCKET_NAME: bankHolidays.bucketName,
         },
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:GetObject"],
                 resources: [`${txcBucket.bucketArn}/*`],
+            }),
+            new PolicyStatement({
+                actions: ["s3:GetObject"],
+                resources: [`${bankHolidays.bucketArn}/*`],
             }),
             new PolicyStatement({
                 actions: ["cloudwatch:PutMetricData"],
