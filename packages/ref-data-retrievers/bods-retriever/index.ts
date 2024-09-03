@@ -30,11 +30,7 @@ export const setupTables = async (dbClient: Kysely<Database>) => {
     }
 };
 
-const getBodsDataAndUploadToS3 = async (
-    bodsUrl: string,
-    txcZippedBucketName: string,
-    fileName: string = "bods.zip",
-) => {
+const getBodsDataAndUploadToS3 = async (bodsUrl: string, txcZippedBucketName: string, fileName: string) => {
     logger.info("Starting retrieval of BODS data");
 
     const response = await axios.get<Stream>(bodsUrl, {
@@ -66,13 +62,13 @@ export const main = async () => {
 
     const {
         BODS_URL: bodsUrl,
-        BODS_COACH_URL: bodCoachUrl,
+        BODS_COACH_URL: bodsCoachUrl,
         TNDS_RETRIEVER_FUNCTION_NAME: tndsRetrieverFunctionName,
         STAGE: stage,
         TXC_ZIPPED_BUCKET_NAME: txcZippedBucketName,
     } = process.env;
 
-    if (!bodsUrl || !tndsRetrieverFunctionName || !stage || !txcZippedBucketName || !bodCoachUrl) {
+    if (!bodsUrl || !tndsRetrieverFunctionName || !stage || !txcZippedBucketName || !bodsCoachUrl) {
         throw new Error(
             "Missing env vars - BODS_URL, BODS_COACH_URL, TNDS_RETRIEVER_FUNCTION_NAME, STAGE and TXC_ZIPPED_BUCKET_NAME must be set",
         );
@@ -83,8 +79,8 @@ export const main = async () => {
 
         await setupTables(dbClient);
 
-        await getBodsDataAndUploadToS3(bodsUrl, txcZippedBucketName);
-        await getBodsDataAndUploadToS3(bodsUrl, txcZippedBucketName, "bodsCoach.zip");
+        await getBodsDataAndUploadToS3(bodsUrl, txcZippedBucketName, "bods.zip");
+        await getBodsDataAndUploadToS3(bodsCoachUrl, txcZippedBucketName, "bodsCoach.zip");
 
         await lambdaClient.send(
             new InvokeCommand({
