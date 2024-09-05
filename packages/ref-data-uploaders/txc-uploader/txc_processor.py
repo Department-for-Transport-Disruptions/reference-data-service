@@ -145,6 +145,13 @@ def collect_journey_pattern_section_refs_and_info(raw_journey_patterns):
 
     return journey_patterns
 
+def safeget(dct, *keys):
+    for key in keys:
+        try:
+            dct = dct[key]
+        except KeyError:
+            return None
+    return dct
 
 def collect_vehicle_journey(vehicle):
     vehicle_journey_info = {
@@ -160,7 +167,7 @@ def collect_vehicle_journey(vehicle):
             vehicle["DepartureTime"] if "DepartureTime" in vehicle else None
         ),
         "journey_code": (
-            vehicle.get("Operational", {}).get("TicketMachine", {}).get("JourneyCode", None)
+            safeget(vehicle, "Operational", "TicketMachine", "JourneyCode")
         ),
     }
 
