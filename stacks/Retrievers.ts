@@ -208,6 +208,7 @@ export function RetrieversStack({ stack }: StackContext) {
         memorySize: 2048,
         environment: {
             BODS_URL: "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive",
+            BODS_COACH_URL: "https://coach.bus-data.dft.gov.uk/TxC-2.4.zip",
             TNDS_RETRIEVER_FUNCTION_NAME: tndsRetriever.functionName,
             TXC_ZIPPED_BUCKET_NAME: txcZippedBucket.bucketName,
             DATABASE_NAME: cluster.defaultDatabaseName,
