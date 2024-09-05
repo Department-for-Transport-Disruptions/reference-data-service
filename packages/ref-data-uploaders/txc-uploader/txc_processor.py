@@ -147,11 +147,9 @@ def collect_journey_pattern_section_refs_and_info(raw_journey_patterns):
 
 def safeget(dct, *keys):
     for key in keys:
-        if dct is None:
-            return None
         try:
             dct = dct[key]
-        except KeyError:
+        except:
             return None
     return dct
 
