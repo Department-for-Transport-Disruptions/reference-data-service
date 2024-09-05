@@ -160,7 +160,7 @@ def collect_vehicle_journey(vehicle):
             vehicle["DepartureTime"] if "DepartureTime" in vehicle else None
         ),
         "journey_code": (
-            vehicle.get("Operational", {}).get("TicketMachine", {}).get("JourneyCode")
+            vehicle.get("Operational", {}).get("TicketMachine", {}).get("JourneyCode", None)
         ),
     }
 
