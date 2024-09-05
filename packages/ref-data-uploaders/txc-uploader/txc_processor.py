@@ -149,7 +149,7 @@ def safeget(dct, *keys):
     for key in keys:
         try:
             dct = dct[key]
-        except KeyError:
+        except:
             return None
     return dct
 
