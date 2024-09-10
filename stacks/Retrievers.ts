@@ -21,7 +21,7 @@ export function RetrieversStack({ stack }: StackContext) {
         txcZippedBucket.bucketName,
     );
 
-    const defaultDaySchedule = stack.stage === "test" ? "*/4" : "*/2";
+    const defaultDaySchedule = stack.stage === "prod" ? "*" : stack.stage === "preprod" ? "*/2" : "*/4";
 
     const nocRetriever = new Function(stack, `ref-data-service-noc-retriever`, {
         functionName: `ref-data-service-noc-retriever-${stack.stage}`,
