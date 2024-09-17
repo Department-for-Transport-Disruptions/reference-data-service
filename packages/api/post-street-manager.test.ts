@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { mockClient } from "aws-sdk-client-mock";
+import { AwsCommand, mockClient } from "aws-sdk-client-mock";
 import * as snsMessageValidator from "./utils/snsMessageValidator";
 import { main } from "./post-street-manager";
 import { APIGatewayEvent } from "aws-lambda";
@@ -26,6 +26,7 @@ const mockSnsEvent = {
         "}",
 } as unknown as APIGatewayEvent;
 
+// @ts-expect-error version issue
 const sqsMock = mockClient(SQSClient);
 const isValidSignatureSpy = vi.spyOn(snsMessageValidator, "isValidSignature");
 const confirmSubscriptionSpy = vi.spyOn(snsMessageValidator, "confirmSubscription");
@@ -104,7 +105,11 @@ describe("post-street-manager", () => {
         };
 
         expect(sqsMock.send.calledOnce).toBeTruthy();
-        expect(sqsMock.commandCalls(SendMessageCommand)[0].args[0].input.MessageBody).toBe(JSON.stringify(expected));
+        expect(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            sqsMock.commandCalls(SendMessageCommand as new (input: any) => AwsCommand<any, any, any, any>)[0].args[0]
+                .input.MessageBody, // eslint-disable-line @typescript-eslint/no-unsafe-member-access
+        ).toBe(JSON.stringify(expected));
     });
 
     it("should not send the validated SNS message body to SQS if permit is older than roadwork", async () => {
