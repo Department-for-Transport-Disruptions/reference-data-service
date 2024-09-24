@@ -56,7 +56,7 @@ describe("getBankHolidaysAndUploadToS3", () => {
         mockedAxios.get.mockResolvedValue({ status: 200, data: undefined });
 
         await expect(() => getBankHolidaysAndUploadToS3("test-bucket")).rejects.toThrow(
-            "Did not recieve any data from bank holidays url",
+            "Did not receive any data from bank holidays url",
         );
     });
 
@@ -64,7 +64,7 @@ describe("getBankHolidaysAndUploadToS3", () => {
         mockedAxios.get.mockResolvedValue({ status: 200, data: {} });
 
         await expect(() => getBankHolidaysAndUploadToS3("test-bucket")).rejects.toThrow(
-            "Did not recieve any data from bank holidays url",
+            "Did not receive any data from bank holidays url",
         );
     });
 });

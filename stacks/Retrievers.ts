@@ -21,7 +21,7 @@ export function RetrieversStack({ stack }: StackContext) {
         txcZippedBucket.bucketName,
     );
 
-    const defaultDaySchedule = stack.stage === "test" ? "*/4" : "*/2";
+    const defaultDaySchedule = stack.stage === "prod" ? "*" : stack.stage === "preprod" ? "*/2" : "*/4";
 
     const bankHolidaysRetriever = new Function(stack, `ref-data-service-bank-holidays-retriever`, {
         functionName: `ref-data-service-bank-holidays-retriever-${stack.stage}`,
@@ -208,6 +208,7 @@ export function RetrieversStack({ stack }: StackContext) {
         memorySize: 2048,
         environment: {
             BODS_URL: "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive",
+            BODS_COACH_URL: "https://coach.bus-data.dft.gov.uk/TxC-2.4.zip",
             TNDS_RETRIEVER_FUNCTION_NAME: tndsRetriever.functionName,
             TXC_ZIPPED_BUCKET_NAME: txcZippedBucket.bucketName,
             DATABASE_NAME: cluster.defaultDatabaseName,

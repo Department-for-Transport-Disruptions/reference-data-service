@@ -49,7 +49,7 @@ When running the application subsequent times, it can be started simply by runni
 
 The data import jobs can be triggered individually via make commands:
 
-- First import the bank holidays data by running `make trigger-bank-holidays-retriever`
+-   First import the bank holidays data by running `make trigger-bank-holidays-retriever`
 -   Then import the CSV data, this can be done individually or all can be triggered at once by running `make trigger-all-csv-retrievers`
 -   Import the NPTG data using `make trigger-nptg-retriever`
 -   TXC data can all be imported by running `make trigger-bods-retriever` however this can take upwards of an hour
