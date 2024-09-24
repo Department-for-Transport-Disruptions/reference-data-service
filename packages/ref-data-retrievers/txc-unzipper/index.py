@@ -29,7 +29,7 @@ def main(event, context):
         namelist = zipfile.namelist()
         xml_files = list(filter(lambda x: x.endswith(".xml"), namelist))
         zip_files = list(filter(lambda x: x.endswith(".zip"), namelist))
-
+        key_base = "bods" if key_base == "bodsCoach" else key_base
         for filename in xml_files:
             s3.upload_fileobj(
                 zipfile.open(filename),
