@@ -414,15 +414,10 @@ export const getServiceJourneys = async (
     const journeys = await dbClient
         .selectFrom("services")
         .innerJoin("service_journey_patterns", "service_journey_patterns.operatorServiceId", "services.id")
-        .innerJoin(
-            "service_journey_pattern_links",
-            "service_journey_pattern_links.journeyPatternId",
-            "service_journey_patterns.id",
-        )
-        .innerJoin(
-            "vehicle_journeys",
-            "vehicle_journeys.journeyPatternRef",
-            "service_journey_patterns.journeyPatternRef",
+        .innerJoin("vehicle_journeys", (join) =>
+            join
+                .onRef("vehicle_journeys.operatorServiceId", "=", "services.id")
+                .onRef("vehicle_journeys.journeyPatternRef", "=", "service_journey_patterns.journeyPatternRef"),
         )
         .select([
             "services.id as serviceId",
