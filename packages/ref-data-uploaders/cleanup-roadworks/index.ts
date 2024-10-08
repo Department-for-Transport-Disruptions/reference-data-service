@@ -28,6 +28,21 @@ export const deleteOldRoadworks = async (dbClient: Kysely<Database>) => {
                         qb("permitStatus", "=", "cancelled"),
                     ]),
                 ]),
+                qb.and([
+                    qb("workStatus", "=", "Works in progress"),
+                    qb.and([
+                        qb(
+                            sql`DATE_FORMAT(SUBSTRING(proposedEndDateTime, 1, 19), '%Y-%m-%dT%H:%i:%s')`,
+                            "<=",
+                            sql`DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 MONTH), '%Y-%m-%dT%H:%i:%s')`,
+                        ),
+                        qb(
+                            sql`DATE_FORMAT(SUBSTRING(lastUpdatedDatetime, 1, 19), '%Y-%m-%dT%H:%i:%s')`,
+                            "<=",
+                            sql`DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 MONTH), '%Y-%m-%dT%H:%i:%s')`,
+                        ),
+                    ]),
+                ]),
             ]),
         )
         .execute();
