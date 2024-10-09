@@ -6,7 +6,7 @@ import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 export function TableRenamerStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
 
-    const defaultDaySchedule = stack.stage === "test" ? "*/4" : "*/2";
+    const defaultDaySchedule = stack.stage === "prod" ? "*" : stack.stage === "preprod" ? "*/2" : "*/4";
 
     const enableSchedule = stack.stage === "prod" || stack.stage === "preprod" || stack.stage === "test";
 

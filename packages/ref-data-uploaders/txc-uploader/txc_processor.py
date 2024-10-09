@@ -111,18 +111,24 @@ def collect_journey_pattern_section_refs_and_info(raw_journey_patterns):
     journey_patterns = []
     for raw_journey_pattern in raw_journey_patterns:
         journey_pattern_info = {
-            "direction": raw_journey_pattern["Direction"]
-            if "Direction" in raw_journey_pattern
-            else None,
-            "destination_display": raw_journey_pattern["DestinationDisplay"]
-            if "DestinationDisplay" in raw_journey_pattern
-            else None,
-            "route_ref": raw_journey_pattern["RouteRef"]
-            if "RouteRef" in raw_journey_pattern
-            else None,
-            "journey_pattern_ref": raw_journey_pattern["@id"]
-            if "@id" in raw_journey_pattern
-            else None,
+            "direction": (
+                raw_journey_pattern["Direction"]
+                if "Direction" in raw_journey_pattern
+                else None
+            ),
+            "destination_display": (
+                raw_journey_pattern["DestinationDisplay"]
+                if "DestinationDisplay" in raw_journey_pattern
+                else None
+            ),
+            "route_ref": (
+                raw_journey_pattern["RouteRef"]
+                if "RouteRef" in raw_journey_pattern
+                else None
+            ),
+            "journey_pattern_ref": (
+                raw_journey_pattern["@id"] if "@id" in raw_journey_pattern else None
+            ),
         }
 
         raw_journey_pattern_section_refs = raw_journey_pattern[
@@ -139,17 +145,30 @@ def collect_journey_pattern_section_refs_and_info(raw_journey_patterns):
 
     return journey_patterns
 
+def safeget(dct, *keys):
+    for key in keys:
+        try:
+            dct = dct[key]
+        except:
+            return None
+    return dct
 
 def collect_vehicle_journey(vehicle):
     vehicle_journey_info = {
-        "vehicle_journey_code": vehicle["VehicleJourneyCode"]
-        if "VehicleJourneyCode" in vehicle
-        else None,
+        "vehicle_journey_code": (
+            vehicle["VehicleJourneyCode"] if "VehicleJourneyCode" in vehicle else None
+        ),
         "service_ref": vehicle["ServiceRef"] if "ServiceRef" in vehicle else None,
         "line_ref": vehicle["LineRef"] if "LineRef" in vehicle else None,
-        "journey_pattern_ref": vehicle["JourneyPatternRef"]
-        if "JourneyPatternRef" in vehicle
-        else None,
+        "journey_pattern_ref": (
+            vehicle["JourneyPatternRef"] if "JourneyPatternRef" in vehicle else None
+        ),
+        "departure_time": (
+            vehicle["DepartureTime"] if "DepartureTime" in vehicle else None
+        ),
+        "journey_code": (
+            safeget(vehicle, "Operational", "TicketMachine", "JourneyCode")
+        ),
     }
 
     return vehicle_journey_info
@@ -386,7 +405,9 @@ def insert_into_txc_journey_pattern_table(
 
 
 def insert_into_txc_vehicle_journey_table(
-    cursor: aurora_data_api.AuroraDataAPICursor, vehicle_journeys_info
+    cursor: aurora_data_api.AuroraDataAPICursor,
+    vehicle_journeys_info,
+    operator_service_id,
 ):
     values = [
         {
@@ -394,11 +415,14 @@ def insert_into_txc_vehicle_journey_table(
             "service_ref": vehicle_journey_info["service_ref"],
             "line_ref": vehicle_journey_info["line_ref"],
             "journey_pattern_ref": vehicle_journey_info["journey_pattern_ref"],
+            "departure_time": vehicle_journey_info["departure_time"],
+            "journey_code": vehicle_journey_info["journey_code"],
+            "operator_service_id": operator_service_id,
         }
         for vehicle_journey_info in vehicle_journeys_info
     ]
 
-    query = "INSERT INTO vehicle_journeys_new (vehicleJourneyCode, serviceRef, lineRef, journeyPatternRef) VALUES (:vehicle_journey_code, :service_ref, :line_ref, :journey_pattern_ref)"
+    query = "INSERT INTO vehicle_journeys_new (vehicleJourneyCode, serviceRef, lineRef, journeyPatternRef, departureTime, journeyCode, operatorServiceId) VALUES (:vehicle_journey_code, :service_ref, :line_ref, :journey_pattern_ref, :departure_time, :journey_code, :operator_service_id)"
     cursor.executemany(query, values)
 
 
@@ -871,6 +895,10 @@ def write_to_database(
                                 logger,
                             )
 
+                            insert_into_txc_vehicle_journey_table(
+                                cursor, vehicle_journeys_for_line, operator_service_id
+                            )
+
                     if route_ref_for_tracks and link_refs_for_tracks:
                         select_route_and_run_insert_query(
                             cursor,
@@ -879,11 +907,6 @@ def write_to_database(
                             route_ref_for_tracks,
                             link_refs_for_tracks,
                         )
-
-                insert_into_txc_vehicle_journey_table(
-                    cursor,
-                    vehicle_journeys_for_line,
-                )
 
             if not file_has_nocs:
                 logger.info(f"No NOCs found in TXC file: '{key}'")
