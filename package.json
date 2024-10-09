@@ -48,10 +48,10 @@
         "packages/**/*"
     ],
     "dependencies": {
-        "@aws-sdk/client-rds-data": "^3.476.0",
-        "@aws-sdk/client-s3": "^3.476.0",
-        "@aws-sdk/client-sns": "^3.476.0",
-        "@aws-sdk/client-sqs": "^3.476.0",
+        "@aws-sdk/client-rds-data": "^3.667.0",
+        "@aws-sdk/client-s3": "^3.667.0",
+        "@aws-sdk/client-sns": "^3.667.0",
+        "@aws-sdk/client-sqs": "^3.667.0",
         "kysely": "^0.27.3",
         "kysely-data-api": "^0.2.0"
     },

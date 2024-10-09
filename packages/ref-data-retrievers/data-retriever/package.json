@@ -12,7 +12,7 @@
         "vitest": "^0.29.1"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.267.0",
+        "@aws-sdk/client-s3": "^3.667.0",
         "adm-zip": "^0.5.10",
         "axios": "^1.6.2",
         "basic-ftp": "^5.0.2",
