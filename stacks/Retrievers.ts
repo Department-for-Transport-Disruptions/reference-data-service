@@ -137,7 +137,7 @@ export function RetrieversStack({ stack }: StackContext) {
     const tndsRetriever = new Function(stack, "ref-data-service-tnds-retriever", {
         functionName: `ref-data-service-tnds-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/tnds-retriever/index.main",
-        runtime: "python3.11",
+        runtime: "python3.12",
         timeout: 300,
         memorySize: 1024,
         environment: {
@@ -222,7 +222,7 @@ export function RetrieversStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-txc-unzipper-${stack.stage}`,
         handler: "packages/ref-data-retrievers/txc-unzipper/index.main",
-        runtime: "python3.11",
+        runtime: "python3.12",
         timeout: 600,
         memorySize: 2560,
         diskSize: "3072 MB",
