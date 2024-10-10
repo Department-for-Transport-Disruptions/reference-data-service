@@ -26,7 +26,6 @@ const mockSnsEvent = {
         "}",
 } as unknown as APIGatewayEvent;
 
-// @ts-expect-error version issue
 const sqsMock = mockClient(SQSClient);
 const isValidSignatureSpy = vi.spyOn(snsMessageValidator, "isValidSignature");
 const confirmSubscriptionSpy = vi.spyOn(snsMessageValidator, "confirmSubscription");
