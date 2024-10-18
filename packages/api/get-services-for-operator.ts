@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { DataSource, getServicesForOperator, isValidMode, ServicesForOperatorQueryInput } from "./client";
+import { DataSource, ServicesForOperatorQueryInput, getServicesForOperator, isValidMode } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 

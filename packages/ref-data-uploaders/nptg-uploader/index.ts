@@ -1,13 +1,13 @@
+import { randomUUID } from "crypto";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
+import { putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
 import { S3Event } from "aws-lambda";
 import { Promise as BluebirdPromise } from "bluebird";
-import { randomUUID } from "crypto";
+import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
 import { parseStringPromise } from "xml2js";
 import { Nptg, nptgSchema } from "./zod";
-import { Kysely, sql } from "kysely";
-import { putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
 
 export const setupTables = async (dbClient: Kysely<Database>) => {
     await dbClient.schema.dropTable("nptg_admin_areas_new").ifExists().execute();
@@ -41,7 +41,7 @@ const uploadLocalities = async (localities: Nptg["localities"], dbClient: Kysely
             (pLocality) => pLocality.nptgLocalityCode === locality.parentLocalityRef,
         );
 
-        delete locality.parentLocalityRef;
+        locality.parentLocalityRef = undefined;
 
         return {
             ...locality,
@@ -96,7 +96,7 @@ export const main = async (event: S3Event) => {
         await waitForDb(dbClient);
         const key = event.Records[0].s3.object.key;
 
-        logger.info(`Starting NPTG Uploader`);
+        logger.info("Starting NPTG Uploader");
 
         const file = await s3Client.send(
             new GetObjectCommand({

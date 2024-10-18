@@ -16,7 +16,7 @@ export function UploadersStack({ stack }: StackContext) {
 
     const enableSchedule = stack.stage === "prod" || stack.stage === "preprod" || stack.stage === "test";
 
-    const csvUploader = new Function(stack, `ref-data-service-csv-uploader`, {
+    const csvUploader = new Function(stack, "ref-data-service-csv-uploader", {
         bind: [cluster],
         functionName: `ref-data-service-csv-uploader-${stack.stage}`,
         handler: "packages/ref-data-uploaders/csv-uploader/index.main",
@@ -114,7 +114,7 @@ export function UploadersStack({ stack }: StackContext) {
 
     nptgBucketCdk.addEventNotification(EventType.OBJECT_CREATED, new LambdaDestination(nptgUploader));
 
-    const cleanupRoadworks = new Function(stack, `ref-data-service-cleanup-roadworks`, {
+    const cleanupRoadworks = new Function(stack, "ref-data-service-cleanup-roadworks", {
         bind: [cluster],
         functionName: `ref-data-service-cleanup-roadworks-${stack.stage}`,
         handler: "packages/ref-data-uploaders/cleanup-roadworks/index.main",

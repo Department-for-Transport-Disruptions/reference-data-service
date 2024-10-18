@@ -1,8 +1,8 @@
 import { promises as fs } from "fs";
-import { describe, expect, it, vi, beforeAll, afterEach, beforeEach } from "vitest";
-import * as nptgUploader from "./index";
 import * as db from "@reference-data-service/core/db";
 import { Kysely } from "kysely";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import * as nptgUploader from "./index";
 
 let dropTableMock = vi.fn();
 
@@ -16,7 +16,7 @@ let nptgString = "";
 
 describe("nptg-uploader", () => {
     beforeAll(async () => {
-        nptgString = await fs.readFile(__dirname + "/../../../test-data/nptg.xml", "utf-8");
+        nptgString = await fs.readFile(`${__dirname}/../../../test-data/nptg.xml`, "utf-8");
     });
 
     beforeEach(() => {

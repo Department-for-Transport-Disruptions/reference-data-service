@@ -24,7 +24,7 @@ export const getQueryInput = (event: APIGatewayEvent): RoadworksQueryInput => {
 
     const page = Number(queryStringParameters?.page ?? "1");
 
-    if (isNaN(page)) {
+    if (Number.isNaN(page)) {
         throw new ClientError("Provided page is not valid");
     }
 

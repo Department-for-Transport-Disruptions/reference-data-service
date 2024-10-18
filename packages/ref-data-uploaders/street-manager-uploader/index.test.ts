@@ -1,7 +1,7 @@
-import { beforeAll, afterEach, describe, expect, it, vi, beforeEach } from "vitest";
+import { mockSqsEvent } from "@reference-data-service/api/test/testdata";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { main } from "./index";
 import * as utils from "./utils";
-import { mockSqsEvent } from "@reference-data-service/api/test/testdata";
 
 describe("street manager uploader", () => {
     beforeAll(() => {
@@ -17,7 +17,6 @@ describe("street manager uploader", () => {
     }));
 
     vi.mock("../../core/db", () => ({
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
         getDbClient: vi.fn().mockImplementation(() => {}),
     }));
 

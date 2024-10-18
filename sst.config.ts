@@ -2,11 +2,11 @@ import { SSTConfig } from "sst";
 import { ApiStack } from "./stacks/Api";
 import { DatabaseStack } from "./stacks/Database";
 import { DnsStack } from "./stacks/Dns";
+import { QueueStack } from "./stacks/Queue";
 import { RetrieversStack } from "./stacks/Retrievers";
 import { S3Stack } from "./stacks/S3";
 import { TableRenamerStack } from "./stacks/TableRenamer";
 import { UploadersStack } from "./stacks/Uploaders";
-import { QueueStack } from "./stacks/Queue";
 
 export default {
     config() {

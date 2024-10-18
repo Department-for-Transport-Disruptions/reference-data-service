@@ -1,7 +1,7 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
-import { getQueryInput } from "./get-stops";
 import { BusStopType } from "./client";
+import { getQueryInput } from "./get-stops";
 
 describe("get-stops", () => {
     describe("input generation", () => {

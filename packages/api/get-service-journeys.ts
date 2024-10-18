@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { getServiceJourneys, isDataSource, ServiceJourneys, ServiceJourneysQueryInput } from "./client";
+import { ServiceJourneys, ServiceJourneysQueryInput, getServiceJourneys, isDataSource } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 
@@ -17,7 +17,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceJourneysQueryInput
 
     const page = Number(queryStringParameters?.page ?? "1");
 
-    if (isNaN(page)) {
+    if (Number.isNaN(page)) {
         throw new ClientError("Provided page is not valid");
     }
 
@@ -34,7 +34,6 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceJourneysQueryInput
     };
 };
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export const formatJourneys = async (journeys: ServiceJourneys): Promise<ServiceJourneys> => {
     return journeys.filter((journey) => !!journey.departureTime);
 };

@@ -1,7 +1,7 @@
-import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
 import { randomUUID } from "crypto";
-import * as logger from "lambda-log";
+import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
 import { Kysely, sql } from "kysely";
+import * as logger from "lambda-log";
 
 export const deleteOldRoadworks = async (dbClient: Kysely<Database>) => {
     await dbClient
