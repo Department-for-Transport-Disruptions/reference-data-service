@@ -4,6 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "preinstall": "npx only-allow pnpm",
         "dev": "aws s3 cp s3://cdd-sandbox-dev-data/.env ./.env.local && sst dev",
         "build": "sst build",
         "deploy": "sst deploy",
@@ -52,6 +53,7 @@
         "@aws-sdk/client-s3": "^3.668.0",
         "@aws-sdk/client-sns": "^3.668.0",
         "@aws-sdk/client-sqs": "^3.668.0",
+        "@aws-sdk/client-sts": "^3.670.0",
         "kysely": "^0.27.3",
         "kysely-data-api": "^0.2.0"
     },
