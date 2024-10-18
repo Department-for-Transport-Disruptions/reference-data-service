@@ -6,10 +6,10 @@ wait-for-db:
 	./scripts/wait_for_db.sh
 
 start-sst:
-	npm run dev
+	pnpm run dev
 
 install-deps:
-	npm install
+	pnpm install
 	( \
 		python3 -m venv venv; \
 		. venv/bin/activate; \

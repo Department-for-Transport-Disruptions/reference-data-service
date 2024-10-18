@@ -37,7 +37,7 @@ All data is initially imported into tables suffixed with "\_new", this TypeScrip
 
 When first running the application, a new stack will need to be deployed into AWS. First make sure you are authenticated against the desired AWS account and run the following:
 
--   `make install-deps start-sst`, this will install the npm and python dependencies and start sst, it will prompt you for a name for your dev stage
+-   `make install-deps start-sst`, this will install the pnpm and python dependencies and start sst, it will prompt you for a name for your dev stage
 
 The first time this runs will take a bit longer than subsequent runs due to having to deploy the infrastructure.
 
