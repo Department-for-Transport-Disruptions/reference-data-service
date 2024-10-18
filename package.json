@@ -16,8 +16,8 @@
         "typecheck": "tsc --noEmit",
         "lint": "eslint .",
         "prepare": "husky install",
-        "test:uploaders": "pnpm -w @reference-data-service/ref-data-uploaders run test",
-        "test:api": "pnpm -w @reference-data-service/api run test",
+        "test:uploaders": "pnpm --filter @reference-data-service/ref-data-uploaders test",
+        "test:api": "pnpm --filter @reference-data-service/api test",
         "test": "pnpm run test:uploaders -- run && pnpm run test:api -- run",
         "tsc:build": "tsc --noemit"
     },
