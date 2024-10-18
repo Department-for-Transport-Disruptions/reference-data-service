@@ -1,10 +1,10 @@
+import { Database } from "@reference-data-service/core/db";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isBetween from "dayjs/plugin/isBetween";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
-import { Database } from "@reference-data-service/core/db";
 import { PermitStatus } from "./utils/roadworkTypes.zod";
 
 dayjs.extend(isBetween);
@@ -48,7 +48,7 @@ export type OperatorQueryInput = {
 export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQueryInput) => {
     logger.info("Starting getOperators...");
 
-    const OPERATORS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
+    const OPERATORS_PAGE_SIZE = 1000;
 
     if (input.nocCode) {
         const services = await dbClient
@@ -89,19 +89,33 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
         };
     }
 
-    return dbClient
-        .selectFrom("operators")
-        .innerJoin("services", "services.nocCode", "operators.nocCode")
-        .$if(!!input.batchNocCodes && input.batchNocCodes.length > 0, (qb) =>
-            qb.where("nocCode", "in", input.batchNocCodes ?? []),
-        )
-        .$if(!!input.adminAreaCodes && input.adminAreaCodes.length > 0, (qb) =>
-            qb
-                .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
-                .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
-        )
-        .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("services.mode", "in", input.modes ?? []))
-        .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
+    let query = dbClient.selectFrom("operators").innerJoin("services", "services.nocCode", "operators.nocCode");
+
+    if (input.batchNocCodes && input.batchNocCodes.length > 0) {
+        query = query.where("nocCode", "in", input.batchNocCodes ?? []);
+    }
+
+    if (!!input.adminAreaCodes && input.adminAreaCodes.length > 0) {
+        query = query
+            .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
+            .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []);
+    }
+
+    if (!!input.modes && input.modes.length > 0) {
+        const modesToUse = input.modes;
+
+        if (modesToUse.includes(VehicleMode.bus)) {
+            modesToUse.push(VehicleMode.blank);
+        }
+
+        query = query.where("services.mode", "in", modesToUse);
+    }
+
+    if (input.dataSource) {
+        query = query.where("services.dataSource", "=", input.dataSource ?? DataSource.bods);
+    }
+
+    return query
         .select([
             "operators.id",
             "operators.nocCode",

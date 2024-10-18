@@ -21,7 +21,7 @@ export function RetrieversStack({ stack }: StackContext) {
         txcZippedBucket.bucketName,
     );
 
-    const defaultDaySchedule = stack.stage === "test" ? "*/4" : "*/2";
+    const defaultDaySchedule = stack.stage === "prod" ? "*" : stack.stage === "preprod" ? "*/2" : "*/4";
 
     const nocRetriever = new Function(stack, `ref-data-service-noc-retriever`, {
         functionName: `ref-data-service-noc-retriever-${stack.stage}`,
@@ -137,7 +137,7 @@ export function RetrieversStack({ stack }: StackContext) {
     const tndsRetriever = new Function(stack, "ref-data-service-tnds-retriever", {
         functionName: `ref-data-service-tnds-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/tnds-retriever/index.main",
-        runtime: "python3.11",
+        runtime: "python3.12",
         timeout: 300,
         memorySize: 1024,
         environment: {
@@ -176,6 +176,7 @@ export function RetrieversStack({ stack }: StackContext) {
         memorySize: 2048,
         environment: {
             BODS_URL: "https://data.bus-data.dft.gov.uk/timetable/download/bulk_archive",
+            BODS_COACH_URL: "https://coach.bus-data.dft.gov.uk/TxC-2.4.zip",
             TNDS_RETRIEVER_FUNCTION_NAME: tndsRetriever.functionName,
             TXC_ZIPPED_BUCKET_NAME: txcZippedBucket.bucketName,
             DATABASE_NAME: cluster.defaultDatabaseName,
@@ -221,7 +222,7 @@ export function RetrieversStack({ stack }: StackContext) {
         bind: [cluster],
         functionName: `ref-data-service-txc-unzipper-${stack.stage}`,
         handler: "packages/ref-data-retrievers/txc-unzipper/index.main",
-        runtime: "python3.11",
+        runtime: "python3.12",
         timeout: 600,
         memorySize: 2560,
         diskSize: "3072 MB",

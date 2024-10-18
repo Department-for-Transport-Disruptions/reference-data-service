@@ -21,15 +21,15 @@
         "tsc:build": "tsc --noemit"
     },
     "devDependencies": {
-        "@aws-sdk/types": "^3.468.0",
-        "@smithy/types": "^2.3.4",
+        "@aws-sdk/types": "^3.664.0",
+        "@smithy/types": "^3.5.0",
         "@tsconfig/node20": "^20.1.2",
         "@types/aws-lambda": "^8.10.130",
         "@typescript-eslint/eslint-plugin": "^6.15.0",
         "@typescript-eslint/parser": "^6.15.0",
         "aws-cdk": "2.148.1",
         "aws-cdk-lib": "2.142.1",
-        "aws-sdk-client-mock": "3.0.0",
+        "aws-sdk-client-mock": "4.0.2",
         "constructs": "10.3.0",
         "eslint": "^8.56.0",
         "eslint-config-prettier": "^9.1.0",
@@ -40,7 +40,7 @@
         "husky": "^8.0.0",
         "mockdate": "^3.0.5",
         "prettier": "^3.1.1",
-        "sst": "2.43.4",
+        "sst": "2.43.7",
         "typescript": "^5.3.3",
         "vitest": "^0.29.1"
     },
@@ -48,10 +48,10 @@
         "packages/**/*"
     ],
     "dependencies": {
-        "@aws-sdk/client-rds-data": "^3.476.0",
-        "@aws-sdk/client-s3": "^3.476.0",
-        "@aws-sdk/client-sns": "^3.476.0",
-        "@aws-sdk/client-sqs": "^3.476.0",
+        "@aws-sdk/client-rds-data": "^3.668.0",
+        "@aws-sdk/client-s3": "^3.668.0",
+        "@aws-sdk/client-sns": "^3.668.0",
+        "@aws-sdk/client-sqs": "^3.668.0",
         "kysely": "^0.27.3",
         "kysely-data-api": "^0.2.0"
     },
