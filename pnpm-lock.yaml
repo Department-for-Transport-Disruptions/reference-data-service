@@ -29,6 +29,9 @@ importers:
       kysely-data-api:
         specifier: ^0.2.0
         version: 0.2.1(@aws-sdk/client-rds-data@3.668.0(aws-crt@1.19.0))(kysely@0.27.3)
+      lambda-log:
+        specifier: ^3.1.0
+        version: 3.1.0
     devDependencies:
       '@aws-sdk/types':
         specifier: ^3.664.0
@@ -45,6 +48,9 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.130
         version: 8.10.130
+      '@types/lambda-log':
+        specifier: ^2.2.1
+        version: 2.2.1
       aws-cdk:
         specifier: 2.161.1
         version: 2.161.1
@@ -76,18 +82,27 @@ importers:
   packages/api:
     dependencies:
       '@reference-data-service/core':
-        specifier: file:../core
+        specifier: workspace:^
         version: link:../core
+      axios:
+        specifier: ^1.7.7
+        version: 1.7.7
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
       geolib:
         specifier: ^3.3.3
         version: 3.3.4
+      lambda-log:
+        specifier: ^3.1.0
+        version: 3.1.0
       zod:
         specifier: ^3.22.3
         version: 3.22.4
     devDependencies:
+      '@types/lambda-log':
+        specifier: ^2.2.1
+        version: 2.2.1
       '@types/node':
         specifier: ^20.10.5
         version: 20.10.5
@@ -116,6 +131,9 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: ^3.668.0
         version: 3.674.0(@aws-sdk/client-s3@3.674.0(aws-crt@1.19.0))
+      '@reference-data-service/core':
+        specifier: workspace:^
+        version: link:../../core
       adm-zip:
         specifier: ^0.5.10
         version: 0.5.10
@@ -182,11 +200,14 @@ importers:
         specifier: ^3.668.0
         version: 3.668.0(aws-crt@1.19.0)
       '@reference-data-service/core':
-        specifier: file:../core
+        specifier: workspace:^
         version: link:../core
       bluebird:
         specifier: ^3.7.2
         version: 3.7.2
+      lambda-log:
+        specifier: ^3.1.0
+        version: 3.1.0
       ospoint:
         specifier: ljones92/ospoint#main
         version: https://codeload.github.com/ljones92/ospoint/tar.gz/9759eb4b39e2741dcfbbea8cd7bbec3d2568851b
@@ -203,6 +224,9 @@ importers:
       '@types/bluebird':
         specifier: ^3.5.38
         version: 3.5.42
+      '@types/lambda-log':
+        specifier: ^2.2.1
+        version: 2.2.1
       '@types/node':
         specifier: ^20.10.5
         version: 20.10.5
@@ -222,7 +246,7 @@ importers:
         specifier: ^3.649.0
         version: 3.668.0(aws-crt@1.19.0)
       '@reference-data-service/core':
-        specifier: file:../core
+        specifier: workspace:^
         version: link:../core
       axios:
         specifier: ^1.7.7

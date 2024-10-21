@@ -1,13 +1,8 @@
 import { RDSData } from "@aws-sdk/client-rds-data";
-import {
-    PermitStatus,
-    TrafficManagementType,
-    WorkCategory,
-    WorkStatus,
-} from "@reference-data-service/api/utils/roadworkTypes.zod";
 import { Generated, Kysely } from "kysely";
 import { DataApiDialect } from "kysely-data-api";
 import * as logger from "lambda-log";
+import { PermitStatus, TrafficManagementType, WorkCategory, WorkStatus } from "../api/utils/roadworkTypes.zod";
 
 export interface StopsTable {
     id: number;

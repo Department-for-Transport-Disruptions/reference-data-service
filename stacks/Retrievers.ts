@@ -1,4 +1,3 @@
-import { disableTableRenamerParamName } from "@reference-data-service/core/ssm";
 import { Schedule } from "aws-cdk-lib/aws-events";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Bucket, EventType } from "aws-cdk-lib/aws-s3";
@@ -6,6 +5,7 @@ import { LambdaDestination } from "aws-cdk-lib/aws-s3-notifications";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { StringParameter } from "aws-cdk-lib/aws-ssm";
 import { Cron, Function, StackContext, use } from "sst/constructs";
+import { disableTableRenamerParamName } from "../packages/core/ssm";
 import { DatabaseStack } from "./Database";
 import { S3Stack } from "./S3";
 

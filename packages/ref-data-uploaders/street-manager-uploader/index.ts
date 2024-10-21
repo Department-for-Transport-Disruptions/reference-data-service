@@ -1,7 +1,7 @@
-import { roadworkSchema } from "@reference-data-service/api/utils/roadworkTypes.zod";
 import { getDbClient } from "@reference-data-service/core/db";
 import { SQSEvent } from "aws-lambda";
 import * as logger from "lambda-log";
+import { roadworkSchema } from "../../api/utils/roadworkTypes.zod";
 import { getRoadworkByPermitReferenceNumber, updateToRoadworksTable, writeToRoadworksTable } from "./utils";
 
 export const main = async (event: SQSEvent) => {

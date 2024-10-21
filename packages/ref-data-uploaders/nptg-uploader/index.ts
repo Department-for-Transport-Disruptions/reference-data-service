@@ -41,7 +41,8 @@ const uploadLocalities = async (localities: Nptg["localities"], dbClient: Kysely
             (pLocality) => pLocality.nptgLocalityCode === locality.parentLocalityRef,
         );
 
-        locality.parentLocalityRef = undefined;
+        // biome-ignore lint/performance/noDelete: parentLocalityRef not used
+        delete locality.parentLocalityRef;
 
         return {
             ...locality,

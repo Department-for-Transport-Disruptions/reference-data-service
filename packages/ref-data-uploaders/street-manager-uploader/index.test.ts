@@ -1,5 +1,5 @@
-import { mockSqsEvent } from "@reference-data-service/api/test/testdata";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { mockSqsEvent } from "../../api/test/testdata";
 import { main } from "./index";
 import * as utils from "./utils";
 
