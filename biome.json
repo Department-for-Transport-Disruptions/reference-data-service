@@ -3,7 +3,7 @@
     "vcs": { "enabled": false, "clientKind": "git", "useIgnoreFile": false },
     "files": {
         "ignoreUnknown": true,
-        "ignore": ["services/**/*.mjs", "node_modules", "*/**/node_modules", ".sst", ".sst*", "*/**/botocore"]
+        "ignore": ["node_modules", "*/**/node_modules", ".sst", ".sst*", "*/**/botocore"]
     },
     "formatter": {
         "indentStyle": "space",
@@ -36,8 +36,7 @@
                 "useButtonType": "off",
                 "useKeyWithClickEvents": "off"
             }
-        },
-        "ignore": ["services/**/*.mjs", "**/node_modules", "*/**/node_modules", "**/.sst", "**/.sst*"]
+        }
     },
     "javascript": {
         "formatter": {

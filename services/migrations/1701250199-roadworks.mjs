@@ -1,5 +1,3 @@
-import { Kysely } from "kysely";
-
 const initialHighwayAuthoritySwaCodeAdminAreaMapping = [
     { administrativeAreaCode: "099", highwayAuthoritySwaCode: "4405" },
     { administrativeAreaCode: "001", highwayAuthoritySwaCode: "114" },
