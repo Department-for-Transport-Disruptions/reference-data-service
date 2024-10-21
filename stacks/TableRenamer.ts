@@ -1,7 +1,7 @@
 import { Schedule } from "aws-cdk-lib/aws-events";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Cron, Function, StackContext, use } from "sst/constructs";
 import { DatabaseStack } from "./Database";
-import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 export function TableRenamerStack({ stack }: StackContext) {
     const { cluster } = use(DatabaseStack);
@@ -10,7 +10,7 @@ export function TableRenamerStack({ stack }: StackContext) {
 
     const enableSchedule = stack.stage === "prod" || stack.stage === "preprod" || stack.stage === "test";
 
-    const tableRenamer = new Function(stack, `ref-data-service-table-renamer`, {
+    const tableRenamer = new Function(stack, "ref-data-service-table-renamer", {
         bind: [cluster],
         functionName: `ref-data-service-table-renamer-${stack.stage}`,
         handler: "packages/table-renamer/index.main",

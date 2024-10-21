@@ -1,5 +1,0 @@
-services/**/*.mjs
-node_modules
-*/**/node_modules
-.sst
-.sst*

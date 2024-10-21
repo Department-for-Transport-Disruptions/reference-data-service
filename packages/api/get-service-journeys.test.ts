@@ -1,7 +1,7 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
-import { getQueryInput } from "./get-service-journeys";
 import { DataSource } from "./client";
+import { getQueryInput } from "./get-service-journeys";
 
 describe("get-service-journeys", () => {
     describe("input generation", () => {

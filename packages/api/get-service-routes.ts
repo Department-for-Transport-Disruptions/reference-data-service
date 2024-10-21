@@ -1,13 +1,13 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
-    getServiceStops,
-    isDataSource,
-    isValidBusStopType,
-    isValidMode,
     ServiceStop,
     ServiceStops,
     ServiceStopsQueryInput,
     ServiceTracks,
+    getServiceStops,
+    isDataSource,
+    isValidBusStopType,
+    isValidMode,
 } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
@@ -97,7 +97,6 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
 
 export const formatStopsRoutes = async (
     stops: ServiceStops | ServiceTracks,
-    // eslint-disable-next-line @typescript-eslint/require-await
 ): Promise<{ outbound: ServiceStop[] | ServiceTracks; inbound: ServiceStop[] }> => {
     if (isServiceStops(stops)) {
         const flattenedStops = flattenStops(stops);
@@ -105,7 +104,6 @@ export const formatStopsRoutes = async (
         const outbound = filterStops(flattenedStops, "outbound");
         const inbound = filterStops(flattenedStops, "inbound");
         return { outbound, inbound };
-    } else {
-        return { outbound: stops, inbound: [] };
     }
+    return { outbound: stops, inbound: [] };
 };

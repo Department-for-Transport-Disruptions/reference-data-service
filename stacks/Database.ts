@@ -19,7 +19,7 @@ export function DatabaseStack({ stack }: StackContext) {
         },
     };
 
-    const cluster = new RDS(stack, `ref-data-service-db-cluster`, {
+    const cluster = new RDS(stack, "ref-data-service-db-cluster", {
         engine: "mysql5.7",
         defaultDatabaseName: "ref_data",
         migrations: "services/migrations",

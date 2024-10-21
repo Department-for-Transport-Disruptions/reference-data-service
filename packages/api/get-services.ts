@@ -1,23 +1,23 @@
+import { Database } from "@reference-data-service/core/db";
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
+import { Kysely } from "kysely";
+import { z } from "zod";
 import {
     DataSource,
-    getServices,
-    getServicesByStops,
-    getServiceStops,
-    isDataSource,
-    isValidMode,
+    ServiceStops,
     ServicesByStops,
     ServicesByStopsQueryInput,
     ServicesQueryInput,
-    ServiceStops,
     VehicleMode,
+    getServiceStops,
+    getServices,
+    getServicesByStops,
+    isDataSource,
+    isValidMode,
 } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
-import { Kysely } from "kysely";
-import { Database } from "@reference-data-service/core/db";
 import { formatStopsRoutes } from "./get-service-routes";
-import { z } from "zod";
 import { Optional, notEmpty } from "./utils";
 
 const MAX_ADMIN_AREA_CODES = process.env.MAX_ADMIN_AREA_CODES || "5";
@@ -76,7 +76,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServicesQueryInput => {
 
     const page = Number(queryStringParameters?.page ?? "1");
 
-    if (isNaN(page)) {
+    if (Number.isNaN(page)) {
         throw new ClientError("Provided page is not valid");
     }
 
@@ -130,7 +130,6 @@ export const formatServicesWithStops = async (
                     (stop) => stop && input.stops.includes(stop),
                 );
 
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { fromAtcoCode, toAtcoCode, ...cleanService } = service;
 
                 return {
