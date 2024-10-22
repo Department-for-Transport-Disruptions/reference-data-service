@@ -75,4 +75,4 @@ jobs:
         env:
           ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
         run: |
-          pnpm run sst -- deploy --stage ${{ inputs.stage }}
+          pnpm run deploy --stage ${{ inputs.stage }}
