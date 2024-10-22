@@ -14,14 +14,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Get Artifact from Release
-        uses: dsaltares/fetch-gh-release-asset@master
+      - name: Checkout repo
+        uses: actions/checkout@v4
         with:
-          version: ${{ github.event.release.id }}
-          file: build.zip
-
-      - name: Unzip artifact
-        run: unzip -q build.zip
+          ref: ${{ github.event.release.tag_name }}
 
       - name: Setup Node.js and cache
         uses: actions/setup-node@v4

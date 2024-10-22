@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: "The branch, tag or SHA to run this pipeline against (optional)"
-        type: string
         
 jobs:
   build:
@@ -17,8 +12,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref }}
 
       - name: Setup Node.js and cache
         uses: actions/setup-node@v4
@@ -69,15 +62,6 @@ jobs:
           echo "Running tests..."
           python3 -m pytest tests/
 
-      - name: Zip artifact
-        run: zip build.zip ./* -rq
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build
-          path: ./build.zip
-
   deploy_to_test:
     needs: ['build']
     name: Deploy to Test
@@ -87,14 +71,8 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: .
-
-      - name: Unzip artifact
-        run: unzip -q build.zip
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Setup Node.js and cache
         uses: actions/setup-node@v4
@@ -144,14 +122,8 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: .
-
-      - name: Unzip artifact
-        run: unzip -q build.zip
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Setup Node.js and cache
         uses: actions/setup-node@v4
@@ -199,12 +171,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: .
-
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
