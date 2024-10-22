@@ -1,6 +1,7 @@
 {
     "name": "@reference-data-service/data-retriever",
     "version": "0.1.0",
+    "type": "module",
     "scripts": {
         "test": "sst bind vitest",
         "typecheck": "tsc -noEmit"
