@@ -1,14 +1,14 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
-    getServiceStops,
-    isDataSource,
-    isValidBusStopType,
-    isValidMode,
     ServiceStop,
     ServiceStops,
     ServiceStopsQueryInput,
     ServiceTracks,
     Stops,
+    getServiceStops,
+    isDataSource,
+    isValidBusStopType,
+    isValidMode,
 } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
@@ -142,8 +142,6 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
         return stopArray;
     });
 };
-
-// eslint-disable-next-line @typescript-eslint/require-await
 export const formatStops = async (stops: ServiceStops | ServiceTracks): Promise<Stops> => {
     if (!isServiceStops(stops)) {
         return [];

@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import { getStops, isValidBusStopType, StopsQueryInput } from "./client";
+import { StopsQueryInput, getStops, isValidBusStopType } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
 import { getPolygon } from "./utils";
@@ -49,7 +49,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
 
     const page = Number(queryStringParameters?.page ?? "1");
 
-    if (isNaN(page)) {
+    if (Number.isNaN(page)) {
         throw new ClientError("Provided page is not valid");
     }
 
@@ -59,7 +59,7 @@ export const getQueryInput = (event: APIGatewayEvent): StopsQueryInput => {
         throw new ClientError("Admin area codes must be provided when providing a polygon");
     }
 
-    let sqlPolygon;
+    let sqlPolygon = "";
 
     if (polygon) {
         sqlPolygon = getPolygon(polygon, MAX_POLYGON_AREA_IN_KM2);
