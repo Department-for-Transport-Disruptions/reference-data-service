@@ -1,6 +1,7 @@
 {
     "name": "@reference-data-service/bods-retriever",
     "version": "0.1.0",
+    "type": "module",
     "scripts": {
         "test": "sst bind vitest",
         "typecheck": "tsc -noEmit"

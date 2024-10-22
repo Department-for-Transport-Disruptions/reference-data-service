@@ -1,6 +1,7 @@
 {
     "name": "@reference-data-service/ref-data-uploaders",
     "version": "0.1.0",
+    "type": "module",
     "scripts": {
         "test:unit": "vitest",
         "test": "vitest",
