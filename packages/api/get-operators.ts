@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
+import { DataSource, OperatorQueryInput, getOperators, isValidMode } from "./client";
 import { ClientError } from "./error";
-import { DataSource, getOperators, isValidMode, OperatorQueryInput } from "./client";
 import { executeClient } from "./execute-client";
 
 const MAX_NOC_CODES = process.env.MAX_NOC_CODES || "5";
@@ -54,7 +54,7 @@ export const getQueryInput = (event: APIGatewayEvent): OperatorQueryInput => {
 
     const page = Number(queryStringParameters?.page ?? "1");
 
-    if (isNaN(page)) {
+    if (Number.isNaN(page)) {
         throw new ClientError("Provided page is not valid");
     }
 

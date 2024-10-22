@@ -3,11 +3,11 @@ import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Bucket, EventType } from "aws-cdk-lib/aws-s3";
 import { LambdaDestination } from "aws-cdk-lib/aws-s3-notifications";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
+import { StringParameter } from "aws-cdk-lib/aws-ssm";
 import { Cron, Function, StackContext, use } from "sst/constructs";
+import { disableTableRenamerParamName } from "../packages/core/ssm";
 import { DatabaseStack } from "./Database";
 import { S3Stack } from "./S3";
-import { StringParameter } from "aws-cdk-lib/aws-ssm";
-import { disableTableRenamerParamName } from "@reference-data-service/core/ssm";
 
 export function RetrieversStack({ stack }: StackContext) {
     const { csvBucket, txcBucket, txcZippedBucket, nptgBucket } = use(S3Stack);
@@ -23,7 +23,7 @@ export function RetrieversStack({ stack }: StackContext) {
 
     const defaultDaySchedule = stack.stage === "prod" ? "*" : stack.stage === "preprod" ? "*/2" : "*/4";
 
-    const nocRetriever = new Function(stack, `ref-data-service-noc-retriever`, {
+    const nocRetriever = new Function(stack, "ref-data-service-noc-retriever", {
         functionName: `ref-data-service-noc-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/data-retriever/index.main",
         runtime: "nodejs20.x",
@@ -58,7 +58,7 @@ export function RetrieversStack({ stack }: StackContext) {
         },
     });
 
-    const naptanRetriever = new Function(stack, `ref-data-service-naptan-retriever`, {
+    const naptanRetriever = new Function(stack, "ref-data-service-naptan-retriever", {
         functionName: `ref-data-service-naptan-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/data-retriever/index.main",
         runtime: "nodejs20.x",
@@ -93,7 +93,7 @@ export function RetrieversStack({ stack }: StackContext) {
         },
     });
 
-    const nptgRetriever = new Function(stack, `ref-data-service-nptg-retriever`, {
+    const nptgRetriever = new Function(stack, "ref-data-service-nptg-retriever", {
         functionName: `ref-data-service-nptg-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/data-retriever/index.main",
         runtime: "nodejs20.x",
@@ -130,8 +130,8 @@ export function RetrieversStack({ stack }: StackContext) {
 
     const ftpSecret = Secret.fromSecretNameV2(
         stack,
-        `reference-data-service-tnds-ftp-credentials-secret`,
-        `reference-data-service-tnds-ftp-credentials`,
+        "reference-data-service-tnds-ftp-credentials-secret",
+        "reference-data-service-tnds-ftp-credentials",
     );
 
     const tndsRetriever = new Function(stack, "ref-data-service-tnds-retriever", {
@@ -167,7 +167,7 @@ export function RetrieversStack({ stack }: StackContext) {
         enableLiveDev: false,
     });
 
-    const bodsRetriever = new Function(stack, `ref-data-service-bods-retriever`, {
+    const bodsRetriever = new Function(stack, "ref-data-service-bods-retriever", {
         bind: [cluster],
         functionName: `ref-data-service-bods-retriever-${stack.stage}`,
         handler: "packages/ref-data-retrievers/bods-retriever/index.main",

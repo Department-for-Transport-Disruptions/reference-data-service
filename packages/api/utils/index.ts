@@ -1,7 +1,7 @@
 import { getAreaOfPolygon } from "geolib";
 import { z } from "zod";
-import { ClientError } from "../error";
 import { ServiceStops, ServiceTracks } from "../client";
+import { ClientError } from "../error";
 
 export const notEmpty = <T>(value: T | null | undefined): value is T => value !== null && value !== undefined;
 
@@ -20,7 +20,7 @@ export const getPolygon = (polygon: string, maxArea: number): string => {
             .min(4)
             .parse(JSON.parse(polygon))
             .map((point) => [point[0], point[1]]);
-    } catch (e) {
+    } catch (_e) {
         throw new ClientError("Invalid polygon provided");
     }
 

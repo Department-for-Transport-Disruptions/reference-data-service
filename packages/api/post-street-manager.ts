@@ -1,10 +1,10 @@
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+import { getDbClient } from "@reference-data-service/core/db";
 import { APIGatewayEvent } from "aws-lambda";
 import * as logger from "lambda-log";
+import { getRoadworkById } from "./client";
 import { BaseMessage, PermitMessage, permitMessageSchema, snsMessageSchema } from "./utils/snsMessageTypes.zod";
 import { confirmSubscription, isValidSignature } from "./utils/snsMessageValidator";
-import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
-import { getRoadworkById } from "./client";
-import { getDbClient } from "@reference-data-service/core/db";
 
 const allowedTopicArns = ["arn:aws:sns:eu-west-2:287813576808:prod-permit-topic"];
 

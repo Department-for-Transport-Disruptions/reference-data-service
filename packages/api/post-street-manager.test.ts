@@ -1,12 +1,12 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { AwsCommand, mockClient } from "aws-sdk-client-mock";
-import * as snsMessageValidator from "./utils/snsMessageValidator";
-import { main } from "./post-street-manager";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { APIGatewayEvent } from "aws-lambda";
+import { AwsCommand, mockClient } from "aws-sdk-client-mock";
 import Mockdate from "mockdate";
-import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
-import { mockStreetManagerNotification, mockStreetManagerNotificationOld } from "./test/testdata";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import * as db from "./client";
+import { main } from "./post-street-manager";
+import { mockStreetManagerNotification, mockStreetManagerNotificationOld } from "./test/testdata";
+import * as snsMessageValidator from "./utils/snsMessageValidator";
 
 const mockSnsEvent = {
     headers: {
@@ -105,9 +105,9 @@ describe("post-street-manager", () => {
 
         expect(sqsMock.send.calledOnce).toBeTruthy();
         expect(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // biome-ignore lint/suspicious/noExplicitAny: reason
             sqsMock.commandCalls(SendMessageCommand as new (input: any) => AwsCommand<any, any, any, any>)[0].args[0]
-                .input.MessageBody, // eslint-disable-line @typescript-eslint/no-unsafe-member-access
+                .input.MessageBody,
         ).toBe(JSON.stringify(expected));
     });
 

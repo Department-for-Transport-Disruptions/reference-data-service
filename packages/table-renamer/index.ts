@@ -1,8 +1,8 @@
-import { Database, getDbClient, Tables } from "@reference-data-service/core/db";
+import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
+import { Database, Tables, getDbClient } from "@reference-data-service/core/db";
+import { disableTableRenamerParamName, putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
-import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
-import { disableTableRenamerParamName, putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
 
 const ssm = new SSMClient({ region: "eu-west-2" });
 
@@ -107,22 +107,18 @@ const tables = [
 ];
 
 export const deleteAndRenameTables = async (db: Kysely<Database>): Promise<void> => {
-    try {
-        await db.transaction().execute(async () => {
-            await sql`SET FOREIGN_KEY_CHECKS=0`.execute(db);
+    await db.transaction().execute(async () => {
+        await sql`SET FOREIGN_KEY_CHECKS=0`.execute(db);
 
-            for (const table of tables) {
-                await db.schema.dropTable(`${table}_old`).ifExists().execute();
-            }
+        for (const table of tables) {
+            await db.schema.dropTable(`${table}_old`).ifExists().execute();
+        }
 
-            await sql`SET FOREIGN_KEY_CHECKS=1`.execute(db);
+        await sql`SET FOREIGN_KEY_CHECKS=1`.execute(db);
 
-            for (const table of tables) {
-                await db.schema.alterTable(table).renameTo(`${table}_old`).execute();
-                await db.schema.alterTable(`${table}_new`).renameTo(table).execute();
-            }
-        });
-    } catch (error) {
-        throw error;
-    }
+        for (const table of tables) {
+            await db.schema.alterTable(table).renameTo(`${table}_old`).execute();
+            await db.schema.alterTable(`${table}_new`).renameTo(table).execute();
+        }
+    });
 };

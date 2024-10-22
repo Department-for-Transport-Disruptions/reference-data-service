@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "@aws-sdk/client-ssm": "^3.649.0",
-        "@reference-data-service/core": "file:../core",
+        "@reference-data-service/core": "workspace:^",
         "axios": "^1.7.7",
         "basic-ftp": "^5.0.2",
         "lambda-log": "^3.1.0"

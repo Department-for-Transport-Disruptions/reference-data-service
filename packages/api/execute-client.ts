@@ -1,9 +1,9 @@
+import { randomUUID } from "crypto";
+import { Database, getDbClient } from "@reference-data-service/core/db";
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
+import { Kysely } from "kysely";
 import * as logger from "lambda-log";
 import { ClientError } from "./error";
-import { Database, getDbClient } from "@reference-data-service/core/db";
-import { Kysely } from "kysely";
-import { randomUUID } from "crypto";
 
 export const executeClient = async <InputT, ResponseT, FormattedT>(
     event: APIGatewayEvent,
@@ -74,7 +74,8 @@ export const executeClient = async <InputT, ResponseT, FormattedT>(
                     error: e.message,
                 }),
             };
-        } else if (e instanceof Error) {
+        }
+        if (e instanceof Error) {
             logger.error(e);
 
             return {
@@ -158,7 +159,8 @@ export const executeClientWithoutInput = async <InputT, ResponseT, FormattedT>(
                     error: e.message,
                 }),
             };
-        } else if (e instanceof Error) {
+        }
+        if (e instanceof Error) {
             logger.error(e);
 
             return {

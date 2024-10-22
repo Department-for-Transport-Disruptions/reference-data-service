@@ -1,8 +1,8 @@
+import { randomUUID } from "crypto";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import AdmZip from "adm-zip";
 import axios from "axios";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import * as logger from "lambda-log";
-import { randomUUID } from "crypto";
 
 const s3Client = new S3Client({ region: "eu-west-2" });
 
@@ -26,7 +26,7 @@ export const main = async () => {
             throw new Error("Missing env vars - DATA_URL, CONTENT_TYPE and BUCKET_NAME must be set");
         }
 
-        logger.info(`Starting Data Retriever`);
+        logger.info("Starting Data Retriever");
 
         const response = await axios.get(dataUrl, {
             responseType: "arraybuffer",

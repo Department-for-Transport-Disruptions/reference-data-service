@@ -1,13 +1,13 @@
+import { randomUUID } from "crypto";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { getDbClient, Tables, TablesNew, waitForDb } from "@reference-data-service/core/db";
+import { Tables, TablesNew, getDbClient, waitForDb } from "@reference-data-service/core/db";
+import { putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
 import { S3Event } from "aws-lambda";
 import { Promise as BluebirdPromise } from "bluebird";
-import { randomUUID } from "crypto";
 import { RawBuilder, sql } from "kysely";
 import * as logger from "lambda-log";
 import OsPoint from "ospoint";
 import { parse } from "papaparse";
-import { putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
 
 const dbClient = getDbClient();
 const s3Client = new S3Client({ region: "eu-west-2" });

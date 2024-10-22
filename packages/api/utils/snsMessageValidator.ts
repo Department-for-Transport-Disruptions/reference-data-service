@@ -1,7 +1,7 @@
+import crypto from "crypto";
 import url from "url";
 import axios from "axios";
 import * as logger from "lambda-log";
-import crypto from "crypto";
 import { SnsMessage } from "./snsMessageTypes.zod";
 
 export const isValidSignature = async (body: SnsMessage) => {
@@ -17,7 +17,7 @@ const verifyMessageSignatureVersion = (version: string) => {
 };
 
 const downloadCertificate = async (signingCertURL: string) => {
-    if (url.parse(signingCertURL).protocol != "https:") {
+    if (url.parse(signingCertURL).protocol !== "https:") {
         throw "SigningCertURL was not using HTTPS";
     }
 
@@ -53,19 +53,19 @@ function buildNotificationStringToSign(body: SnsMessage) {
     let stringToSign = "";
 
     stringToSign = "Message\n";
-    stringToSign += body.Message + "\n";
+    stringToSign += `${body.Message}\n`;
     stringToSign += "MessageId\n";
-    stringToSign += body.MessageId + "\n";
+    stringToSign += `${body.MessageId}\n`;
     if (body.Subject) {
         stringToSign += "Subject\n";
-        stringToSign += body.Subject + "\n";
+        stringToSign += `${body.Subject}\n`;
     }
     stringToSign += "Timestamp\n";
-    stringToSign += body.Timestamp + "\n";
+    stringToSign += `${body.Timestamp}\n`;
     stringToSign += "TopicArn\n";
-    stringToSign += body.TopicArn + "\n";
+    stringToSign += `${body.TopicArn}\n`;
     stringToSign += "Type\n";
-    stringToSign += body.Type + "\n";
+    stringToSign += `${body.Type}\n`;
 
     return stringToSign;
 }
@@ -74,19 +74,19 @@ function buildSubscriptionStringToSign(body: SnsMessage) {
     let stringToSign = "";
 
     stringToSign = "Message\n";
-    stringToSign += body.Message + "\n";
+    stringToSign += `${body.Message}\n`;
     stringToSign += "MessageId\n";
-    stringToSign += body.MessageId + "\n";
+    stringToSign += `${body.MessageId}\n`;
     stringToSign += "SubscribeURL\n";
-    stringToSign += (body.SubscribeURL ?? "") + "\n";
+    stringToSign += `${body.SubscribeURL ?? ""}\n`;
     stringToSign += "Timestamp\n";
-    stringToSign += body.Timestamp + "\n";
+    stringToSign += `${body.Timestamp}\n`;
     stringToSign += "Token\n";
-    stringToSign += (body.Token ?? "") + "\n";
+    stringToSign += `${body.Token ?? ""}\n`;
     stringToSign += "TopicArn\n";
-    stringToSign += body.TopicArn + "\n";
+    stringToSign += `${body.TopicArn}\n`;
     stringToSign += "Type\n";
-    stringToSign += body.Type + "\n";
+    stringToSign += `${body.Type}\n`;
 
     return stringToSign;
 }
