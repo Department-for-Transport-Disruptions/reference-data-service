@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ input.ref }}
+          ref: ${{ inputs.ref }}
 
       - name: Setup Node.js and cache
         uses: actions/setup-node@v4
