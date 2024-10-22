@@ -126,7 +126,7 @@ jobs:
         env:
           ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
         run: |
-          pnpm run sst -- deploy --stage test
+          pnpm run deploy --stage test
 
   deploy_to_preprod:
     needs: ['deploy_to_test']
@@ -183,7 +183,7 @@ jobs:
         env:
           ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
         run: |
-          pnpm run sst -- deploy --stage preprod
+          pnpm run deploy --stage preprod
 
   create_draft_release:
     needs: ['deploy_to_preprod']

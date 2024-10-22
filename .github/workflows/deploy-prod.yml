@@ -61,4 +61,4 @@ jobs:
           ROOT_DOMAIN: ${{ vars.ROOT_DOMAIN }}
           PROD_DOMAIN: ${{ vars.PROD_DOMAIN }}
         run: |
-          pnpm run sst -- deploy --stage prod
+          pnpm run deploy --stage prod
