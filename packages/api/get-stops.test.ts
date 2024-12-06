@@ -1,6 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
-import { BusStopType } from "./client";
 import { getQueryInput } from "./get-stops";
 
 describe("get-stops", () => {
@@ -132,17 +131,15 @@ describe("get-stops", () => {
             });
         });
 
-        it("handles stopTypes and busStopType", () => {
+        it("handles stopTypes", () => {
             const event = {
                 queryStringParameters: {
                     stopTypes: "BCT",
-                    busStopTypes: BusStopType.MKD,
                 },
             } as unknown as APIGatewayEvent;
 
             expect(getQueryInput(event)).toEqual({
                 stopTypes: ["BCT"],
-                busStopTypes: [BusStopType.MKD],
                 page: 0,
             });
         });
@@ -211,15 +208,6 @@ describe("get-stops", () => {
             } as unknown as APIGatewayEvent;
 
             expect(() => getQueryInput(event)).toThrowError("Area of polygon must be below 36km2");
-        });
-        it("throws a ClientError if invalid busStopType provided", () => {
-            const event = {
-                queryStringParameters: {
-                    busStopTypes: "test",
-                },
-            } as unknown as APIGatewayEvent;
-
-            expect(() => getQueryInput(event)).toThrowError("Invalid bus stop type provided");
         });
     });
 });
