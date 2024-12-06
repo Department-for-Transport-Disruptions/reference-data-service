@@ -22,19 +22,12 @@ export enum VehicleMode {
     blank = "",
 }
 
-export enum BusStopType {
-    MKD = "MKD",
-    CUS = "CUS",
-}
-
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
-
-export const isValidBusStopType = (busStopType: string): busStopType is BusStopType =>
-    !!busStopType && busStopType in BusStopType;
 
 export const isDataSource = (input: string): input is DataSource => input in DataSource;
 
 const ignoredStopTypes = ["FTD", "LSE", "RSE", "TMU"];
+const ignoredBusStopTypes = ["HAL", "FLX"];
 
 export type OperatorQueryInput = {
     nocCode?: string;
@@ -147,7 +140,6 @@ export type StopsQueryInput = {
     adminAreaCodes?: string[];
     page?: number;
     polygon?: string;
-    busStopTypes?: BusStopType[];
     stopTypes?: string[];
     searchInput?: string;
 };
@@ -180,6 +172,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
             "stops.status",
         ])
         .where("stopType", "not in", ignoredStopTypes)
+        .where("busStopType", "not in", ignoredBusStopTypes)
         .where("status", "=", "active")
         .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
         .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
@@ -193,7 +186,6 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                 ),
         )
         .$if(!!input.stopTypes?.[0], (qb) => qb.where("stopType", "in", input.stopTypes ?? ["---"]))
-        .$if(!!input.busStopTypes?.[0], (qb) => qb.where("busStopType", "in", input.busStopTypes ?? ["---"]))
         .$if(!!input.searchInput, (qb) =>
             qb.where((eb) =>
                 eb.or([
@@ -459,7 +451,6 @@ export type ServiceStopsQueryInput = {
     serviceRef: string;
     dataSource: DataSource;
     modes?: VehicleMode[];
-    busStopTypes?: BusStopType[];
     stopTypes?: string[];
     adminAreaCodes?: string[];
     useTracks?: boolean;
@@ -562,17 +553,14 @@ export const getServiceStops = async (
         .where("dataSource", "=", input.dataSource)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
+        .where("fromStop.busStopType", "not in", ignoredBusStopTypes)
+        .where("toStop.busStopType", "not in", ignoredBusStopTypes)
         .where((qb) => qb.or([qb("fromStop.status", "=", "active"), qb("toStop.status", "=", "active")]))
         .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
         .$if(!!input.stopTypes?.[0], (qb) =>
             qb
                 .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
                 .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
-        )
-        .$if(!!input.busStopTypes?.[0], (qb) =>
-            qb
-                .where("toStop.busStopType", "in", input.busStopTypes ?? ["---"])
-                .where("fromStop.busStopType", "in", input.busStopTypes ?? ["---"]),
         )
         .orderBy("service_journey_pattern_links.orderInSequence")
         .orderBy("service_journey_pattern_links.journeyPatternId")

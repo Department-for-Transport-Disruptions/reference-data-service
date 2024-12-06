@@ -7,7 +7,6 @@ import {
     Stops,
     getServiceStops,
     isDataSource,
-    isValidBusStopType,
     isValidMode,
 } from "./client";
 import { ClientError } from "./error";
@@ -62,24 +61,9 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
-    const busStopTypes = pathParameters?.busStopTypes || "";
-    const busStopTypesArray = busStopTypes
-        .split(",")
-        .filter((stop) => stop)
-        .map((busStopType) => busStopType.trim());
-
-    const filteredBusStopTypesArray = busStopTypesArray.filter(isValidBusStopType);
-
-    if (filteredBusStopTypesArray.length !== busStopTypesArray.length) {
-        throw new ClientError("Invalid bus stop type provided");
-    }
-
     return {
         serviceRef,
         dataSource: dataSourceInput,
-        ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
-            ? { busStopTypes: filteredBusStopTypesArray }
-            : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
         ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),

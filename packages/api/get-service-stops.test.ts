@@ -1,6 +1,6 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
-import { BusStopType, DataSource, VehicleMode } from "./client";
+import { DataSource, VehicleMode } from "./client";
 import { formatStops, getQueryInput } from "./get-service-stops";
 import { stopsDbData } from "./test/testdata";
 
@@ -29,12 +29,11 @@ describe("get-service-stops", () => {
             expect(getQueryInput(event)).toEqual({ dataSource: "bods", serviceRef: "abc" });
         });
 
-        it("handles serviceId, stopTypes, busStopType and modes", () => {
+        it("handles serviceId, stopTypes and modes", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
                     stopTypes: "BCT",
-                    busStopTypes: BusStopType.MKD,
                     modes: VehicleMode.bus,
                 },
             } as unknown as APIGatewayEvent;
@@ -42,7 +41,6 @@ describe("get-service-stops", () => {
             expect(getQueryInput(event)).toEqual({
                 serviceRef: "234",
                 stopTypes: ["BCT"],
-                busStopTypes: [BusStopType.MKD],
                 modes: [VehicleMode.bus],
                 dataSource: DataSource.bods,
             });
@@ -53,7 +51,6 @@ describe("get-service-stops", () => {
                 pathParameters: {
                     serviceId: "234",
                     stopTypes: "BCT",
-                    busStopTypes: BusStopType.MKD,
                     modes: VehicleMode.bus,
                 },
             } as unknown as APIGatewayEvent;
@@ -61,7 +58,6 @@ describe("get-service-stops", () => {
             expect(getQueryInput(event)).toEqual({
                 serviceRef: "234",
                 stopTypes: ["BCT"],
-                busStopTypes: [BusStopType.MKD],
                 modes: [VehicleMode.bus],
                 dataSource: DataSource.bods,
             });
@@ -73,17 +69,6 @@ describe("get-service-stops", () => {
             } as unknown as APIGatewayEvent;
 
             expect(() => getQueryInput(event)).toThrowError("Service Ref must be provided");
-        });
-
-        it("throws a ClientError if invalid busStopType provided", () => {
-            const event = {
-                pathParameters: {
-                    serviceId: "234",
-                    busStopTypes: "invalid",
-                },
-            } as unknown as APIGatewayEvent;
-
-            expect(() => getQueryInput(event)).toThrowError("Invalid bus stop type provided");
         });
     });
 
