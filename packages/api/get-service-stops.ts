@@ -33,13 +33,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid datasource provided");
     }
 
-    const stopTypes = pathParameters.stopTypes || "";
-    const stopTypesArray = stopTypes
-        .split(",")
-        .filter((stop) => stop)
-        .map((stop) => stop.trim());
-
-    const modes = pathParameters.modes || "";
+    const modes = queryStringParameters?.modes || "";
     const modesArray = modes
         .split(",")
         .filter((mode) => mode)
@@ -51,7 +45,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid mode provided");
     }
 
-    const adminAreaCodes = pathParameters?.adminAreaCodes ?? "";
+    const adminAreaCodes = queryStringParameters?.adminAreaCodes ?? "";
     const adminAreaCodeArray = adminAreaCodes
         .split(",")
         .filter((adminAreaCode) => adminAreaCode)
@@ -65,7 +59,6 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         serviceRef,
         dataSource: dataSourceInput,
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
-        ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
     };
 };

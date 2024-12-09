@@ -10,7 +10,6 @@ describe("get-service-routes", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
-                    useTracks: true,
                 },
             } as unknown as APIGatewayEvent;
 
@@ -34,15 +33,11 @@ describe("get-service-routes", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
-                    stopTypes: "BCT",
-                    modes: VehicleMode.bus,
                 },
             } as unknown as APIGatewayEvent;
 
             expect(getQueryInput(event)).toEqual({
                 serviceRef: "234",
-                stopTypes: ["BCT"],
-                modes: [VehicleMode.bus],
                 dataSource: DataSource.bods,
                 useTracks: true,
             });
@@ -56,19 +51,18 @@ describe("get-service-routes", () => {
             expect(() => getQueryInput(event)).toThrowError("Service Ref must be provided");
         });
 
-        it("handles serviceId, stopTypes and modes", () => {
+        it("handles serviceId and modes", () => {
             const event = {
                 pathParameters: {
                     serviceId: "234",
-                    stopTypes: "BCT",
+                },
+                queryStringParameters: {
                     modes: VehicleMode.bus,
-                    useTracks: true,
                 },
             } as unknown as APIGatewayEvent;
 
             expect(getQueryInput(event)).toEqual({
                 serviceRef: "234",
-                stopTypes: ["BCT"],
                 modes: [VehicleMode.bus],
                 useTracks: true,
                 dataSource: DataSource.bods,
