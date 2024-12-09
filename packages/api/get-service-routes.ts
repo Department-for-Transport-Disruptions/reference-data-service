@@ -31,13 +31,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid datasource provided");
     }
 
-    const stopTypes = pathParameters.stopTypes || "";
-    const stopTypesArray = stopTypes
-        .split(",")
-        .filter((stop) => stop)
-        .map((stop) => stop.trim());
-
-    const modes = pathParameters.modes || "";
+    const modes = queryStringParameters?.modes || "";
     const modesArray = modes
         .split(",")
         .filter((mode) => mode)
@@ -53,7 +47,6 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         serviceRef,
         dataSource: dataSourceInput,
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
-        ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         useTracks: true,
     };
 };

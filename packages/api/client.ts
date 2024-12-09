@@ -27,7 +27,7 @@ export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode
 export const isDataSource = (input: string): input is DataSource => input in DataSource;
 
 const ignoredStopTypes = ["FTD", "LSE", "RSE", "TMU"];
-const ignoredBusStopTypes = ["HAL", "FLX"];
+const ignoredBusStopTypes = ["HAR", "FLX"];
 
 export type OperatorQueryInput = {
     nocCode?: string;
@@ -557,11 +557,6 @@ export const getServiceStops = async (
         .where("toStop.busStopType", "not in", ignoredBusStopTypes)
         .where((qb) => qb.or([qb("fromStop.status", "=", "active"), qb("toStop.status", "=", "active")]))
         .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
-        .$if(!!input.stopTypes?.[0], (qb) =>
-            qb
-                .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
-                .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
-        )
         .orderBy("service_journey_pattern_links.orderInSequence")
         .orderBy("service_journey_pattern_links.journeyPatternId")
         .execute();
