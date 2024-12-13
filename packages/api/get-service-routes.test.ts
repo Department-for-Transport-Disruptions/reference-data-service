@@ -63,7 +63,7 @@ describe("get-service-routes", () => {
 
             expect(getQueryInput(event)).toEqual({
                 serviceRef: "234",
-                modes: [VehicleMode.bus],
+                modes: [VehicleMode.bus, VehicleMode.blank],
                 useTracks: true,
                 dataSource: DataSource.bods,
             });
