@@ -41,7 +41,7 @@ describe("get-service-stops", () => {
 
             expect(getQueryInput(event)).toEqual({
                 serviceRef: "234",
-                modes: [VehicleMode.bus],
+                modes: [VehicleMode.bus, VehicleMode.blank],
                 dataSource: DataSource.bods,
             });
         });

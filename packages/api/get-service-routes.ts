@@ -4,6 +4,7 @@ import {
     ServiceStops,
     ServiceStopsQueryInput,
     ServiceTracks,
+    VehicleMode,
     getServiceStops,
     isDataSource,
     isValidMode,
@@ -41,6 +42,10 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
 
     if (filteredModesArray.length !== modesArray.length) {
         throw new ClientError("Invalid mode provided");
+    }
+
+    if (filteredModesArray.includes(VehicleMode.bus)) {
+        filteredModesArray.push(VehicleMode.blank);
     }
 
     return {

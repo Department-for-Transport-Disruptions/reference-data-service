@@ -1,5 +1,6 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
+import { VehicleMode } from "./client";
 import { getQueryInput } from "./get-services-for-operator";
 
 describe("get-services-for-operator", () => {
@@ -24,7 +25,11 @@ describe("get-services-for-operator", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ nocCode: "TEST", modes: ["bus", "tram"], dataSource: "bods" });
+            expect(getQueryInput(event)).toEqual({
+                nocCode: "TEST",
+                modes: [VehicleMode.bus, VehicleMode.tram, VehicleMode.blank],
+                dataSource: "bods",
+            });
         });
 
         it("handles modes with trailing or leading spaces", () => {
@@ -37,7 +42,11 @@ describe("get-services-for-operator", () => {
                 },
             } as unknown as APIGatewayEvent;
 
-            expect(getQueryInput(event)).toEqual({ nocCode: "TEST", modes: ["bus", "tram"], dataSource: "bods" });
+            expect(getQueryInput(event)).toEqual({
+                nocCode: "TEST",
+                modes: [VehicleMode.bus, VehicleMode.tram, VehicleMode.blank],
+                dataSource: "bods",
+            });
         });
 
         it("handles dataSource", () => {

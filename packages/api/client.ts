@@ -95,13 +95,7 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
     }
 
     if (!!input.modes && input.modes.length > 0) {
-        const modesToUse = input.modes;
-
-        if (modesToUse.includes(VehicleMode.bus)) {
-            modesToUse.push(VehicleMode.blank);
-        }
-
-        query = query.where("services.mode", "in", modesToUse);
+        query = query.where("services.mode", "in", input.modes);
     }
 
     if (input.dataSource) {
