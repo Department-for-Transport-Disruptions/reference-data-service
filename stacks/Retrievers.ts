@@ -140,6 +140,7 @@ export function RetrieversStack({ stack }: StackContext) {
         runtime: "python3.12",
         timeout: 300,
         memorySize: 1024,
+        diskSize: 1024,
         environment: {
             TXC_BUCKET_NAME: txcBucket.bucketName,
             ZIPPED_BUCKET_NAME: txcZippedBucket.bucketName,
