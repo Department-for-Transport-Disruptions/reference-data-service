@@ -49,7 +49,8 @@ When running the application subsequent times, it can be started simply by runni
 
 The data import jobs can be triggered individually via make commands:
 
--   First import the CSV data, this can be done individually or all can be triggered at once by running `make trigger-all-csv-retrievers`
+-   First import the bank holidays data by running `make trigger-bank-holidays-retriever`
+-   Then import the CSV data, this can be done individually or all can be triggered at once by running `make trigger-all-csv-retrievers`
 -   Import the NPTG data using `make trigger-nptg-retriever`
 -   TXC data can all be imported by running `make trigger-bods-retriever` however this can take upwards of an hour
 -   In order to test a single TXC file upload, run `make test-bods-uploader` or `make test-tnds-uploader`, this will upload a single `test.xml` file which can be updated as necessary

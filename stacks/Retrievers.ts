@@ -10,7 +10,7 @@ import { DatabaseStack } from "./Database";
 import { S3Stack } from "./S3";
 
 export function RetrieversStack({ stack }: StackContext) {
-    const { csvBucket, txcBucket, txcZippedBucket, nptgBucket } = use(S3Stack);
+    const { csvBucket, txcBucket, txcZippedBucket, nptgBucket, bankHolidaysBucket } = use(S3Stack);
     const { cluster } = use(DatabaseStack);
 
     const enableSchedule = stack.stage === "prod" || stack.stage === "preprod" || stack.stage === "test";
@@ -22,6 +22,38 @@ export function RetrieversStack({ stack }: StackContext) {
     );
 
     const defaultDaySchedule = stack.stage === "prod" ? "*" : stack.stage === "preprod" ? "*/2" : "*/4";
+
+    const bankHolidaysRetriever = new Function(stack, "ref-data-service-bank-holidays-retriever", {
+        functionName: `ref-data-service-bank-holidays-retriever-${stack.stage}`,
+        handler: "packages/ref-data-retrievers/bank-holidays-retriever/index.main",
+        runtime: "nodejs20.x",
+        timeout: 60,
+        memorySize: 256,
+        environment: {
+            BANK_HOLIDAYS_BUCKET_NAME: bankHolidaysBucket.bucketName,
+        },
+        logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
+        permissions: [
+            new PolicyStatement({
+                actions: ["s3:PutObject"],
+                resources: [`${bankHolidaysBucket.bucketArn}/*`],
+            }),
+            new PolicyStatement({
+                actions: ["cloudwatch:PutMetricData"],
+                resources: ["*"],
+            }),
+        ],
+    });
+
+    new Cron(stack, "ref-data-service-bank-holidays-retriever-cron", {
+        job: bankHolidaysRetriever,
+        enabled: enableSchedule,
+        cdk: {
+            rule: {
+                schedule: Schedule.cron({ minute: "40", hour: "1", day: defaultDaySchedule }),
+            },
+        },
+    });
 
     const nocRetriever = new Function(stack, "ref-data-service-noc-retriever", {
         functionName: `ref-data-service-noc-retriever-${stack.stage}`,

@@ -120,6 +120,25 @@ importers:
         specifier: ^0.29.1
         version: 0.29.8
 
+  packages/ref-data-retrievers/bank-holidays-retriever:
+    dependencies:
+      '@baselime/lambda-logger':
+        specifier: ^0.2.2
+        version: 0.2.2
+      axios:
+        specifier: ^1.7.2
+        version: 1.7.7
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.110
+        version: 8.10.145
+      '@types/node':
+        specifier: ^20.11.19
+        version: 20.17.16
+      vitest:
+        specifier: ^0.29.1
+        version: 0.29.8
+
   packages/ref-data-retrievers/bods-retriever:
     dependencies:
       '@aws-sdk/client-lambda':
@@ -840,6 +859,9 @@ packages:
     resolution: {integrity: sha512-vwIVdXG+j+FOpkwqHRcBgHLYNL7XMkufrlaFvL9o6Ai9sJn9+PdyIL5qa0XzTZw084c+u9LOls53eoZWP/W5WQ==}
     engines: {node: '>=6.9.0'}
 
+  '@baselime/lambda-logger@0.2.2':
+    resolution: {integrity: sha512-32jmqKYZgVskg4aA/bLwmrO3HsklR/mutqd4U1qtCtvAWauBZ5yre/WMinJxPkdicrYS1djr1e8g9x2hQRvBDg==}
+
   '@biomejs/biome@1.9.4':
     resolution: {integrity: sha512-1rkd7G70+o9KkTn5KLmDYXihGoTaIGO9PIIN2ZB7UJxFrWw04CZHPYiMRjYsaDvVV7hP1dYNRLxSANLaBFGpog==}
     engines: {node: '>=14.21.3'}
@@ -1498,6 +1520,9 @@ packages:
 
   '@types/node@20.10.5':
     resolution: {integrity: sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==}
+
+  '@types/node@20.17.16':
+    resolution: {integrity: sha512-vOTpLduLkZXePLxHiHsBLp98mHGnl8RptV4YAO3HfKO5UHjDvySGbxKtpYfy8Sx5+WKcgc45qNreJJRVM3L6mw==}
 
   '@types/node@22.7.5':
     resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
@@ -5515,6 +5540,8 @@ snapshots:
       '@babel/helper-validator-identifier': 7.25.7
       to-fast-properties: 2.0.0
 
+  '@baselime/lambda-logger@0.2.2': {}
+
   '@biomejs/biome@1.9.4':
     optionalDependencies:
       '@biomejs/cli-darwin-arm64': 1.9.4
@@ -6289,7 +6316,7 @@ snapshots:
 
   '@types/adm-zip@0.5.5':
     dependencies:
-      '@types/node': 22.7.5
+      '@types/node': 20.17.16
 
   '@types/aws-lambda@8.10.145': {}
 
@@ -6313,13 +6340,17 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
+  '@types/node@20.17.16':
+    dependencies:
+      undici-types: 6.19.8
+
   '@types/node@22.7.5':
     dependencies:
       undici-types: 6.19.8
 
   '@types/papaparse@5.3.14':
     dependencies:
-      '@types/node': 22.7.5
+      '@types/node': 20.17.16
 
   '@types/sinon@17.0.3':
     dependencies:
@@ -6329,17 +6360,17 @@ snapshots:
 
   '@types/unzipper@0.10.9':
     dependencies:
-      '@types/node': 22.7.5
+      '@types/node': 20.17.16
 
   '@types/uuid@9.0.8': {}
 
   '@types/ws@8.5.10':
     dependencies:
-      '@types/node': 22.7.5
+      '@types/node': 20.17.16
 
   '@types/xml2js@0.4.14':
     dependencies:
-      '@types/node': 22.7.5
+      '@types/node': 20.17.16
 
   '@vitest/expect@0.29.8':
     dependencies:
