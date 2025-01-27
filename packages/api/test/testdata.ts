@@ -1,5 +1,5 @@
-import { DataSource, ServiceStops, ServicesByStops } from "../client";
 import { APIGatewayEvent } from "aws-lambda";
+import { DataSource, ServiceStops, ServicesByStops } from "../client";
 
 export const stopsDbData: ServiceStops = [
     {

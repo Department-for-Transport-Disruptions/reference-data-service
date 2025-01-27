@@ -1,6 +1,7 @@
 {
     "name": "@reference-data-service/table-renamer",
     "version": "0.1.0",
+    "type": "module",
     "scripts": {
         "test": "sst bind vitest",
         "typecheck": "tsc -noEmit"
@@ -11,9 +12,9 @@
         "vitest": "^0.29.1"
     },
     "dependencies": {
-        "@aws-sdk/client-ssm": "^3.476.0",
-        "@reference-data-service/core": "file:../core",
-        "axios": "^1.6.2",
+        "@aws-sdk/client-ssm": "^3.675.0",
+        "@reference-data-service/core": "workspace:^",
+        "axios": "^1.7.7",
         "basic-ftp": "^5.0.2",
         "lambda-log": "^3.1.0"
     }

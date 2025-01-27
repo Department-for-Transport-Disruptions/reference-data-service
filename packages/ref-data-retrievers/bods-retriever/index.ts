@@ -1,13 +1,13 @@
-import { InvocationType, InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
-import axios from "axios";
-import * as logger from "lambda-log";
 import { randomUUID } from "crypto";
-import { Kysely, sql } from "kysely";
+import { PassThrough, Stream } from "stream";
+import { InvocationType, InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
+import { S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
 import { putTableRenamerDisableParameter } from "@reference-data-service/core/ssm";
-import { Stream, PassThrough } from "stream";
-import { Upload } from "@aws-sdk/lib-storage";
-import { S3Client } from "@aws-sdk/client-s3";
+import axios from "axios";
+import { Kysely, sql } from "kysely";
+import * as logger from "lambda-log";
 
 const lambdaClient = new LambdaClient({ region: "eu-west-2" });
 const s3Client = new S3Client({ region: "eu-west-2" });

@@ -1,5 +1,5 @@
-import { Kysely } from "kysely";
 import { Database, RoadworksTable } from "@reference-data-service/core/db";
+import { Kysely } from "kysely";
 
 export const getRoadworkByPermitReferenceNumber = async (permitReferenceNumber: string, dbClient: Kysely<Database>) => {
     return await dbClient

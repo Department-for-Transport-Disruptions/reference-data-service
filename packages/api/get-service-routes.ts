@@ -1,13 +1,13 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
-    getServiceStops,
-    isDataSource,
-    isValidBusStopType,
-    isValidMode,
     ServiceStop,
     ServiceStops,
     ServiceStopsQueryInput,
     ServiceTracks,
+    VehicleMode,
+    getServiceStops,
+    isDataSource,
+    isValidMode,
 } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
@@ -32,13 +32,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid datasource provided");
     }
 
-    const stopTypes = pathParameters.stopTypes || "";
-    const stopTypesArray = stopTypes
-        .split(",")
-        .filter((stop) => stop)
-        .map((stop) => stop.trim());
-
-    const modes = pathParameters.modes || "";
+    const modes = queryStringParameters?.modes || "";
     const modesArray = modes
         .split(",")
         .filter((mode) => mode)
@@ -50,26 +44,14 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid mode provided");
     }
 
-    const busStopTypes = pathParameters?.busStopTypes || "";
-    const busStopTypesArray = busStopTypes
-        .split(",")
-        .filter((stop) => stop)
-        .map((busStopType) => busStopType.trim());
-
-    const filteredBusStopTypesArray = busStopTypesArray.filter(isValidBusStopType);
-
-    if (filteredBusStopTypesArray.length !== busStopTypesArray.length) {
-        throw new ClientError("Invalid bus stop type provided");
+    if (filteredModesArray.includes(VehicleMode.bus)) {
+        filteredModesArray.push(VehicleMode.blank);
     }
 
     return {
         serviceRef,
         dataSource: dataSourceInput,
-        ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
-            ? { busStopTypes: filteredBusStopTypesArray }
-            : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
-        ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         useTracks: true,
     };
 };
@@ -97,7 +79,6 @@ const filterStops = (flattenedStops: ServiceStop[], direction: string) => {
 
 export const formatStopsRoutes = async (
     stops: ServiceStops | ServiceTracks,
-    // eslint-disable-next-line @typescript-eslint/require-await
 ): Promise<{ outbound: ServiceStop[] | ServiceTracks; inbound: ServiceStop[] }> => {
     if (isServiceStops(stops)) {
         const flattenedStops = flattenStops(stops);
@@ -105,7 +86,6 @@ export const formatStopsRoutes = async (
         const outbound = filterStops(flattenedStops, "outbound");
         const inbound = filterStops(flattenedStops, "inbound");
         return { outbound, inbound };
-    } else {
-        return { outbound: stops, inbound: [] };
     }
+    return { outbound: stops, inbound: [] };
 };

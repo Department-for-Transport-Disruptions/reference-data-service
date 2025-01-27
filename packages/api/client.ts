@@ -1,10 +1,10 @@
+import { Database } from "@reference-data-service/core/db";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isBetween from "dayjs/plugin/isBetween";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { Kysely, sql } from "kysely";
 import * as logger from "lambda-log";
-import { Database } from "@reference-data-service/core/db";
 import { PermitStatus } from "./utils/roadworkTypes.zod";
 
 dayjs.extend(isBetween);
@@ -22,19 +22,12 @@ export enum VehicleMode {
     blank = "",
 }
 
-export enum BusStopType {
-    MKD = "MKD",
-    CUS = "CUS",
-}
-
 export const isValidMode = (mode: string): mode is VehicleMode => !!mode && mode in VehicleMode;
-
-export const isValidBusStopType = (busStopType: string): busStopType is BusStopType =>
-    !!busStopType && busStopType in BusStopType;
 
 export const isDataSource = (input: string): input is DataSource => input in DataSource;
 
 const ignoredStopTypes = ["FTD", "LSE", "RSE", "TMU"];
+const ignoredBusStopTypes = ["HAR", "FLX"];
 
 export type OperatorQueryInput = {
     nocCode?: string;
@@ -48,7 +41,7 @@ export type OperatorQueryInput = {
 export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQueryInput) => {
     logger.info("Starting getOperators...");
 
-    const OPERATORS_PAGE_SIZE = process.env.IS_LOCAL === "true" ? 50 : 1000;
+    const OPERATORS_PAGE_SIZE = 1000;
 
     if (input.nocCode) {
         const services = await dbClient
@@ -89,19 +82,27 @@ export const getOperators = async (dbClient: Kysely<Database>, input: OperatorQu
         };
     }
 
-    return dbClient
-        .selectFrom("operators")
-        .innerJoin("services", "services.nocCode", "operators.nocCode")
-        .$if(!!input.batchNocCodes && input.batchNocCodes.length > 0, (qb) =>
-            qb.where("nocCode", "in", input.batchNocCodes ?? []),
-        )
-        .$if(!!input.adminAreaCodes && input.adminAreaCodes.length > 0, (qb) =>
-            qb
-                .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
-                .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []),
-        )
-        .$if(!!input.modes && input.modes.length > 0, (qb) => qb.where("services.mode", "in", input.modes ?? []))
-        .$if(!!input.dataSource, (qb) => qb.where("services.dataSource", "=", input.dataSource ?? DataSource.bods))
+    let query = dbClient.selectFrom("operators").innerJoin("services", "services.nocCode", "operators.nocCode");
+
+    if (input.batchNocCodes && input.batchNocCodes.length > 0) {
+        query = query.where("nocCode", "in", input.batchNocCodes ?? []);
+    }
+
+    if (!!input.adminAreaCodes && input.adminAreaCodes.length > 0) {
+        query = query
+            .innerJoin("service_admin_area_codes", "service_admin_area_codes.serviceId", "services.id")
+            .where("service_admin_area_codes.adminAreaCode", "in", input.adminAreaCodes ?? []);
+    }
+
+    if (!!input.modes && input.modes.length > 0) {
+        query = query.where("services.mode", "in", input.modes);
+    }
+
+    if (input.dataSource) {
+        query = query.where("services.dataSource", "=", input.dataSource ?? DataSource.bods);
+    }
+
+    return query
         .select([
             "operators.id",
             "operators.nocCode",
@@ -133,7 +134,6 @@ export type StopsQueryInput = {
     adminAreaCodes?: string[];
     page?: number;
     polygon?: string;
-    busStopTypes?: BusStopType[];
     stopTypes?: string[];
     searchInput?: string;
 };
@@ -166,6 +166,7 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
             "stops.status",
         ])
         .where("stopType", "not in", ignoredStopTypes)
+        .where("busStopType", "not in", ignoredBusStopTypes)
         .where("status", "=", "active")
         .$if(!!input.atcoCodes?.[0], (qb) => qb.where("atcoCode", "in", input.atcoCodes ?? ["---"]))
         .$if(!!input.naptanCodes?.[0], (qb) => qb.where("naptanCode", "in", input.naptanCodes ?? ["---"]))
@@ -179,7 +180,6 @@ export const getStops = async (dbClient: Kysely<Database>, input: StopsQueryInpu
                 ),
         )
         .$if(!!input.stopTypes?.[0], (qb) => qb.where("stopType", "in", input.stopTypes ?? ["---"]))
-        .$if(!!input.busStopTypes?.[0], (qb) => qb.where("busStopType", "in", input.busStopTypes ?? ["---"]))
         .$if(!!input.searchInput, (qb) =>
             qb.where((eb) =>
                 eb.or([
@@ -445,7 +445,6 @@ export type ServiceStopsQueryInput = {
     serviceRef: string;
     dataSource: DataSource;
     modes?: VehicleMode[];
-    busStopTypes?: BusStopType[];
     stopTypes?: string[];
     adminAreaCodes?: string[];
     useTracks?: boolean;
@@ -548,18 +547,10 @@ export const getServiceStops = async (
         .where("dataSource", "=", input.dataSource)
         .where("fromStop.stopType", "not in", ignoredStopTypes)
         .where("toStop.stopType", "not in", ignoredStopTypes)
+        .where("fromStop.busStopType", "not in", ignoredBusStopTypes)
+        .where("toStop.busStopType", "not in", ignoredBusStopTypes)
         .where((qb) => qb.or([qb("fromStop.status", "=", "active"), qb("toStop.status", "=", "active")]))
         .$if(!!input.modes?.[0], (qb) => qb.where("services.mode", "in", input.modes ?? ["---"]))
-        .$if(!!input.stopTypes?.[0], (qb) =>
-            qb
-                .where("fromStop.stopType", "in", input.stopTypes ?? ["---"])
-                .where("toStop.stopType", "in", input.stopTypes ?? ["---"]),
-        )
-        .$if(!!input.busStopTypes?.[0], (qb) =>
-            qb
-                .where("toStop.busStopType", "in", input.busStopTypes ?? ["---"])
-                .where("fromStop.busStopType", "in", input.busStopTypes ?? ["---"]),
-        )
         .orderBy("service_journey_pattern_links.orderInSequence")
         .orderBy("service_journey_pattern_links.journeyPatternId")
         .execute();

@@ -1,4 +1,4 @@
-import { SSMClient, PutParameterCommandInput, PutParameterCommand } from "@aws-sdk/client-ssm";
+import { PutParameterCommand, PutParameterCommandInput, SSMClient } from "@aws-sdk/client-ssm";
 import { Logger } from "@smithy/types";
 
 const ssmClient = new SSMClient({ region: "eu-west-2" });
