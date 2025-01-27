@@ -10,7 +10,7 @@ import { StringParameter } from "aws-cdk-lib/aws-ssm";
 import { disableTableRenamerParamName } from "@reference-data-service/core/ssm";
 
 export function RetrieversStack({ stack }: StackContext) {
-    const { csvBucket, txcBucket, txcZippedBucket, nptgBucket, bankHolidays } = use(S3Stack);
+    const { csvBucket, txcBucket, txcZippedBucket, nptgBucket, bankHolidaysBucket } = use(S3Stack);
     const { cluster } = use(DatabaseStack);
 
     const enableSchedule = stack.stage === "prod" || stack.stage === "preprod" || stack.stage === "test";
@@ -30,13 +30,13 @@ export function RetrieversStack({ stack }: StackContext) {
         timeout: 60,
         memorySize: 256,
         environment: {
-            BANK_HOLIDAYS_BUCKET_NAME: bankHolidays.bucketName,
+            BANK_HOLIDAYS_BUCKET_NAME: bankHolidaysBucket.bucketName,
         },
         logRetention: stack.stage === "prod" ? "one_month" : "two_weeks",
         permissions: [
             new PolicyStatement({
                 actions: ["s3:PutObject"],
-                resources: [`${bankHolidays.bucketArn}/*`],
+                resources: [`${bankHolidaysBucket.bucketArn}/*`],
             }),
             new PolicyStatement({
                 actions: ["cloudwatch:PutMetricData"],
