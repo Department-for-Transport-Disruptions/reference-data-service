@@ -1,5 +1,3 @@
-import { Kysely, sql } from "kysely";
-
 /**
  * @param db {Kysely<any>}
  */
@@ -26,11 +24,11 @@ export async function up(db) {
         .addColumn("creationDateTime", "varchar(255)")
         .addColumn("modificationDateTime", "varchar(255)")
         .addColumn("revisionNumber", "varchar(255)")
-        .addColumn("modification","varchar(255)")
+        .addColumn("modification", "varchar(255)")
         .addPrimaryKeyConstraint("primary_key", ["nptgLocalityCode"])
         .execute();
 
-        await db.schema.createIndex("idx_adminAreaCode").on("localities").column("administrativeAreaCode").execute();
+    await db.schema.createIndex("idx_adminAreaCode").on("localities").column("administrativeAreaCode").execute();
 }
 
 /**

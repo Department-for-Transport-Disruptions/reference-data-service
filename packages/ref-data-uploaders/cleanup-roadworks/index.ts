@@ -1,7 +1,7 @@
-import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
 import { randomUUID } from "crypto";
-import * as logger from "lambda-log";
+import { Database, getDbClient, waitForDb } from "@reference-data-service/core/db";
 import { Kysely, sql } from "kysely";
+import * as logger from "lambda-log";
 
 export const deleteOldRoadworks = async (dbClient: Kysely<Database>) => {
     await dbClient
@@ -26,6 +26,21 @@ export const deleteOldRoadworks = async (dbClient: Kysely<Database>) => {
                         qb("permitStatus", "=", "revoked"),
                         qb("permitStatus", "=", "refused"),
                         qb("permitStatus", "=", "cancelled"),
+                    ]),
+                ]),
+                qb.and([
+                    qb("workStatus", "=", "Works in progress"),
+                    qb.and([
+                        qb(
+                            sql`DATE_FORMAT(SUBSTRING(proposedEndDateTime, 1, 19), '%Y-%m-%dT%H:%i:%s')`,
+                            "<=",
+                            sql`DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 MONTH), '%Y-%m-%dT%H:%i:%s')`,
+                        ),
+                        qb(
+                            sql`DATE_FORMAT(SUBSTRING(lastUpdatedDatetime, 1, 19), '%Y-%m-%dT%H:%i:%s')`,
+                            "<=",
+                            sql`DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 MONTH), '%Y-%m-%dT%H:%i:%s')`,
+                        ),
                     ]),
                 ]),
             ]),

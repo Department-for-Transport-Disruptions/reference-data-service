@@ -1,5 +1,6 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { describe, expect, it } from "vitest";
+import { VehicleMode } from "./client";
 import { getQueryInput } from "./get-operators";
 
 describe("get-operators", () => {
@@ -70,7 +71,7 @@ describe("get-operators", () => {
             } as unknown as APIGatewayEvent;
 
             expect(getQueryInput(event)).toEqual({
-                modes: ["bus", "tram"],
+                modes: [VehicleMode.bus, VehicleMode.tram, VehicleMode.blank],
                 page: 0,
             });
         });

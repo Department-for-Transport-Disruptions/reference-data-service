@@ -1,5 +1,9 @@
+import { Database } from "@reference-data-service/core/db";
 import { APIGatewayEvent } from "aws-lambda";
+import { Kysely } from "kysely";
 import { describe, expect, it, vi } from "vitest";
+import { DataSource } from "./client";
+import * as client from "./client";
 import { formatServicesWithStops, getQueryInput, getServicesByStopsQueryInput } from "./get-services";
 import {
     expectedFormattedServicesWithStops,
@@ -7,10 +11,6 @@ import {
     serviceWithStopsData,
     stopsDbData,
 } from "./test/testdata";
-import { DataSource } from "./client";
-import * as client from "./client";
-import { Kysely } from "kysely";
-import { Database } from "@reference-data-service/core/db";
 
 describe("get-services", () => {
     describe("input generation", () => {

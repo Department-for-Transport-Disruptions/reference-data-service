@@ -1,14 +1,14 @@
 import { APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
-    getServiceStops,
-    isDataSource,
-    isValidBusStopType,
-    isValidMode,
     ServiceStop,
     ServiceStops,
     ServiceStopsQueryInput,
     ServiceTracks,
     Stops,
+    VehicleMode,
+    getServiceStops,
+    isDataSource,
+    isValidMode,
 } from "./client";
 import { ClientError } from "./error";
 import { executeClient } from "./execute-client";
@@ -34,13 +34,7 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid datasource provided");
     }
 
-    const stopTypes = pathParameters.stopTypes || "";
-    const stopTypesArray = stopTypes
-        .split(",")
-        .filter((stop) => stop)
-        .map((stop) => stop.trim());
-
-    const modes = pathParameters.modes || "";
+    const modes = queryStringParameters?.modes || "";
     const modesArray = modes
         .split(",")
         .filter((mode) => mode)
@@ -52,7 +46,11 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError("Invalid mode provided");
     }
 
-    const adminAreaCodes = pathParameters?.adminAreaCodes ?? "";
+    if (filteredModesArray.includes(VehicleMode.bus)) {
+        filteredModesArray.push(VehicleMode.blank);
+    }
+
+    const adminAreaCodes = queryStringParameters?.adminAreaCodes ?? "";
     const adminAreaCodeArray = adminAreaCodes
         .split(",")
         .filter((adminAreaCode) => adminAreaCode)
@@ -62,26 +60,10 @@ export const getQueryInput = (event: APIGatewayEvent): ServiceStopsQueryInput =>
         throw new ClientError(`Only up to ${MAX_ADMIN_AREA_CODES} administrative area codes can be provided`);
     }
 
-    const busStopTypes = pathParameters?.busStopTypes || "";
-    const busStopTypesArray = busStopTypes
-        .split(",")
-        .filter((stop) => stop)
-        .map((busStopType) => busStopType.trim());
-
-    const filteredBusStopTypesArray = busStopTypesArray.filter(isValidBusStopType);
-
-    if (filteredBusStopTypesArray.length !== busStopTypesArray.length) {
-        throw new ClientError("Invalid bus stop type provided");
-    }
-
     return {
         serviceRef,
         dataSource: dataSourceInput,
-        ...(filteredBusStopTypesArray && filteredBusStopTypesArray.length > 0
-            ? { busStopTypes: filteredBusStopTypesArray }
-            : {}),
         ...(filteredModesArray && filteredModesArray.length > 0 ? { modes: filteredModesArray } : {}),
-        ...(stopTypesArray && stopTypesArray.length > 0 ? { stopTypes: stopTypesArray } : {}),
         ...(adminAreaCodes && adminAreaCodeArray.length > 0 ? { adminAreaCodes: adminAreaCodeArray } : {}),
     };
 };
@@ -142,8 +124,6 @@ export const flattenStops = (stops: ServiceStops): ServiceStop[] => {
         return stopArray;
     });
 };
-
-// eslint-disable-next-line @typescript-eslint/require-await
 export const formatStops = async (stops: ServiceStops | ServiceTracks): Promise<Stops> => {
     if (!isServiceStops(stops)) {
         return [];
